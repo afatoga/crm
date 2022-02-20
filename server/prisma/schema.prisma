@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator typegraphql {
+  provider = "typegraphql-prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url    = env("DATABASE_URL")
+}
+
+model AppUser {
+  id    Int     @id @default(autoincrement())
+  nickname String?  @unique @db.VarChar(60)
+  email String  @unique @db.VarChar(254)
+  count Int     @default(0) //jwt refresh
+  appUserGroup    AppUserGroup?    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int?
+}
+
+model AppUserGroup {
+  id    Int     @id @default(autoincrement())
+  name String  @unique @db.VarChar(60)
+  note String? @db.Text
+  parties Party[]
+  appUsers AppUser[]
+}
+
+model Party {
+  id        Int     @id @default(autoincrement())
+  type   PartyType? @relation(fields: [typeId], references: [id])
+  typeId   Int?
+  status   Status? @relation(fields: [statusId], references: [id])
+  statusId   Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  appUserGroup    AppUserGroup    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int
+  persons Person[]
+  organizations Organization[]
+  firstPartyRelationships PartyRelationship[] @relation("FirstPartyOfRelationship")
+  secondPartyRelationships PartyRelationship[] @relation("SecondPartyOfRelationship")
+}
+
+model Person {
+  party    Party?    @relation(fields: [partyId], references: [id])
+  partyId Int @id
+  preDegree String? @db.VarChar(30)
+  surname String @db.VarChar(120)
+  name String @db.VarChar(120)
+  postDegree String? @db.VarChar(30)
+  birthday DateTime?
+}
+
+model Organization {
+  party    Party?    @relation(fields: [partyId], references: [id])
+  partyId Int @id
+  name String @db.VarChar(120)
+  type OrganizationType? @relation(fields: [typeId], references: [id])
+  typeId Int? //could be undefined
+}
+
+model PartyRelationship {
+  id Int @id @default(autoincrement())
+  firstParty Party @relation(name:"FirstPartyOfRelationship", fields:[firstPartyId], references: [id])
+  secondParty Party @relation(name:"SecondPartyOfRelationship", fields:[secondPartyId], references: [id])
+  firstPartyId Int
+  secondPartyId Int
+  type PartyRelationshipType? @relation(fields: [typeId], references: [id])
+  typeId Int? //could be undefined
+}
+
+model PartyRelationshipType {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  partyRelationships PartyRelationship[]
+}
+
+model PartyType {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  parties Party[]
+}
+
+model OrganizationType {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  organizations Organization[]
+}
+
+model Status {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  parties Party[]
+}
