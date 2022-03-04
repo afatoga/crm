@@ -2,6 +2,7 @@ import 'reflect-metadata'
 import * as tq from 'type-graphql'
 //import { PostCreateInput, PostResolver, SortOrder } from './PostResolver'
 import { AppUserResolver } from './AppUserResolver'
+import { PartyResolver } from './PartyResolver'
 import { ApolloServer } from 'apollo-server'
 import { DateTimeResolver } from 'graphql-scalars'
 import { context } from './context'
@@ -14,7 +15,7 @@ const app = async () => {
 //   })
 
   const schema = await tq.buildSchema({
-    resolvers: [AppUserResolver],
+    resolvers: [AppUserResolver, PartyResolver],
     scalarsMap: [{ type: GraphQLScalarType, scalar: DateTimeResolver }],
   })
 
