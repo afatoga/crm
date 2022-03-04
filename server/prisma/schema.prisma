@@ -2,9 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator typegraphql {
-  provider = "typegraphql-prisma"
-}
+// generator typegraphql {
+//   provider = "typegraphql-prisma"
+// }
 
 datasource db {
   provider = "postgresql"
@@ -51,7 +51,7 @@ model Person {
   surname String @db.VarChar(120)
   name String @db.VarChar(120)
   postDegree String? @db.VarChar(30)
-  birthday DateTime?
+  birthday DateTime? @db.Date
 }
 
 model Organization {

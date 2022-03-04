@@ -14,6 +14,8 @@ import {
 //import { Post } from './Post'
 import { AppUser } from './AppUser'
 import { Context } from './context'
+import { Prisma } from '@prisma/client'
+
 //import { PostCreateInput } from './PostResolver'
 @InputType()
 class AppUserUniqueInput {
@@ -32,7 +34,7 @@ class AppUserCreateInput {
   @Field({ nullable: true })
   nickname: string
 
-  @Field()
+  @Field({nullable: true})
   appUserGroupId: number
 
   // @Field((type) => [PostCreateInput], { nullable: true })
@@ -52,25 +54,43 @@ export class AppUserResolver {
   //     .posts()
   // }
 
+
+    // const postData = data.posts?.map((post) => {
+    //   return { title: post.title, content: post.content || undefined }
+    // })
   @Mutation((returns) => AppUser)
   async signupAppUser(
     @Arg('data') data: AppUserCreateInput,
     @Ctx() ctx: Context,
   ): Promise<AppUser> {
-    // const postData = data.posts?.map((post) => {
-    //   return { title: post.title, content: post.content || undefined }
-    // })
 
-    return ctx.prisma.appUser.create({
-      data: {
-        email: data.email,
-        nickname: data.nickname,
-        appUserGroupId: data.appUserGroupId
-        // posts: {
-        //   create: postData,
-        // },
-      },
-    })
+
+    //try {
+      return ctx.prisma.appUser.create({
+        data: {
+          email: data.email,
+          nickname: data.nickname,
+          appUserGroupId: data.appUserGroupId
+          // posts: {
+          //   create: postData,
+          // },
+        },
+      })
+    // } catch (e) {
+      
+    //   if (e instanceof Prisma.PrismaClientKnownRequestError) {
+    //     // The .code property can be accessed in a type-safe manner
+    //     if (e.code === 'P2002') {
+    //       console.log(
+    //         'There is a unique constraint violation, a new user cannot be created with this email'
+    //       )
+    //     }
+    //     return e;
+    //   }
+      
+    // }
+
+
   }
 
   @Query(() => [AppUser])

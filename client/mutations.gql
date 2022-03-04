@@ -1,0 +1,20 @@
+mutation {
+  signupAppUser(data: { email: "fakemail@gmail.com", appUserGroupId: 2 }) {
+    id
+    email
+  }
+}
+
+mutation {
+  createPerson(data: { name: "Adam", surname: "Pospisil", appUserGroupId: 1 }) {
+    partyId
+  }
+}
+
+mutation {
+  createPartyRelationship(
+    data: { firstPartyId: 5, secondPartyId: 4, typeId: 1 }
+  ) {
+    id
+  }
+}
