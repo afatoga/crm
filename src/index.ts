@@ -7,7 +7,7 @@ import { ApolloServer } from 'apollo-server'
 import { DateTimeResolver } from 'graphql-scalars'
 import { context } from './context'
 import { GraphQLScalarType } from 'graphql'
-import { ApolloServerPluginLandingPageGraphQLPlayground, ApolloServerPluginLandingPageDisabled } from 'apollo-server-core'
+// import { ApolloServerPluginLandingPageGraphQLPlayground, ApolloServerPluginLandingPageDisabled } from 'apollo-server-core'
 
 const app = async () => {
 //   tq.registerEnumType(SortOrder, {
@@ -19,7 +19,7 @@ const app = async () => {
     scalarsMap: [{ type: GraphQLScalarType, scalar: DateTimeResolver }],
   })
 
-  new ApolloServer({ schema, context: context, plugins: [ ApolloServerPluginLandingPageGraphQLPlayground(), ApolloServerPluginLandingPageDisabled() ] }).listen({ port: process.env.PORT }, () =>
+  new ApolloServer({ schema, context: context }).listen({ port: process.env.PORT }, () =>
     console.log(`Server ready at port 4000`),
   )
 }
