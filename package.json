@@ -1,7 +1,9 @@
 {
   "name": "typegraphql-example",
   "scripts": {
-    "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts"
+    "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
+    "build": "rimraf ./build && tsc",
+    "start": "npm run build && node build/index.js"
   },
   "dependencies": {
     "@prisma/client": "3.9.2",
@@ -20,7 +22,8 @@
     "ts-node": "10.5.0",
     "ts-node-dev": "1.1.8",
     "typegraphql-prisma": "^0.19.0",
-    "typescript": "4.5.5"
+    "typescript": "4.5.5",
+    "rimraf": "3.0.2"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
