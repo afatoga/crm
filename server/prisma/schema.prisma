@@ -18,6 +18,7 @@ model AppUser {
   count Int     @default(0) //jwt refresh
   appUserGroup    AppUserGroup?    @relation(fields: [appUserGroupId], references: [id])
   appUserGroupId  Int?
+  notes Note[]
 }
 
 model AppUserGroup {
@@ -25,6 +26,9 @@ model AppUserGroup {
   name String  @unique @db.VarChar(60)
   note String? @db.Text
   parties Party[]
+  contacts Contact[]
+  tags Tag[]
+  notes Note[]
   appUsers AppUser[]
 }
 
@@ -42,6 +46,11 @@ model Party {
   organizations Organization[]
   firstPartyRelationships PartyRelationship[] @relation("FirstPartyOfRelationship")
   secondPartyRelationships PartyRelationship[] @relation("SecondPartyOfRelationship")
+  mainPartyContacts Contact[] @relation("MainPartyOfContact")
+  firstPartyContacts Contact[] @relation("FirstPartyOfContact")
+  secondPartyContacts Contact[] @relation("SecondPartyOfContact")
+  tagParty TagParty[] //separate table
+  noteParty NoteParty[] //separate table
 }
 
 model Person {
@@ -94,4 +103,79 @@ model Status {
   id Int @id @default(autoincrement())
   name String @db.VarChar(30)
   parties Party[]
+  contacts Contact[]
+}
+
+model ContactType {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  contacts Contact[]
+}
+
+model Contact {
+  id        Int     @id @default(autoincrement())
+  contactType   ContactType? @relation(fields: [typeId], references: [id])
+  typeId   Int?
+  value    String @db.VarChar(254)
+  status   Status? @relation(fields: [statusId], references: [id])
+  statusId   Int?
+  mainParty Party @relation(name:"MainPartyOfContact", fields:[mainPartyId], references: [id])
+  firstParty Party @relation(name:"FirstPartyOfContact", fields:[firstPartyId], references: [id])
+  secondParty Party? @relation(name:"SecondPartyOfContact", fields:[secondPartyId], references: [id])
+  mainPartyId Int
+  firstPartyId Int
+  secondPartyId Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  appUserGroup    AppUserGroup    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int
+}
+
+model Tag {
+  id        Int     @id @default(autoincrement())
+  name      String @unique @db.VarChar(32)
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  appUserGroup    AppUserGroup    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int
+  tagParty TagParty[]
+  noteTag NoteTag[]
+}
+
+model TagParty {
+  id        Int     @id @default(autoincrement())
+  party   Party @relation(fields: [partyId], references: [id])
+  partyId Int
+  tag   Tag @relation(fields: [tagId], references: [id])
+  tagId Int
+}
+
+model Note {
+  id        Int     @id @default(autoincrement())
+  content   String @db.Text()
+  isPrivate Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  appUser    AppUser    @relation(fields: [appUserId], references: [id])
+  appUserId  Int
+  appUserGroup    AppUserGroup?    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int?
+  noteParty NoteParty[]
+  noteTag NoteTag[]
+}
+
+model NoteParty {
+  id        Int     @id @default(autoincrement())
+  party   Party @relation(fields: [partyId], references: [id])
+  partyId Int
+  note   Note @relation(fields: [noteId], references: [id])
+  noteId Int
+}
+
+model NoteTag { //displayed in Tag detail page
+  id        Int     @id @default(autoincrement())
+  tag   Tag @relation(fields: [tagId], references: [id])
+  tagId Int
+  note   Note @relation(fields: [noteId], references: [id])
+  noteId Int
 }
