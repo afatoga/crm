@@ -10,7 +10,7 @@ export class AppUser {
   id: number
 
   @Field()
-  @IsEmail()
+  @IsEmail() //does not work! :(
   @IsEmailAlreadyExist({message: "email already used"})
   email: string
 

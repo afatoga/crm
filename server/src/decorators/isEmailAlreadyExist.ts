@@ -10,6 +10,9 @@ import {context} from '../context'
   export class IsEmailAlreadyExistConstraint
     implements ValidatorConstraintInterface {
     validate(email: string) {
+
+      return false;
+
       return context.prisma.appUser.findFirst({ where: { email } }).then(user => {
         if (user) return false;
         return true;

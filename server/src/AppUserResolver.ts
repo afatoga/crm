@@ -27,7 +27,11 @@ class AppUserUniqueInput {
 }
 
 @InputType()
-class AppUserCreateInput {
+class AppUserInput {
+
+  @Field({nullable: true})
+  id: number
+
   @Field()
   email: string
 
@@ -59,12 +63,23 @@ export class AppUserResolver {
     //   return { title: post.title, content: post.content || undefined }
     // })
   @Mutation((returns) => AppUser)
-  async signupAppUser(
-    @Arg('data') data: AppUserCreateInput,
+  async createUpdateAppUser(
+    @Arg('data') data: AppUserInput,
     @Ctx() ctx: Context,
   ): Promise<AppUser> {
 
-
+    if (data.id) { //update
+      return ctx.prisma.appUser.update({
+        where: {
+          id: data.id,
+        },
+        data: {
+          email: data.email, // test could be null?
+          nickname: data?.nickname,
+          appUserGroupId: data.appUserGroupId
+        }
+      })
+    }
     //try {
       return ctx.prisma.appUser.create({
         data: {

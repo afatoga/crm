@@ -1,12 +1,19 @@
 mutation {
-  signupAppUser(data: { email: "fakemail@gmail.com", appUserGroupId: 2 }) {
+  createUpdateAppUser(data: { email: "fakemail@gmail.com", appUserGroupId: 2 }) {
     id
     email
   }
 }
-
+#creates
 mutation {
-  createPerson(data: { name: "Adam", surname: "Pospisil", appUserGroupId: 1 }) {
+  createUpdatePerson(data: { name: "Adam", surname: "Pospisil", appUserGroupId: 1 }) {
+    partyId
+  }
+}
+
+# updates
+mutation {
+  createUpdatePerson(data: { partyId: 3, name: "Karel", surname: "Pospisil", appUserGroupId: 1 }) {
     partyId
   }
 }
@@ -16,5 +23,11 @@ mutation {
     data: { firstPartyId: 5, secondPartyId: 4, typeId: 1 }
   ) {
     id
+  }
+}
+#creates
+mutation {
+  createUpdateOrganization(data: { name: "CSOB", appUserGroupId: 1 }) {
+    partyId
   }
 }

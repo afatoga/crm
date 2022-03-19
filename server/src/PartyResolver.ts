@@ -8,7 +8,7 @@ import {
   InputType,
   Field,
 } from 'type-graphql'
-import { Party, Person, PartyRelationship } from './Party'
+import { Party, Person, PartyRelationship, Organization } from './Party'
 import { Context } from './context'
 
 
@@ -37,6 +37,24 @@ class PersonInput {
 
   @Field({ nullable: true })
   birthday: Date
+
+  @Field()
+  appUserGroupId: number
+}
+
+@InputType()
+class OrganizationInput {
+  @Field({ nullable: true })
+  partyId: number
+
+  @Field({ nullable: true })
+  statusId: number
+
+  @Field()
+  name: string
+
+  @Field({ nullable: true })
+  organizationTypeId: number
 
   @Field()
   appUserGroupId: number
@@ -117,6 +135,46 @@ export class PartyResolver {
     return ctx.prisma.person.findMany()
   }
 
+  @Mutation((returns) => Organization)
+  async createUpdateOrganization(
+    @Arg('data') data: OrganizationInput,
+    @Ctx() ctx: Context,
+  ): Promise<Organization> {
+    
+    if (data.partyId) { //update
+      return ctx.prisma.organization.update({
+        where: {
+          partyId: data.partyId,
+        },
+        data: {
+          name: data.name,
+          typeId: data?.organizationTypeId,
+        }
+      })
+    }
+
+      //create
+      const party = await ctx.prisma.party.create({
+        data: {
+          typeId: 2,
+          appUserGroupId: data.appUserGroupId
+        },
+      })
+
+      return ctx.prisma.organization.create({
+        data: {
+          partyId: party.id,
+          name: data.name,
+          typeId: data?.organizationTypeId,
+        },
+      })
+  }
+
+  @Query(() => [Person])
+  async allOrganizations(@Ctx() ctx: Context) {
+    return ctx.prisma.organization.findMany()
+  }
+
   @Mutation((returns) => PartyRelationship)
   async createPartyRelationship(
     @Arg('data') data: PartyRelationshipInput,
@@ -136,7 +194,7 @@ export class PartyResolver {
       },
     })
 
-    if (isRelationshipExist) throw new Error('This relationship exists')
+    if (isRelationshipExist) throw new Error('This relationship already exists')
 
     const firstParty = await ctx.prisma.party.findFirst({
       where: {

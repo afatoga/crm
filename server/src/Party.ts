@@ -47,6 +47,18 @@ export class Person {
 }
 
 @ObjectType()
+export class Organization {
+  @Field((type) => ID)
+  partyId: number
+
+  @Field((type) => String)
+  name: string
+
+  @Field((type) => Number,  { nullable: true })
+  typeId: number | null
+}
+
+@ObjectType()
 export class PartyRelationship {
   @Field((type) => ID)
   id: number
