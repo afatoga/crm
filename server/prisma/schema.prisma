@@ -104,6 +104,7 @@ model Status {
   name String @db.VarChar(30)
   parties Party[]
   contacts Contact[]
+  tags Tag[]
 }
 
 model ContactType {
@@ -134,6 +135,8 @@ model Contact {
 model Tag {
   id        Int     @id @default(autoincrement())
   name      String @unique @db.VarChar(32)
+  status   Status?  @relation(fields: [statusId], references: [id])
+  statusId   Int?
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
   appUserGroup    AppUserGroup    @relation(fields: [appUserGroupId], references: [id])
@@ -153,7 +156,7 @@ model TagParty {
 model Note {
   id        Int     @id @default(autoincrement())
   content   String @db.Text()
-  isPrivate Boolean
+  //isPrivate Boolean //redundant if appUserGroupId is filled
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
   appUser    AppUser    @relation(fields: [appUserId], references: [id])
