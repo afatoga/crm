@@ -10,11 +10,14 @@ import {
   // Int,
   InputType,
   Field,
+  Authorized
 } from 'type-graphql'
 //import { Post } from './Post'
 import { AppUser } from './AppUser'
 import { Context } from './context'
 import { Prisma } from '@prisma/client'
+import { IsEmail } from 'class-validator'
+import { IsEmailAlreadyExist } from './decorators/isEmailAlreadyExist'
 
 //import { PostCreateInput } from './PostResolver'
 @InputType()
@@ -33,6 +36,8 @@ class AppUserInput {
   id: number
 
   @Field()
+  @IsEmail()
+  @IsEmailAlreadyExist({message: "email already used"})
   email: string
 
   @Field({ nullable: true })
@@ -108,6 +113,7 @@ export class AppUserResolver {
 
   }
 
+  @Authorized() 
   @Query(() => [AppUser])
   async allAppUsers(@Ctx() ctx: Context) {
     return ctx.prisma.appUser.findMany()

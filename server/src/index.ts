@@ -8,6 +8,7 @@ import { DateTimeResolver } from 'graphql-scalars'
 import { context } from './context'
 import { GraphQLScalarType } from 'graphql'
 import { ApolloServerPluginLandingPageGraphQLPlayground, ApolloServerPluginLandingPageDisabled } from 'apollo-server-core'
+import { authChecker } from "./authChecker"
 
 const app = async () => {
 //   tq.registerEnumType(SortOrder, {
@@ -17,6 +18,7 @@ const app = async () => {
   const schema = await tq.buildSchema({
     resolvers: [AppUserResolver, PartyResolver],
     scalarsMap: [{ type: GraphQLScalarType, scalar: DateTimeResolver }],
+    authChecker, // register auth checking function
   })
 
   new ApolloServer({ schema, context: context, plugins: [ ApolloServerPluginLandingPageGraphQLPlayground(), ApolloServerPluginLandingPageDisabled() ] }).listen({ port: process.env.PORT }, () =>
