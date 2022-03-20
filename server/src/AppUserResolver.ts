@@ -18,8 +18,9 @@ import { Context } from './context'
 import { Prisma } from '@prisma/client'
 import { IsEmail } from 'class-validator'
 import { IsEmailAlreadyExist } from './decorators/isEmailAlreadyExist'
+import bcrypt from "bcryptjs";
+import {createTokens} from './auth';
 
-//import { PostCreateInput } from './PostResolver'
 @InputType()
 class AppUserUniqueInput {
   @Field({ nullable: true })
@@ -27,6 +28,14 @@ class AppUserUniqueInput {
 
   @Field({ nullable: true })
   email: string
+}
+
+@InputType()
+class AppUserLogin {
+  @Field()
+  email:string
+  @Field()
+  password:string
 }
 
 @InputType()
@@ -40,6 +49,9 @@ class AppUserInput {
   @IsEmailAlreadyExist({message: "email already used"})
   email: string
 
+  @Field({nullable: true})
+  password: string
+
   @Field({ nullable: true })
   nickname: string
 
@@ -52,28 +64,17 @@ class AppUserInput {
 
 @Resolver(AppUser)
 export class AppUserResolver {
-  // @FieldResolver()
-  // async posts(@Root() appUser: AppUser, @Ctx() ctx: Context): Promise<Post[]> {
-  //   return ctx.prisma.appUser
-  //     .findUnique({
-  //       where: {
-  //         id: appUser.id,
-  //       },
-  //     })
-  //     .posts()
-  // }
 
-
-    // const postData = data.posts?.map((post) => {
-    //   return { title: post.title, content: post.content || undefined }
-    // })
   @Mutation((returns) => AppUser)
   async createUpdateAppUser(
     @Arg('data') data: AppUserInput,
     @Ctx() ctx: Context,
   ): Promise<AppUser> {
 
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
     if (data.id) { //update
+
       return ctx.prisma.appUser.update({
         where: {
           id: data.id,
@@ -81,7 +82,8 @@ export class AppUserResolver {
         data: {
           email: data.email, // test could be null?
           nickname: data?.nickname,
-          appUserGroupId: data.appUserGroupId
+          appUserGroupId: data.appUserGroupId,
+          password: data.password && hashedPassword
         }
       })
     }
@@ -89,38 +91,48 @@ export class AppUserResolver {
       return ctx.prisma.appUser.create({
         data: {
           email: data.email,
-          nickname: data.nickname,
-          appUserGroupId: data.appUserGroupId
-          // posts: {
-          //   create: postData,
-          // },
+          nickname: data?.nickname,
+          appUserGroupId: data.appUserGroupId && data.appUserGroupId,
+          password: hashedPassword
         },
       })
-    // } catch (e) {
-      
-    //   if (e instanceof Prisma.PrismaClientKnownRequestError) {
-    //     // The .code property can be accessed in a type-safe manner
-    //     if (e.code === 'P2002') {
-    //       console.log(
-    //         'There is a unique constraint violation, a new user cannot be created with this email'
-    //       )
-    //     }
-    //     return e;
-    //   }
-      
-    // }
+    
 
 
+  }
+  @Mutation(() => AppUser, { nullable: true })
+  async login(
+    @Arg("data") data: AppUserLogin,
+    @Ctx() ctx: Context
+  ): Promise<AppUser | null> {
+    const user = await ctx.prisma.appUser.findFirst({ where: { email:data.email } });
+
+    if (!user) {
+      return null;
+    }
+
+    const valid = await bcrypt.compare(data.password, user.password);
+
+    if (!valid) {
+      return null;
+    }
+
+    const { accessToken, refreshToken } = createTokens(user);
+
+    ctx.res.cookie("refresh-token", refreshToken);
+    ctx.res.cookie("access-token", accessToken);
+
+    return user;
   }
 
   @Authorized() 
   @Query(() => [AppUser])
   async allAppUsers(@Ctx() ctx: Context) {
-    return ctx.prisma.appUser.findMany()
+    return ctx.prisma.appUser.findMany({where:{appUserGroupId : ctx.user.appUserGroupId}})
   }
 
   // @Query((returns) => [Post], { nullable: true })
-  // async draftsByAppUser(
+  // async notesByAppUser(
   //   @Arg('appUserUniqueInput') appUserUniqueInput: AppUserUniqueInput,
   //   @Ctx() ctx: Context,
   // ) {

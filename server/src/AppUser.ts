@@ -9,10 +9,13 @@ export class AppUser {
   @Field((type) => ID)
   id: number
 
-  @Field()
+  @Field((type) => String)
   //@IsEmail()
   //@IsEmailAlreadyExist({message: "email already used"})
   email: string
+  
+  @Field((type) => String)
+  password: string
 
   @Field((type) => String, { nullable: true })
   nickname: string | null
@@ -20,6 +23,8 @@ export class AppUser {
   @Field((type) => Number, {nullable: true})
   appUserGroupId: number |null
 
+  @Field((type) => Number)
+  count: number
   // @Field((type) => [Post], { nullable: true })
   // posts?: [Post] | null
 }

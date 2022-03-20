@@ -4,14 +4,16 @@ import {
     ValidatorConstraint,
     ValidatorConstraintInterface
   } from "class-validator";
-import {context} from '../context'
+import { AppUser } from "../AppUser";
+import { PrismaClient } from '@prisma/client'
   
   @ValidatorConstraint({ async: true })
   export class IsEmailAlreadyExistConstraint
     implements ValidatorConstraintInterface {
     validate(email: string) {
-
-      return context.prisma.appUser.findFirst({ where: { email } }).then(user => {
+      const prisma = new PrismaClient()
+      // idea to use context: context is no longer object
+      return prisma.appUser.findFirst({ where: { email } }).then((user:AppUser | null) => {
         if (user) return false;
         return true;
       });

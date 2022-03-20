@@ -7,9 +7,11 @@ import {
   Ctx,
   InputType,
   Field,
+  Authorized,
 } from 'type-graphql'
 import { Party, Person, PartyRelationship, Organization } from './Party'
 import { Context } from './context'
+//import { Service } from 'typedi'
 
 
 @InputType()
@@ -73,10 +75,11 @@ class PartyRelationshipInput {
 }
 
 
-
+//@Service()
 @Resolver(Party)
 export class PartyResolver {
 
+  @Authorized()
   @Mutation((returns) => Person)
   async createUpdatePerson(
     @Arg('data') data: PersonInput,

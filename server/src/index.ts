@@ -1,4 +1,5 @@
 import 'reflect-metadata'
+//import Container from 'typedi'
 import * as tq from 'type-graphql'
 //import { PostCreateInput, PostResolver, SortOrder } from './PostResolver'
 import { AppUserResolver } from './AppUserResolver'
@@ -9,6 +10,7 @@ import { context } from './context'
 import { GraphQLScalarType } from 'graphql'
 import { ApolloServerPluginLandingPageGraphQLPlayground, ApolloServerPluginLandingPageDisabled } from 'apollo-server-core'
 import { authChecker } from "./authChecker"
+import {ErrorLoggerMiddleware} from './middleware/errorLogger'
 
 const app = async () => {
 //   tq.registerEnumType(SortOrder, {
@@ -19,6 +21,8 @@ const app = async () => {
     resolvers: [AppUserResolver, PartyResolver],
     scalarsMap: [{ type: GraphQLScalarType, scalar: DateTimeResolver }],
     authChecker, // register auth checking function
+    //globalMiddlewares: [ErrorLoggerMiddleware],
+    //container: Container
   })
 
   new ApolloServer({ schema, context: context, plugins: [ ApolloServerPluginLandingPageGraphQLPlayground(), ApolloServerPluginLandingPageDisabled() ] }).listen({ port: process.env.PORT }, () =>
