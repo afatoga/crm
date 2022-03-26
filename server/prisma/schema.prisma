@@ -2,6 +2,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// plugin for CRUD operations, ommited
 // generator typegraphql {
 //   provider = "typegraphql-prisma"
 // }
@@ -16,10 +17,28 @@ model AppUser {
   nickname String?  @unique @db.VarChar(60)
   email String  @unique @db.VarChar(254)
   password String @db.VarChar(60)
-  count Int     @default(0) //jwt refresh
+  count Int     @default(0) //to extend jwt access with refresh tokens
   appUserGroup    AppUserGroup?    @relation(fields: [appUserGroupId], references: [id])
   appUserGroupId  Int?
   notes Note[]
+  appUserGroupRelationships AppUserGroupRelationship[]
+}
+
+model AppUserRole {
+  id    Int     @id @default(autoincrement())
+  name String @unique @db.VarChar(16)
+  //capabilities are in application logic
+  appUserGroupRelationships AppUserGroupRelationship[]
+}
+
+model AppUserGroupRelationship {
+  appUser AppUser @relation(fields: [appUserId], references: [id])
+  appUserId Int
+  appUserRole AppUserRole  @relation(fields: [appUserRoleId], references: [id])
+  appUserRoleId Int
+  appUserGroups AppUserGroup  @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId Int
+  @@id([appUserId,appUserRoleId,appUserGroupId])
 }
 
 model AppUserGroup {
@@ -31,6 +50,7 @@ model AppUserGroup {
   tags Tag[]
   notes Note[]
   appUsers AppUser[]
+  appUserGroupRelationships AppUserGroupRelationship[]
 }
 
 model Party {
@@ -47,9 +67,9 @@ model Party {
   organizations Organization[]
   firstPartyRelationships PartyRelationship[] @relation("FirstPartyOfRelationship")
   secondPartyRelationships PartyRelationship[] @relation("SecondPartyOfRelationship")
-  mainPartyContacts Contact[] @relation("MainPartyOfContact")
-  firstPartyContacts Contact[] @relation("FirstPartyOfContact")
-  secondPartyContacts Contact[] @relation("SecondPartyOfContact")
+  contacts Contact[] @relation("MainPartyOfContact")
+  //firstPartyContacts Contact[] @relation("FirstPartyOfContact")
+  //secondPartyContacts Contact[] @relation("SecondPartyOfContact")
   tagParty TagParty[] //separate table
   noteParty NoteParty[] //separate table
 }
@@ -74,6 +94,7 @@ model Organization {
 
 model PartyRelationship {
   id Int @id @default(autoincrement())
+  contacts Contact[] @relation("PartyRelationshipOfContact")
   firstParty Party @relation(name:"FirstPartyOfRelationship", fields:[firstPartyId], references: [id])
   secondParty Party @relation(name:"SecondPartyOfRelationship", fields:[secondPartyId], references: [id])
   firstPartyId Int
@@ -122,11 +143,13 @@ model Contact {
   status   Status? @relation(fields: [statusId], references: [id])
   statusId   Int?
   mainParty Party @relation(name:"MainPartyOfContact", fields:[mainPartyId], references: [id])
-  firstParty Party @relation(name:"FirstPartyOfContact", fields:[firstPartyId], references: [id])
-  secondParty Party? @relation(name:"SecondPartyOfContact", fields:[secondPartyId], references: [id])
+  partyRelationship PartyRelationship? @relation(name:"PartyRelationshipOfContact", fields:[partyRelationshipId], references: [id])
+  //firstParty Party @relation(name:"FirstPartyOfContact", fields:[firstPartyId], references: [id])
+  //secondParty Party? @relation(name:"SecondPartyOfContact", fields:[secondPartyId], references: [id])
   mainPartyId Int
-  firstPartyId Int
-  secondPartyId Int?
+  partyRelationshipId Int?
+  //firstPartyId Int
+  //secondPartyId Int?
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
   appUserGroup    AppUserGroup    @relation(fields: [appUserGroupId], references: [id])
@@ -147,17 +170,17 @@ model Tag {
 }
 
 model TagParty {
-  id        Int     @id @default(autoincrement())
+  //id        Int     @id @default(autoincrement())
   party   Party @relation(fields: [partyId], references: [id])
   partyId Int
   tag   Tag @relation(fields: [tagId], references: [id])
   tagId Int
+  @@id ([partyId, tagId])
 }
 
 model Note {
   id        Int     @id @default(autoincrement())
   content   String @db.Text()
-  //isPrivate Boolean //redundant if appUserGroupId is filled
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
   appUser    AppUser    @relation(fields: [appUserId], references: [id])
@@ -169,17 +192,19 @@ model Note {
 }
 
 model NoteParty {
-  id        Int     @id @default(autoincrement())
+  //id        Int     @id @default(autoincrement())
   party   Party @relation(fields: [partyId], references: [id])
   partyId Int
   note   Note @relation(fields: [noteId], references: [id])
   noteId Int
+  @@id ([partyId, noteId])
 }
 
 model NoteTag { //displayed in Tag detail page
-  id        Int     @id @default(autoincrement())
+  //id        Int     @id @default(autoincrement())
   tag   Tag @relation(fields: [tagId], references: [id])
   tagId Int
   note   Note @relation(fields: [noteId], references: [id])
   noteId Int
+  @@id ([tagId, noteId])
 }
