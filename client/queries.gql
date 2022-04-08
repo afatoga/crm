@@ -1,15 +1,37 @@
-
+query {
+  allAppUsers {
+    email
+  }
+}
 
 query {
-    allAppUsers  {
-      email
-    }
+  allPersons {
+    partyId
+    name
+    surname
   }
+}
 
 query {
-    allPersons {
-      partyId
-      name
-      surname
-    }
+  personsByAppUserGroup(data: { id: 1, partyTypeId: 1, statusId: 1 }) {
+    name
+    surname
   }
+}
+
+query {
+  organizationsByAppUserGroup(data: { id: 1, partyTypeId: 2 }) {
+    name
+    partyId
+    typeId
+  }
+}
+
+query {
+  singlePartyNotes(data: { noteTarget:"party", noteTargetId: 2 }) {
+    id
+    content
+    appUserGroupId #isPrivate if null
+  }
+}
+

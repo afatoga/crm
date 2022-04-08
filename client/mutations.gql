@@ -31,3 +31,10 @@ mutation {
     partyId
   }
 }
+
+mutation {
+    createUpdateNote (data:{content: "tajna", noteTarget: "party", noteTargetId: 1, isPrivate:  true})  {
+   result
+    message
+    }
+  }

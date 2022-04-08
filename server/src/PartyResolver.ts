@@ -11,6 +11,7 @@ import {
 } from 'type-graphql'
 import { Party, Person, PartyRelationship, Organization } from './Party'
 import { Context } from './context'
+import { Prisma } from '@prisma/client'
 //import { Service } from 'typedi'
 
 
@@ -72,6 +73,17 @@ class PartyRelationshipInput {
 
   @Field({nullable: true})
   typeId: number
+}
+@InputType()
+class AppUserGroupUniqueInput {
+  @Field()
+  id: number
+
+  @Field({nullable: true})
+  statusId: number
+
+  @Field()
+  partyTypeId: number
 }
 
 
@@ -226,23 +238,51 @@ export class PartyResolver {
   }
 
 
-  // @Query((returns) => [Post], { nullable: true })
-  // async draftsByAppUser(
-  //   @Arg('appUserUniqueInput') appUserUniqueInput: AppUserUniqueInput,
-  //   @Ctx() ctx: Context,
-  // ) {
-  //   return ctx.prisma.appUser
-  //     .findUnique({
-  //       where: {
-  //         id: appUserUniqueInput.id || undefined,
-  //         email: appUserUniqueInput.email || undefined,
-  //       },
-  //     })
-  //     .posts({
-  //       where: {
-  //         published: false,
-  //       },
-  //     })
-  // }
+  @Query((returns) => [Person], { nullable: true })
+  async personsByAppUserGroup(
+    @Arg('data') data: AppUserGroupUniqueInput,
+    @Ctx() ctx: Context,
+  ) {
+
+    let statusCondition = (data.statusId) ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}` : Prisma.empty;
+
+    return ctx.prisma.$queryRaw<Person[]>(Prisma.sql`
+      SELECT "Person".* 
+      FROM "Party"
+      INNER JOIN "Person" ON "Party"."id" = "Person"."partyId"
+      WHERE "Party"."appUserGroupId" = ${data.id}
+      ${statusCondition}
+    `);
+    
+  }
+
+  @Query((returns) => [Organization], { nullable: true })
+  async organizationsByAppUserGroup(
+    @Arg('data') data: AppUserGroupUniqueInput,
+    @Ctx() ctx: Context,
+  ) {
+
+    
+    return ctx.prisma.appUserGroup.findUnique({
+      where: {
+        id: data.id
+      }
+    }).parties({
+      where:{
+        typeId: data.partyTypeId
+      },
+      include: {
+        organizations: true
+      }
+    }).then((res) => 
+    { 
+
+      return res.map(item => {
+        return item.organizations[0]
+      })
+    })
+
+  }
 
 }
+
