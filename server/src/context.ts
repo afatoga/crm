@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { verify } from "jsonwebtoken"
+import {AppUser} from './AppUser'
 
 const prisma = new PrismaClient(
   // {
@@ -22,13 +23,8 @@ const prisma = new PrismaClient(
 
 export interface Context {
   prisma: PrismaClient
-  user: { 
-    id: number | null;
-    email: string | null;
-    roles: string[];
-    appUserGroupId: number | null;
-  }
-  roles: string[],
+  currentUser?: Pick<AppUser,'email'|'id'|'appUserGroupRelationships' >
+  appRoles: string[],
   //req:any //test
   res: any
 }
@@ -60,15 +56,20 @@ export const context = ({ req, res }: {req:any, res:Response}): Context => {
     }
   }
 
+  // development!
+  userData = {
+    id: 2,
+    email: 'fakemail@gmail.com',
+    appUserGroupRelationships: [
+      {appUserGroupId: 1,
+        appUserRoleId: 1}
+    ]
+  }
+
   return {
     prisma: prisma,
-    user: {
-      id: userData ? userData.id : null,
-      email: userData ? userData.email : null,
-      appUserGroupId: userData ? userData.appUserGroupId : null,
-      roles: accessToken ? ['USER'] : ["ANONYMOUS"]
-    },
-    roles: ['ADMIN', 'USER', 'ANONYMOUS'],
+    currentUser: userData ? userData : undefined,
+    appRoles: ['ANONYMOUS', 'ADMIN', 'MOD', 'MEMBER'], //retrieve like ctx.roles[ctx.currentUser.appUserRoleId]
     //req,
     res //to send cookies
   }

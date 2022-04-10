@@ -1,26 +1,28 @@
 import { AuthChecker } from "type-graphql";
 
-import { context, Context } from "./context";
+import { Context } from "./context";
 
 // create auth checker function
-export const authChecker: AuthChecker<Context> = ({ args, context: { user,roles} }) => {
-  //console.log('args:',args);
+//({ args, context: { currentUser} }, roles)
+export const authChecker: AuthChecker<Context> = ({ args, context: { currentUser, appRoles} }, roles) => {
+ 
   if (roles.length === 0) {
-    // if `@Authorized()`, check only if user exists
-    return user !== undefined;
+    // if `@Authorized()`, check only if currentUser exists
+    return currentUser !== undefined;
   }
   // there are some roles defined now
 
-  if (!user) {
+  if (!currentUser) {
     // and if no user, restrict access
     return false;
   }
 
   // if (args.data.appUserGroupId !== user.appUserGroupId) return false;
-
-  if (user.roles.some(role => roles.includes(role))) {
-    // grant access if the roles overlap
-    return true;
+  for (let i = 0; i<currentUser.appUserGroupRelationships.length; i++) {
+    if (currentUser.appUserGroupRelationships[i].appUserGroupId === args.data.appUserGroupId) {
+      if (roles.includes(appRoles[currentUser.appUserGroupRelationships[i].appUserRoleId])) return true;
+      break;
+    }
   }
 
   // no roles matched, restrict access

@@ -1,8 +1,13 @@
 import 'reflect-metadata'
 import { ObjectType, Field, ID } from 'type-graphql'
-//import { IsEmail } from 'class-validator'
-//import {IsEmailAlreadyExist} from './decorators/isEmailAlreadyExist'
-//import { Post } from './Post'
+
+@ObjectType()
+class AppUserGroupRelationship {
+  @Field(type => Number)
+  appUserGroupId: number;
+  @Field(type => Number)
+  appUserRoleId: number;
+}
 
 @ObjectType()
 export class AppUser {
@@ -10,8 +15,6 @@ export class AppUser {
   id: number
 
   @Field((type) => String)
-  //@IsEmail()
-  //@IsEmailAlreadyExist({message: "email already used"})
   email: string
   
   @Field((type) => String)
@@ -20,8 +23,8 @@ export class AppUser {
   @Field((type) => String, { nullable: true })
   nickname: string | null
 
-  @Field((type) => Number, {nullable: true})
-  appUserGroupId: number |null
+  //@Field()
+  appUserGroupRelationships: AppUserGroupRelationship[] 
 
   @Field((type) => Number)
   count: number

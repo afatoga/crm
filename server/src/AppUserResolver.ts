@@ -13,6 +13,7 @@ import {
   Authorized
 } from 'type-graphql'
 //import { Post } from './Post'
+import { APIResponse } from './GlobalObjects'
 import { AppUser } from './AppUser'
 import { Context } from './context'
 import { Prisma } from '@prisma/client'
@@ -22,12 +23,9 @@ import bcrypt from "bcryptjs";
 import {createTokens} from './auth';
 
 @InputType()
-class AppUserUniqueInput {
-  @Field({ nullable: true })
+class AppUserGroupUniqueInput {
+  @Field()
   id: number
-
-  @Field({ nullable: true })
-  email: string
 }
 
 @InputType()
@@ -44,7 +42,7 @@ class AppUserInput {
   @Field({nullable: true})
   id: number
 
-  @Field()
+  @Field({nullable: true})
   @IsEmail()
   @IsEmailAlreadyExist({message: "email already used"})
   email: string
@@ -55,8 +53,11 @@ class AppUserInput {
   @Field({ nullable: true })
   nickname: string
 
-  @Field({nullable: true})
+  @Field()
   appUserGroupId: number
+
+  @Field()
+  appUserRoleId: number
 
   // @Field((type) => [PostCreateInput], { nullable: true })
   // posts: [PostCreateInput]
@@ -65,37 +66,101 @@ class AppUserInput {
 @Resolver(AppUser)
 export class AppUserResolver {
 
+
   @Mutation((returns) => AppUser)
   async createUpdateAppUser(
     @Arg('data') data: AppUserInput,
     @Ctx() ctx: Context,
-  ): Promise<AppUser> {
+  ): Promise<APIResponse> {
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+   console.log(data.id, ctx.currentUser)
 
-    if (data.id) { //update
+    //
 
-      return ctx.prisma.appUser.update({
+    if (ctx.currentUser && ctx.currentUser.id === data.id && data.password.length) {
+      const hashedPassword = await bcrypt.hash(data.password, 10)
+      // user updates his profile
+
+      await ctx.prisma.appUser.update({
         where: {
           id: data.id,
         },
         data: {
-          email: data.email, // test could be null?
+          email: data?.email,
           nickname: data?.nickname,
-          appUserGroupId: data.appUserGroupId,
-          password: data.password && hashedPassword
+          password: hashedPassword
         }
       })
+
+      return {result: 'success', message: 'account details updated'}
+
+    } else if (ctx.currentUser) {
+
+      const appUserGroups = ctx.currentUser.appUserGroupRelationships
+      let userIsAdminInTargetGroup = false
+      // user has admin role in the appUserGroup
+      for (let i=0;i<appUserGroups.length;i++) {
+        if (appUserGroups[i].appUserGroupId === data.appUserGroupId && ctx.appRoles[appUserGroups[i].appUserRoleId] === "ADMIN") {
+            userIsAdminInTargetGroup = true
+            break;
+        }
+      }
+
+      if (!userIsAdminInTargetGroup) throw new Error('Not permitted for this action')
+
+      // check if target user has relation with target
+
+      await ctx.prisma.appUserGroupRelationship.upsert({
+        where: {
+          appUserId_appUserRoleId_appUserGroupId: {
+            appUserId: data.id,
+            appUserGroupId: data.appUserGroupId,
+            appUserRoleId: data.appUserRoleId
+          }
+        },
+          update: {
+            appUserRoleId: data.appUserRoleId,
+            appUserGroupId: data.appUserGroupId,
+        },
+        create: {
+          appUserId: data.id,
+          appUserGroupId: data.appUserGroupId,
+          appUserRoleId: data.appUserRoleId
+        }
+      })
+
+      return {result: 'success'}
     }
-    //try {
-      return ctx.prisma.appUser.create({
+
+    else {
+      const hashedPassword = await bcrypt.hash(data.password, 10)
+      const appUser = await ctx.prisma.appUser.create({
         data: {
           email: data.email,
           nickname: data?.nickname,
-          appUserGroupId: data.appUserGroupId && data.appUserGroupId,
+          //appUserGroupId: data.appUserGroupId && data.appUserGroupId,
           password: hashedPassword
         },
       })
+
+      //option to create new appUserGroup with just single user in it
+
+      const appUserGroupRelationship = await ctx.prisma.appUserGroupRelationship.create({
+        data: {
+          appUserId: appUser.id,
+          appUserGroupId: data.appUserGroupId,
+          appUserRoleId: data.appUserRoleId
+        }
+      })
+
+      return {result: 'success', message: 'account created'}
+
+      // return {...appUser, 
+      //   appUserGroupId: appUserGroupRelationship.appUserGroupId, 
+      //   appUserRoleId: appUserGroupRelationship.appUserRoleId} 
+    }
+    
+     
     
 
 
@@ -125,28 +190,12 @@ export class AppUserResolver {
     return user;
   }
 
-  @Authorized() 
+  @Authorized(["MOD"]) 
   @Query(() => [AppUser])
-  async allAppUsers(@Ctx() ctx: Context) {
-    return ctx.prisma.appUser.findMany({where:{appUserGroupId : ctx.user.appUserGroupId}})
+  async allAppUsers(
+    @Arg("data") data: AppUserGroupUniqueInput,
+    @Ctx() ctx: Context) {
+    return ctx.prisma.appUserGroupRelationship.findMany({where:{appUserGroupId : data.id}})
   }
 
-  // @Query((returns) => [Post], { nullable: true })
-  // async notesByAppUser(
-  //   @Arg('appUserUniqueInput') appUserUniqueInput: AppUserUniqueInput,
-  //   @Ctx() ctx: Context,
-  // ) {
-  //   return ctx.prisma.appUser
-  //     .findUnique({
-  //       where: {
-  //         id: appUserUniqueInput.id || undefined,
-  //         email: appUserUniqueInput.email || undefined,
-  //       },
-  //     })
-  //     .posts({
-  //       where: {
-  //         published: false,
-  //       },
-  //     })
-  // }
 }

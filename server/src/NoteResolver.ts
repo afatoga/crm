@@ -12,6 +12,7 @@ import {
 import { Note } from './Note'
 import {APIResponse} from './GlobalObjects'
 import { Context } from './context'
+import { AppUser } from './AppUser'
 //import { Prisma } from '@prisma/client'
 //import { Service } from 'typedi'
 
@@ -62,7 +63,7 @@ export class NoteResolver {
     @Ctx() ctx: Context,
   ): Promise<APIResponse> {
 
-    if(!ctx.user.id || !ctx.user.appUserGroupId) throw new Error('Only for logged in users')
+    if(!ctx.currentUser) throw new Error('Only for logged in users')
     
     let target = null;
     if (data.noteTarget === 'tag') {
@@ -70,7 +71,7 @@ export class NoteResolver {
         target = await ctx.prisma.tag.findFirst({
             where: {
               id: data.noteTargetId,
-              appUserGroupId: ctx.user.appUserGroupId
+              appUserGroupId: ctx.currentUser.appUserGroupId
             },
           })
 
@@ -78,7 +79,7 @@ export class NoteResolver {
         target = await ctx.prisma.party.findFirst({
             where: {
               id: data.noteTargetId,
-              appUserGroupId: ctx.user.appUserGroupId
+              appUserGroupId: ctx.currentUser.appUserGroupId
             },
           })
     }
@@ -91,7 +92,7 @@ export class NoteResolver {
             let currentNote = await ctx.prisma.note.findFirst({
                 where: {
                     id: data.id,
-                    appUserId: ctx.user.id
+                    appUserId: ctx.currentUser.id
                 }
             })
 
@@ -133,7 +134,7 @@ export class NoteResolver {
                 },
                 data: {
                   content: data.content,
-                  appUserGroupId: data.isPrivate ? null : ctx.user.appUserGroupId
+                  appUserGroupId: data.isPrivate ? null : ctx.currentUser.appUserGroupId
                 }
               })
 
@@ -144,8 +145,8 @@ export class NoteResolver {
             const createdNote = await ctx.prisma.note.create({
             data: {
               content: data.content,
-              appUserId: ctx.user.id,
-              appUserGroupId: data.isPrivate ? null : ctx.user.appUserGroupId 
+              appUserId: ctx.currentUser.id,
+              appUserGroupId: data.isPrivate ? null : ctx.currentUser.appUserGroupId 
             },
           })
 
@@ -173,24 +174,25 @@ export class NoteResolver {
     
   }
 
-  public retrieveNotes = (foundItems:any, appUserId: number | null) => {
-
-    if(!appUserId) throw new Error('Only for logged in users')
+  public retrieveNotes = (foundItems:any, currentUserId:number) => {
 
     return foundItems.flatMap((item: any) => {
         //this logic will go through every noteTag / noteParty item with certain noteTargetId
 
-        return (item.note.appUserId === appUserId) ? item.note : []
+        return (item.note.appUserId === currentUserId) ? item.note : []
       })    
   }
 
+  @Authorized()
   @Query((returns) => [Note], { nullable: true })
   async singlePartyNotes(
     @Arg('data') data: TargetNotesInput,
     @Ctx() ctx: Context,
   ) {
 
-   
+
+    if (!ctx.currentUser) throw new Error('Only for logged in users')
+    const currentUserId = ctx.currentUser.id;
 
     if (data.noteTarget === 'tag') {
         return ctx.prisma.noteTag.findMany({
@@ -200,7 +202,7 @@ export class NoteResolver {
             include: {
                 note: true
             }
-        }).then(foundItems => this.retrieveNotes(foundItems, ctx.user.id))  
+        }).then(foundItems => this.retrieveNotes(foundItems, currentUserId))  
 
     } else if (data.noteTarget === 'party') {
         return ctx.prisma.noteParty.findMany({
@@ -210,7 +212,7 @@ export class NoteResolver {
             include: {
                 note: true
             }
-        }).then(foundItems => this.retrieveNotes(foundItems, ctx.user.id))
+        }).then(foundItems => this.retrieveNotes(foundItems, currentUserId))
            
     }
   }

@@ -75,7 +75,7 @@ class PartyRelationshipInput {
   typeId: number
 }
 @InputType()
-class AppUserGroupUniqueInput {
+class PartyByAppUserGroupInput {
   @Field()
   id: number
 
@@ -240,7 +240,7 @@ export class PartyResolver {
 
   @Query((returns) => [Person], { nullable: true })
   async personsByAppUserGroup(
-    @Arg('data') data: AppUserGroupUniqueInput,
+    @Arg('data') data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context,
   ) {
 
@@ -258,7 +258,7 @@ export class PartyResolver {
 
   @Query((returns) => [Organization], { nullable: true })
   async organizationsByAppUserGroup(
-    @Arg('data') data: AppUserGroupUniqueInput,
+    @Arg('data') data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context,
   ) {
 

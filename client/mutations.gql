@@ -1,5 +1,12 @@
 mutation {
-  createUpdateAppUser(data: { email: "fakemail@gmail.com", appUserGroupId: 2 }) {
+  createUpdateAppUser(data: 
+    { 
+      email: "fakemail@gmail.com", 
+      appUserGroupId: 1, 
+      appUserRoleId: 3, 
+      password: "heslo" 
+    }) 
+  {
     id
     email
   }
