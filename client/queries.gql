@@ -1,4 +1,15 @@
 query {
+  login(data: { email: "trydems@team.com", password: "heslo" }) {
+    id
+    appUserGroupRelationships {
+      appUserGroupId
+      appUserId
+      appUserRoleId
+    }
+  }
+}
+
+query {
   allAppUsers {
     email
   }

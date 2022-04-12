@@ -4,6 +4,8 @@ import { ObjectType, Field, ID } from 'type-graphql'
 @ObjectType()
 class AppUserGroupRelationship {
   @Field(type => Number)
+  appUserId: number;
+  @Field(type => Number)
   appUserGroupId: number;
   @Field(type => Number)
   appUserRoleId: number;
@@ -23,7 +25,7 @@ export class AppUser {
   @Field((type) => String, { nullable: true })
   nickname: string | null
 
-  //@Field()
+  @Field((type) => [AppUserGroupRelationship])
   appUserGroupRelationships: AppUserGroupRelationship[] 
 
   @Field((type) => Number)

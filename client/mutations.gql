@@ -11,6 +11,14 @@ mutation {
     email
   }
 }
+
+# puts a user in a group, sets role
+mutation {
+    createUpdateAppUser (data:{id:5, appUserGroupId: 2, appUserRoleId: 2}) {
+      result
+    }
+}
+
 #creates
 mutation {
   createUpdatePerson(data: { name: "Adam", surname: "Pospisil", appUserGroupId: 1 }) {

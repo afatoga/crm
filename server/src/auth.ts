@@ -2,7 +2,7 @@ import { sign } from "jsonwebtoken";
 import { AppUser } from "./AppUser";
 // import dotenv from "dotenv";
 
-export const createTokens = (user: AppUser) => {
+export const createTokens = (user: Pick<AppUser,'email'|'id'|'count' >) => {
 
   const refresh_secret = process.env.REFRESH_TOKEN_SECRET ? process.env.REFRESH_TOKEN_SECRET : 'secret'; 
   const access_secret = process.env.ACCESS_TOKEN_SECRET ? process.env.ACCESS_TOKEN_SECRET : 'secret'; 
@@ -14,7 +14,7 @@ export const createTokens = (user: AppUser) => {
       expiresIn: "7d"
     }
   );
-  const accessToken = sign({ id: user.id, email: user.email, appUserGroupId: user.appUserGroupId },access_secret , {
+  const accessToken = sign({ id: user.id, email: user.email },access_secret , {
     expiresIn: "15min"
   });
 

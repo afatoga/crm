@@ -21,9 +21,19 @@ const prisma = new PrismaClient(
 //   console.log("Duration: " + e.duration + "ms");
 // });
 
+interface IappUserGroupRelationship {
+  appUserId: number;
+  appUserGroupId: number;
+  appUserRoleId: number;
+}
+
+interface IUser extends Pick<AppUser, 'email'|'id'> {
+  appUserGroupRelationships: IappUserGroupRelationship[];
+}
+
 export interface Context {
   prisma: PrismaClient
-  currentUser?: Pick<AppUser,'email'|'id'|'appUserGroupRelationships' >
+  currentUser?: IUser
   appRoles: string[],
   //req:any //test
   res: any
@@ -58,10 +68,11 @@ export const context = ({ req, res }: {req:any, res:Response}): Context => {
 
   // development!
   userData = {
-    id: 2,
+    id: 4,
     email: 'fakemail@gmail.com',
     appUserGroupRelationships: [
-      {appUserGroupId: 1,
+      {appUserGroupId: 2,
+        appUserId: 4, //could be ommited
         appUserRoleId: 1}
     ]
   }
