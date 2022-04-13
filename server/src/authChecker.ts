@@ -1,6 +1,6 @@
 import { AuthChecker } from "type-graphql";
 
-import { Context } from "./context";
+import { Context, ICurrentUser } from "./context";
 
 // create auth checker function
 //({ args, context: { currentUser} }, roles)
@@ -19,7 +19,7 @@ export const authChecker: AuthChecker<Context> = ({ args, context: { currentUser
 
   // if (args.data.appUserGroupId !== user.appUserGroupId) return false;
   for (let i = 0; i<currentUser.appUserGroupRelationships.length; i++) {
-    if (currentUser.appUserGroupRelationships[i].appUserGroupId === args.data.appUserGroupId) {
+    if (currentUser.appUserGroupRelationships[i].appUserGroupId === currentUser.currentAppUserGroupId) {
       if (roles.includes(appRoles[currentUser.appUserGroupRelationships[i].appUserRoleId])) return true;
       break;
     }
@@ -27,4 +27,26 @@ export const authChecker: AuthChecker<Context> = ({ args, context: { currentUser
 
   // no roles matched, restrict access
   return false;
+};
+
+export const isUserAuthorized = (
+  currentUser: ICurrentUser,
+  targetGroupId: number,
+  appRoles: string[]
+): boolean => {
+  let isAuthorized = false;
+  let appUserGroups = currentUser.appUserGroupRelationships;
+
+  for (let i = 0; i < appUserGroups.length; i++) {
+    if (
+      appUserGroups[i].appUserGroupId === targetGroupId &&
+      appRoles[appUserGroups[i].appUserRoleId] === "ADMIN"
+    ) {
+      // user has admin role in the target group
+      isAuthorized = true;
+      break;
+    }
+  }
+
+  return isAuthorized ? true : false;
 };

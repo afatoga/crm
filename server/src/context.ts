@@ -27,15 +27,16 @@ interface IappUserGroupRelationship {
   appUserRoleId: number;
 }
 
-interface IUser extends Pick<AppUser, 'email'|'id'> {
+export interface ICurrentUser extends Pick<AppUser, 'email'|'id'> {
   appUserGroupRelationships: IappUserGroupRelationship[];
+  currentAppUserGroupId: number;
 }
 
 export interface Context {
   prisma: PrismaClient
-  currentUser?: IUser
+  currentUser?: ICurrentUser
   appRoles: string[],
-  //req:any //test
+  //req:any
   res: any
 }
 
@@ -66,16 +67,20 @@ export const context = ({ req, res }: {req:any, res:Response}): Context => {
     }
   }
 
+  const appUserGroupId = cookies && cookies['current-group-id'];
+
   // development!
   userData = {
     id: 4,
-    email: 'fakemail@gmail.com',
+    email: 'fakemail@gmail.com', // could be ommitted
     appUserGroupRelationships: [
-      {appUserGroupId: 2,
+      {appUserGroupId: 1,
         appUserId: 4, //could be ommited
         appUserRoleId: 1}
     ]
   }
+
+  userData = {...userData, currentAppUserGroupId: appUserGroupId ? appUserGroupId : userData.appUserGroupRelationships[0].appUserGroupId}
 
   return {
     prisma: prisma,

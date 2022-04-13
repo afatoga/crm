@@ -1,4 +1,4 @@
-import 'reflect-metadata'
+import "reflect-metadata";
 import {
   Resolver,
   Query,
@@ -8,97 +8,97 @@ import {
   InputType,
   Field,
   Authorized,
-} from 'type-graphql'
-import { Party, Person, PartyRelationship, Organization } from './Party'
-import { Context } from './context'
-import { Prisma } from '@prisma/client'
+} from "type-graphql";
+import { Party, Person, PartyRelationship, Organization } from "./Party";
+import { Context } from "./context";
+import { Prisma } from "@prisma/client";
+import {isUserAuthorized} from "./authChecker";
 //import { Service } from 'typedi'
-
 
 @InputType()
 class PersonInput {
   @Field({ nullable: true })
-  partyId: number
+  partyId: number;
 
   @Field({ nullable: true })
-  typeId: number
+  typeId: number;
 
   @Field({ nullable: true })
-  statusId: number
+  statusId: number;
 
   @Field({ nullable: true })
-  preDegree: string
+  preDegree: string;
 
   @Field()
-  name: string
+  name: string;
 
   @Field()
-  surname: string
+  surname: string;
 
   @Field({ nullable: true })
-  postDegree: string
+  postDegree: string;
 
   @Field({ nullable: true })
-  birthday: Date
+  birthday: Date;
 
-  @Field()
-  appUserGroupId: number
+  @Field({ nullable: true })
+  appUserGroupId: number;
 }
 
 @InputType()
 class OrganizationInput {
   @Field({ nullable: true })
-  partyId: number
+  partyId: number;
 
   @Field({ nullable: true })
-  statusId: number
+  statusId: number;
 
   @Field()
-  name: string
+  name: string;
 
   @Field({ nullable: true })
-  organizationTypeId: number
+  organizationTypeId: number;
 
-  @Field()
-  appUserGroupId: number
+  @Field({ nullable: true })
+  appUserGroupId: number;
 }
 
 @InputType()
 class PartyRelationshipInput {
   @Field()
-  firstPartyId: number
+  firstPartyId: number;
 
   @Field()
-  secondPartyId: number
+  secondPartyId: number;
 
-  @Field({nullable: true})
-  typeId: number
+  @Field({ nullable: true })
+  typeId: number;
 }
 @InputType()
 class PartyByAppUserGroupInput {
   @Field()
-  id: number
+  id: number;
 
-  @Field({nullable: true})
-  statusId: number
+  @Field({ nullable: true })
+  statusId: number;
 
   @Field()
-  partyTypeId: number
+  partyTypeId: number;
 }
-
 
 //@Service()
 @Resolver(Party)
 export class PartyResolver {
-
-  @Authorized()
+  @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Person)
   async createUpdatePerson(
-    @Arg('data') data: PersonInput,
-    @Ctx() ctx: Context,
+    @Arg("data") data: PersonInput,
+    @Ctx() ctx: Context
   ): Promise<Person> {
-    
-    if (data.partyId) { //update
+    if (!ctx.currentUser) throw new Error();
+
+    if (data.partyId) {
+      //update
       return ctx.prisma.person.update({
         where: {
           partyId: data.partyId,
@@ -108,9 +108,9 @@ export class PartyResolver {
           name: data.name,
           surname: data.surname,
           postDegree: data?.postDegree,
-          birthday: data?.birthday
-        }
-      })
+          birthday: data?.birthday,
+        },
+      });
     }
 
     // const person = await ctx.prisma.person.findFirst({
@@ -120,43 +120,45 @@ export class PartyResolver {
     //   }
     // })
 
-    //if (!person) { 
-      //create
-      const party = await ctx.prisma.party.create({
-        data: {
-          typeId: 1,
-          appUserGroupId: data.appUserGroupId
-        },
-      })
+    //if (!person) {
+    //create
+    const party = await ctx.prisma.party.create({
+      data: {
+        typeId: 1,
+        statusId: data.statusId && data.statusId,
+        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+      },
+    });
 
-      return ctx.prisma.person.create({
-        data: {
-          partyId: party.id,
-          preDegree: data?.preDegree,
-          name: data.name,
-          surname: data.surname,
-          postDegree: data?.postDegree,
-          birthday: data?.birthday
-        },
-      })
+    return ctx.prisma.person.create({
+      data: {
+        partyId: party.id,
+        preDegree: data?.preDegree,
+        name: data.name,
+        surname: data.surname,
+        postDegree: data?.postDegree,
+        birthday: data?.birthday,
+      },
+    });
 
     //return person; //or return error that user exists
   }
 
-
-
   @Query(() => [Person])
   async allPersons(@Ctx() ctx: Context) {
-    return ctx.prisma.person.findMany()
+    return ctx.prisma.person.findMany();
   }
 
+  @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Organization)
   async createUpdateOrganization(
-    @Arg('data') data: OrganizationInput,
-    @Ctx() ctx: Context,
+    @Arg("data") data: OrganizationInput,
+    @Ctx() ctx: Context
   ): Promise<Organization> {
-    
-    if (data.partyId) { //update
+    if (!ctx.currentUser) throw new Error();
+
+    if (data.partyId) {
+      //update
       return ctx.prisma.organization.update({
         where: {
           partyId: data.partyId,
@@ -164,87 +166,86 @@ export class PartyResolver {
         data: {
           name: data.name,
           typeId: data?.organizationTypeId,
-        }
-      })
+        },
+      });
     }
 
-      //create
-      const party = await ctx.prisma.party.create({
-        data: {
-          typeId: 2,
-          appUserGroupId: data.appUserGroupId
-        },
-      })
+    //create
+    const party = await ctx.prisma.party.create({
+      data: {
+        typeId: 2,
+        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+      },
+    });
 
-      return ctx.prisma.organization.create({
-        data: {
-          partyId: party.id,
-          name: data.name,
-          typeId: data?.organizationTypeId,
-        },
-      })
+    return ctx.prisma.organization.create({
+      data: {
+        partyId: party.id,
+        name: data.name,
+        typeId: data?.organizationTypeId,
+      },
+    });
   }
 
   @Query(() => [Person])
   async allOrganizations(@Ctx() ctx: Context) {
-    return ctx.prisma.organization.findMany()
+    return ctx.prisma.organization.findMany();
   }
 
   @Mutation((returns) => PartyRelationship)
   async createPartyRelationship(
-    @Arg('data') data: PartyRelationshipInput,
-    @Ctx() ctx: Context,
+    @Arg("data") data: PartyRelationshipInput,
+    @Ctx() ctx: Context
   ): Promise<PartyRelationship> {
     // const postData = data.posts?.map((post) => {
     //   return { title: post.title, content: post.content || undefined }
     // })
 
-    if (data.firstPartyId === data.secondPartyId) throw new Error('Parties must be different')
-  
+    if (data.firstPartyId === data.secondPartyId)
+      throw new Error("Parties must be different");
+
     const isRelationshipExist = await ctx.prisma.partyRelationship.findFirst({
       where: {
         firstPartyId: data.firstPartyId,
         secondPartyId: data.secondPartyId,
-        typeId: data.typeId
+        typeId: data.typeId,
       },
-    })
+    });
 
-    if (isRelationshipExist) throw new Error('This relationship already exists')
+    if (isRelationshipExist)
+      throw new Error("This relationship already exists");
 
     const firstParty = await ctx.prisma.party.findFirst({
       where: {
-        id: data.firstPartyId
+        id: data.firstPartyId,
       },
-    })
+    });
 
     const secondParty = await ctx.prisma.party.findFirst({
       where: {
-        id: data.secondPartyId
+        id: data.secondPartyId,
       },
-    })
+    });
 
-    if (firstParty && secondParty && (firstParty.id !== secondParty.id)) { 
-    
-    return ctx.prisma.partyRelationship.create({
-      data: {
-        typeId: data.typeId,
-        firstPartyId: firstParty.id,
-        secondPartyId: secondParty.id
-      },
-    })
-    }
-
-    else throw new Error('Input parties is invalid')
+    if (firstParty && secondParty && firstParty.id !== secondParty.id) {
+      return ctx.prisma.partyRelationship.create({
+        data: {
+          typeId: data.typeId,
+          firstPartyId: firstParty.id,
+          secondPartyId: secondParty.id,
+        },
+      });
+    } else throw new Error("Input parties is invalid");
   }
-
 
   @Query((returns) => [Person], { nullable: true })
   async personsByAppUserGroup(
-    @Arg('data') data: PartyByAppUserGroupInput,
-    @Ctx() ctx: Context,
+    @Arg("data") data: PartyByAppUserGroupInput,
+    @Ctx() ctx: Context
   ) {
-
-    let statusCondition = (data.statusId) ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}` : Prisma.empty;
+    let statusCondition = data.statusId
+      ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}`
+      : Prisma.empty;
 
     return ctx.prisma.$queryRaw<Person[]>(Prisma.sql`
       SELECT "Person".* 
@@ -253,36 +254,39 @@ export class PartyResolver {
       WHERE "Party"."appUserGroupId" = ${data.id}
       ${statusCondition}
     `);
-    
   }
 
+  @Authorized()
   @Query((returns) => [Organization], { nullable: true })
   async organizationsByAppUserGroup(
-    @Arg('data') data: PartyByAppUserGroupInput,
-    @Ctx() ctx: Context,
+    @Arg("data") data: PartyByAppUserGroupInput,
+    @Ctx() ctx: Context
   ) {
 
-    
-    return ctx.prisma.appUserGroup.findUnique({
-      where: {
-        id: data.id
-      }
-    }).parties({
-      where:{
-        typeId: data.partyTypeId
-      },
-      include: {
-        organizations: true
-      }
-    }).then((res) => 
-    { 
+    //ensure user is authorized
+    if(!ctx.currentUser || !isUserAuthorized(ctx.currentUser, data.id, ctx.appRoles)) throw new Error('Not authorized')
 
-      return res.map(item => {
-        return item.organizations[0]
+    return ctx.prisma.appUserGroup
+      .findUnique({
+        where: {
+          id: data.id
+        },
       })
-    })
-
+      .parties({
+        where: {
+          typeId: data.partyTypeId,
+          statusId: data.statusId && data.statusId
+        },
+        include: {
+          organization: true,
+        },
+      }).then((res) =>
+      {
+        return res.map(item => {
+          return item.organization
+        })
+      });
   }
-
 }
+
 

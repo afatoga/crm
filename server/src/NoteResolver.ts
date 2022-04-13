@@ -12,9 +12,6 @@ import {
 import { Note } from './Note'
 import {APIResponse} from './GlobalObjects'
 import { Context } from './context'
-import { AppUser } from './AppUser'
-//import { Prisma } from '@prisma/client'
-//import { Service } from 'typedi'
 
 
 @InputType()
@@ -71,7 +68,7 @@ export class NoteResolver {
         target = await ctx.prisma.tag.findFirst({
             where: {
               id: data.noteTargetId,
-              appUserGroupId: ctx.currentUser.appUserGroupId
+              appUserGroupId: ctx.currentUser.currentAppUserGroupId
             },
           })
 
@@ -79,7 +76,7 @@ export class NoteResolver {
         target = await ctx.prisma.party.findFirst({
             where: {
               id: data.noteTargetId,
-              appUserGroupId: ctx.currentUser.appUserGroupId
+              appUserGroupId: ctx.currentUser.currentAppUserGroupId
             },
           })
     }
@@ -134,7 +131,7 @@ export class NoteResolver {
                 },
                 data: {
                   content: data.content,
-                  appUserGroupId: data.isPrivate ? null : ctx.currentUser.appUserGroupId
+                  appUserGroupId: data.isPrivate ? null : ctx.currentUser.currentAppUserGroupId
                 }
               })
 
@@ -146,7 +143,7 @@ export class NoteResolver {
             data: {
               content: data.content,
               appUserId: ctx.currentUser.id,
-              appUserGroupId: data.isPrivate ? null : ctx.currentUser.appUserGroupId 
+              appUserGroupId: data.isPrivate ? null : ctx.currentUser.currentAppUserGroupId 
             },
           })
 

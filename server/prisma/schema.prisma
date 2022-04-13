@@ -156,7 +156,7 @@ model Contact {
 
 model Tag {
   id        Int     @id @default(autoincrement())
-  name      String @unique @db.VarChar(32)
+  name      String @db.VarChar(32)
   status   Status?  @relation(fields: [statusId], references: [id])
   statusId   Int?
   createdAt DateTime @default(now())
@@ -165,6 +165,7 @@ model Tag {
   appUserGroupId  Int
   tagParty TagParty[]
   noteTag NoteTag[]
+  @@unique([appUserGroupId, name])
 }
 
 model TagParty {
