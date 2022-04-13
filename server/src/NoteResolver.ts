@@ -139,6 +139,7 @@ export class NoteResolver {
         }
 
         else { //create
+
             const createdNote = await ctx.prisma.note.create({
             data: {
               content: data.content,

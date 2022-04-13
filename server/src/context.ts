@@ -71,7 +71,7 @@ export const context = ({ req, res }: {req:any, res:Response}): Context => {
 
   // development!
   userData = {
-    id: 4,
+    id: 1,
     email: 'fakemail@gmail.com', // could be ommitted
     appUserGroupRelationships: [
       {appUserGroupId: 1,

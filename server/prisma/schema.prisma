@@ -142,8 +142,6 @@ model Contact {
   statusId   Int?
   mainParty Party @relation(name:"MainPartyOfContact", fields:[mainPartyId], references: [id])
   partyRelationship PartyRelationship? @relation(name:"ContactBelongsToRelationship", fields:[partyRelationshipId], references: [id])
-  //firstParty Party @relation(name:"FirstPartyOfContact", fields:[firstPartyId], references: [id])
-  //secondParty Party? @relation(name:"SecondPartyOfContact", fields:[secondPartyId], references: [id])
   mainPartyId Int
   partyRelationshipId Int?
   //firstPartyId Int

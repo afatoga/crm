@@ -37,29 +37,27 @@ class PartyTagsInput {
   partyId: number;
 }
 
-
-
-const createTagName = (name:string) => {
+const createTagName = (name: string) => {
   let result = name.toLowerCase();
 
   result = result
-    .replace(new RegExp('\\s', 'g'), '')
-    .replace(new RegExp('[àáâãäå]', 'g'), 'a')
-    .replace(new RegExp('æ', 'g'), 'ae')
-    .replace(new RegExp('[çč]', 'g'), 'c')
-    .replace(new RegExp('[ď]', 'g'), 'd')
-    .replace(new RegExp('[èéêëě]', 'g'), 'e')
-    .replace(new RegExp('[ìíîï]', 'g'), 'i')
-    .replace(new RegExp('ñň', 'g'), 'n')
-    .replace(new RegExp('[òóôõö]', 'g'), 'o')
-    .replace(new RegExp('œ', 'g'), 'oe')
-    .replace(new RegExp('ř', 'g'), 'r')
-    .replace(new RegExp('š', 'g'), 's')
-    .replace(new RegExp('ť', 'g'), 't')
-    .replace(new RegExp('[ùúûüů]', 'g'), 'u')
-    .replace(new RegExp('[ýÿ]', 'g'), 'y')
-    .replace(new RegExp('[ž]', 'g'), 'z')
-    .replace(new RegExp('\\W', 'g'), '');
+    .replace(new RegExp("\\s", "g"), "")
+    .replace(new RegExp("[àáâãäå]", "g"), "a")
+    .replace(new RegExp("æ", "g"), "ae")
+    .replace(new RegExp("[çč]", "g"), "c")
+    .replace(new RegExp("[ď]", "g"), "d")
+    .replace(new RegExp("[èéêëě]", "g"), "e")
+    .replace(new RegExp("[ìíîï]", "g"), "i")
+    .replace(new RegExp("ñň", "g"), "n")
+    .replace(new RegExp("[òóôõö]", "g"), "o")
+    .replace(new RegExp("œ", "g"), "oe")
+    .replace(new RegExp("ř", "g"), "r")
+    .replace(new RegExp("š", "g"), "s")
+    .replace(new RegExp("ť", "g"), "t")
+    .replace(new RegExp("[ùúûüů]", "g"), "u")
+    .replace(new RegExp("[ýÿ]", "g"), "y")
+    .replace(new RegExp("[ž]", "g"), "z")
+    .replace(new RegExp("\\W", "g"), "");
 
   return result.length > 32 ? result.slice(0, 32) : result;
 };
@@ -67,7 +65,6 @@ const createTagName = (name:string) => {
 //@Service()
 @Resolver(Tag)
 export class TagResolver {
-  
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => APIResponse || Tag)
   async createUpdateTag(
@@ -77,17 +74,17 @@ export class TagResolver {
     if (!ctx.currentUser) throw new Error("Only for logged in users");
 
     if (data.partyId) {
-    let target = await ctx.prisma.party.findFirst({
-      where: {
-        id: data.partyId,
-        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
-      },
-    });
+      let target = await ctx.prisma.party.findFirst({
+        where: {
+          id: data.partyId,
+          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        },
+      });
 
-    //look for target object
+      //look for target object
 
-    if (!target) throw new Error("Target party does not exist");
-  }
+      if (!target) throw new Error("Target party does not exist");
+    }
 
     if (data.id) {
       //update
@@ -104,7 +101,7 @@ export class TagResolver {
           "tag does not exist or you are not authorized to update"
         );
 
-      if (typeof data.name !== 'undefined' && !data.name.length) {
+      if (typeof data.name !== "undefined" && !data.name.length) {
         //delete relationships
 
         await ctx.prisma.tagParty.deleteMany({
@@ -143,34 +140,28 @@ export class TagResolver {
       });
 
       if (data.partyId) {
-
-        const relationExist = await ctx.prisma.tagParty
-          .findUnique({
-            where: {
-              partyId_tagId: {
-                partyId: data.partyId,
-                tagId: data.id
-              }
-            }
-          })
-
-        if (!relationExist) await ctx.prisma.tagParty.create({
-          data: {
-            partyId: data.partyId,
-            tagId: data.id,
+        const relationExist = await ctx.prisma.tagParty.findUnique({
+          where: {
+            partyId_tagId: {
+              partyId: data.partyId,
+              tagId: data.id,
+            },
           },
         });
 
+        if (!relationExist)
+          await ctx.prisma.tagParty.create({
+            data: {
+              partyId: data.partyId,
+              tagId: data.id,
+            },
+          });
       }
-   
 
       return { result: "success", message: "tag was updated" };
     } else {
-
       if (!data.name || !data.name.length)
-        throw new Error(
-          "tag name is required"
-        );
+        throw new Error("tag name is required");
 
       // check if unique name
       let currentTag = await ctx.prisma.tag.findFirst({
@@ -180,38 +171,36 @@ export class TagResolver {
         },
       });
 
-      if(!currentTag) {
-
-      //create
-      currentTag = await ctx.prisma.tag.create({
-        data: {
-          name: createTagName(data.name),
-          statusId: data.statusId ? data.statusId: undefined,
-          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
-        },
-      });
+      if (!currentTag) {
+        //create
+        currentTag = await ctx.prisma.tag.create({
+          data: {
+            name: createTagName(data.name),
+            statusId: data.statusId ? data.statusId : undefined,
+            appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+          },
+        });
       }
 
-      const relationExist = await ctx.prisma.tagParty
-      .findUnique({
+      const relationExist = await ctx.prisma.tagParty.findUnique({
         where: {
           partyId_tagId: {
             partyId: data.partyId,
-            tagId: currentTag.id
-          }
-        }
-      })
-
-      if (data.partyId && !relationExist) await ctx.prisma.tagParty.create({
-        data: {
-          partyId: data.partyId,
-          tagId: currentTag.id,
+            tagId: currentTag.id,
+          },
         },
       });
 
-      console.log(currentTag);
-      return currentTag;
-      //return { result: "success", message: "tag was created" };
+      if (data.partyId && !relationExist)
+        await ctx.prisma.tagParty.create({
+          data: {
+            partyId: data.partyId,
+            tagId: currentTag.id,
+          },
+        });
+
+      //return currentTag;
+      return { result: "success", message: "tag was created" };
     }
   }
 
@@ -233,7 +222,6 @@ export class TagResolver {
         },
       })
       .then((foundItems) => {
-
         return foundItems.flatMap((item: any) => {
           return item.tag.appUserGroupId ===
             ctx.currentUser?.currentAppUserGroupId
@@ -248,5 +236,4 @@ export class TagResolver {
   //    isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
   //    ? data.appUserGroupId
   //    : undefined,
-
 }

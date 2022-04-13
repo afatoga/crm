@@ -34,12 +34,21 @@ mutation {
 }
 
 mutation {
-  createPartyRelationship(
-    data: { firstPartyId: 5, secondPartyId: 4, typeId: 1 }
+  createUpdatePartyRelationship(
+    data: { firstPartyId: 5, secondPartyId: 4, typeId: 1, operation: "CREATE" }
   ) {
     id
   }
 }
+
+mutation {
+  createUpdatePartyRelationship(
+    data: { firstPartyId: 2, secondPartyId: 3, typeId: 1, id:4, operation: "UPDATE" }
+  ) {
+    id
+  }
+}
+
 #creates
 mutation {
   createUpdateOrganization(data: { name: "CSOB", appUserGroupId: 1 }) {
@@ -51,5 +60,21 @@ mutation {
     createUpdateNote (data:{content: "tajna", noteTarget: "party", noteTargetId: 1, isPrivate:  true})  {
    result
     message
+    }
+  }
+
+#updates
+mutation {
+    createUpdateTag (data:{id:1, name: "móda 2022", partyId: 2})  {
+   result
+    message
+    }
+  }
+
+#creates
+mutation {
+    createUpdateContact (data:{mainPartyId: 1, value: "+420777000111", typeId: 1, operation: "CREATE"})  {
+   id
+    value
     }
   }

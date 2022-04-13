@@ -12,7 +12,7 @@ import {
 import { Party, Person, PartyRelationship, Organization } from "./Party";
 import { Context } from "./context";
 import { Prisma } from "@prisma/client";
-import {isUserAuthorized} from "./authChecker";
+import { isUserAuthorized } from "./authChecker";
 //import { Service } from 'typedi'
 
 @InputType()
@@ -65,14 +65,20 @@ class OrganizationInput {
 
 @InputType()
 class PartyRelationshipInput {
-  @Field()
+  @Field({ nullable: true })
+  id: number;
+
+  @Field({ nullable: true })
   firstPartyId: number;
 
-  @Field()
+  @Field({ nullable: true })
   secondPartyId: number;
 
   @Field({ nullable: true })
   typeId: number;
+
+  @Field({ nullable: true })
+  operation: "CREATE" | "UPDATE" | "DELETE";
 }
 @InputType()
 class PartyByAppUserGroupInput {
@@ -192,50 +198,114 @@ export class PartyResolver {
     return ctx.prisma.organization.findMany();
   }
 
+  @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => PartyRelationship)
-  async createPartyRelationship(
+  async createUpdatePartyRelationship(
     @Arg("data") data: PartyRelationshipInput,
     @Ctx() ctx: Context
   ): Promise<PartyRelationship> {
-    // const postData = data.posts?.map((post) => {
-    //   return { title: post.title, content: post.content || undefined }
-    // })
-
+    if (!data.operation) throw new Error("Invalid");
+    if (!ctx.currentUser) throw new Error("Only for logged in users");
     if (data.firstPartyId === data.secondPartyId)
-      throw new Error("Parties must be different");
+      throw new Error("use two different parties");
 
-    const isRelationshipExist = await ctx.prisma.partyRelationship.findFirst({
-      where: {
-        firstPartyId: data.firstPartyId,
-        secondPartyId: data.secondPartyId,
-        typeId: data.typeId,
-      },
-    });
+    if (data.operation === "CREATE") {
+      if (!data.firstPartyId || !data.firstPartyId)
+        throw new Error("provide first and second party");
 
-    if (isRelationshipExist)
-      throw new Error("This relationship already exists");
+      const relationshipExist = await ctx.prisma.partyRelationship.findFirst({
+        where: {
+          firstPartyId: data.firstPartyId,
+          secondPartyId: data.secondPartyId,
+          typeId: data.typeId,
+        },
+      });
 
-    const firstParty = await ctx.prisma.party.findFirst({
-      where: {
-        id: data.firstPartyId,
-      },
-    });
+      if (relationshipExist) throw new Error("relationship exist");
 
-    const secondParty = await ctx.prisma.party.findFirst({
-      where: {
-        id: data.secondPartyId,
-      },
-    });
+      const firstParty = await ctx.prisma.party.findFirst({
+        where: {
+          id: data.firstPartyId,
+          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        },
+      });
 
-    if (firstParty && secondParty && firstParty.id !== secondParty.id) {
-      return ctx.prisma.partyRelationship.create({
+      const secondParty = await ctx.prisma.party.findFirst({
+        where: {
+          id: data.secondPartyId,
+          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        },
+      });
+
+      if (!firstParty || !secondParty || firstParty.id === secondParty.id)
+        throw new Error("first or second party invalid");
+
+      return await ctx.prisma.partyRelationship.create({
         data: {
           typeId: data.typeId,
           firstPartyId: firstParty.id,
           secondPartyId: secondParty.id,
         },
       });
-    } else throw new Error("Input parties is invalid");
+    } else if (data.operation === "UPDATE") {
+      if (!data.id) throw new Error("provide id to update");
+      const existingRelationship = await ctx.prisma.partyRelationship.findFirst(
+        {
+          where: {
+            firstPartyId: data.firstPartyId,
+            secondPartyId: data.secondPartyId,
+            typeId: data.typeId
+          },
+        }
+      );
+
+      if (existingRelationship) throw new Error("relationship already exists");
+
+      const firstParty = await ctx.prisma.party.findFirst({
+        where: {
+          id: data.firstPartyId,
+          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        },
+      });
+
+      const secondParty = await ctx.prisma.party.findFirst({
+        where: {
+          id: data.secondPartyId,
+          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        },
+      });
+      if (!firstParty || !secondParty || firstParty.id === secondParty.id)
+      throw new Error("first or second party invalid");
+
+      return await ctx.prisma.partyRelationship.update({
+        where: {
+          id: data.id,
+        },
+        data: {
+          typeId: data.typeId && data.typeId,
+          firstPartyId: firstParty.id,
+          secondPartyId: secondParty.id,
+        },
+      });
+    } else if (data.operation === "DELETE") {
+      if (!data.id) throw new Error("provide id for removal");
+
+      //remove all contacts
+      await ctx.prisma.contact.deleteMany({
+        where: {
+          partyRelationshipId: data.id,
+          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        },
+      });
+
+      return await ctx.prisma.partyRelationship.delete({
+        where: {
+          id: data.id,
+        },
+      });
+    }
+
+    throw new Error("invalid request");
   }
 
   @Query((returns) => [Person], { nullable: true })
@@ -262,31 +332,32 @@ export class PartyResolver {
     @Arg("data") data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
-
     //ensure user is authorized
-    if(!ctx.currentUser || !isUserAuthorized(ctx.currentUser, data.id, ctx.appRoles)) throw new Error('Not authorized')
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.id, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
 
     return ctx.prisma.appUserGroup
       .findUnique({
         where: {
-          id: data.id
+          id: data.id,
         },
       })
       .parties({
         where: {
           typeId: data.partyTypeId,
-          statusId: data.statusId && data.statusId
+          statusId: data.statusId && data.statusId,
         },
         include: {
           organization: true,
         },
-      }).then((res) =>
-      {
-        return res.map(item => {
-          return item.organization
-        })
+      })
+      .then((res) => {
+        return res.map((item) => {
+          return item.organization;
+        });
       });
   }
 }
-
-
