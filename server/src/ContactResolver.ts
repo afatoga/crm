@@ -81,6 +81,9 @@ export class ContactResolver {
       const currentContact = await ctx.prisma.contact.findUnique({where: {id : data.id}})
       if (!currentContact) throw new Error('contact does not exist')
 
+      // zamceni zaznamu for update
+      // druhy uzivatel ceka, nedostane nactana data
+
       if (data.partyRelationshipId) {
         const partyRelationship = await ctx.prisma.partyRelationship.findUnique({where: {id : data.partyRelationshipId}})
         if (!partyRelationship) throw new Error('partyRelationship does not exist')

@@ -27,6 +27,9 @@ class TagInput {
   @Field({ nullable: true })
   partyId: number; //target
 
+  @Field()
+  operation: 'CREATE' | 'UPDATE' | 'DELETE'
+
   // @Field({ nullable: true })
   // appUserGroupId: number;
 }
@@ -71,6 +74,7 @@ export class TagResolver {
     @Arg("data") data: TagInput,
     @Ctx() ctx: Context
   ): Promise<APIResponse | Tag> {
+
     if (!ctx.currentUser) throw new Error("Only for logged in users");
 
     if (data.partyId) {
@@ -86,8 +90,8 @@ export class TagResolver {
       if (!target) throw new Error("Target party does not exist");
     }
 
-    if (data.id) {
-      //update
+    if (data.operation === 'UPDATE') {
+      if (!data.id) throw new Error("fill tag id");
 
       let currentTag = await ctx.prisma.tag.findFirst({
         where: {
@@ -101,67 +105,23 @@ export class TagResolver {
           "tag does not exist or you are not authorized to update"
         );
 
-      if (typeof data.name !== "undefined" && !data.name.length) {
-        //delete relationships
-
-        await ctx.prisma.tagParty.deleteMany({
-          where: {
-            tagId: data.id,
-          },
-        });
-
-        await ctx.prisma.noteTag.deleteMany({
-          where: {
-            tagId: data.id,
-          },
-        });
-
-        // delete tag
-        await ctx.prisma.tag.delete({
-          where: {
-            id: data.id,
-          },
-        });
-
-        return {
-          result: "success",
-          message: "tag and its relations were deleted",
-        };
-      }
+     
 
       await ctx.prisma.tag.update({
         where: {
           id: data.id,
         },
         data: {
-          name: data.name ? createTagName(data.name) : undefined,
+          name: data.name && createTagName(data.name),
           statusId: data.statusId ? data.statusId : undefined,
         },
       });
 
-      if (data.partyId) {
-        const relationExist = await ctx.prisma.tagParty.findUnique({
-          where: {
-            partyId_tagId: {
-              partyId: data.partyId,
-              tagId: data.id,
-            },
-          },
-        });
 
-        if (!relationExist)
-          await ctx.prisma.tagParty.create({
-            data: {
-              partyId: data.partyId,
-              tagId: data.id,
-            },
-          });
-      }
 
       return { result: "success", message: "tag was updated" };
-    } else {
-      if (!data.name || !data.name.length)
-        throw new Error("tag name is required");
+    } else if (data.operation === 'CREATE') {
+      if (!data.name || !data.name.length) throw new Error("tag name is required");
 
       // check if unique name
       let currentTag = await ctx.prisma.tag.findFirst({
@@ -182,26 +142,63 @@ export class TagResolver {
         });
       }
 
-      const relationExist = await ctx.prisma.tagParty.findUnique({
-        where: {
-          partyId_tagId: {
-            partyId: data.partyId,
-            tagId: currentTag.id,
+      if (data.partyId) { // assign tag to party
+        
+        const relationExist = await ctx.prisma.tagParty.findUnique({
+          where: {
+            partyId_tagId: {
+              partyId: data.partyId,
+              tagId: currentTag.id,
+            },
           },
+        });
+  
+        if (data.partyId && !relationExist)
+          await ctx.prisma.tagParty.create({
+            data: {
+              partyId: data.partyId,
+              tagId: currentTag.id,
+            },
+          });
+      
+      }
+
+      return currentTag;
+      //return { result: "success", message: "tag was created" };
+    }
+
+    else  if (data.operation === 'DELETE') {
+
+      if (!data.id) throw new Error("fill tag id");
+
+      //delete relationships
+
+      await ctx.prisma.tagParty.deleteMany({
+        where: {
+          tagId: data.id,
         },
       });
 
-      if (data.partyId && !relationExist)
-        await ctx.prisma.tagParty.create({
-          data: {
-            partyId: data.partyId,
-            tagId: currentTag.id,
-          },
-        });
+      await ctx.prisma.noteTag.deleteMany({
+        where: {
+          tagId: data.id,
+        },
+      });
 
-      //return currentTag;
-      return { result: "success", message: "tag was created" };
+      // delete tag
+      return await ctx.prisma.tag.delete({
+        where: {
+          id: data.id,
+        },
+      });
+
+      // return {
+      //   result: "success",
+      //   message: "tag and its relations were deleted",
+      // };
     }
+
+    throw new Error('invalid request')
   }
 
   @Authorized()
