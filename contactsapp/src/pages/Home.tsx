@@ -1,6 +1,6 @@
 import { styled, Typography } from '@mui/material';
 import { useContext } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 import logo from '../logo.svg';
 
@@ -12,11 +12,13 @@ export const Home = () => {
 
   return (
     <>
+    <HelmetProvider>
       <Helmet>
         <title>
           {PAGE_TITLE_HOME} | {APP_TITLE}
         </title>
       </Helmet>
+      </HelmetProvider>
       <Typography variant="h4">{`Hello, ${context.user.name} 🎃`}</Typography>
       <LogoWrapper>
         <StyledLogo src={logo} alt="logo" />

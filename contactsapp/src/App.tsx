@@ -37,7 +37,6 @@ function App() {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Router>
-          {/* <Layout> */}
             <Routes>
                 <Route path="/" element={<Layout />} >
                 {routes.map((route: AppRoute) =>
@@ -46,7 +45,6 @@ function App() {
                 </ Route>
               
             </Routes>
-            {/* </Layout> */}
           </Router>
         </ThemeProvider>
       </ThemeModeContext.Provider>

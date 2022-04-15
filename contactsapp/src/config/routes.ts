@@ -12,6 +12,7 @@ import {
 } from '@mui/icons-material';
 
 import { Home } from '../pages/Home';
+import { Login } from '../pages/Login';
 
 import { Route } from '../types/Route';
 
@@ -103,6 +104,14 @@ const routes: Array<Route> = [
       },
     ],
   },
+  {
+    key: 'login',
+    title: 'Login',
+    path: '/login',
+    isEnabled: false,
+    component: Login
+    //icon: UserIcon,
+  }
 ];
 
 export default routes;

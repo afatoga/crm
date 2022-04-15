@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Helmet } from 'react-helmet';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
+  createHttpLink,
   useQuery,
   gql
 } from "@apollo/client";
@@ -14,13 +15,20 @@ import App from './App';
 //import reportWebVitals from './reportWebVitals';
 import { APP_TITLE, APP_DESCRIPTION } from './utils/constants';
 
-const client = new ApolloClient({
+
+const link = createHttpLink({
   uri: 'http://localhost:4000',
-  cache: new InMemoryCache()
+  credentials: 'same-origin' //credentials: 'include' if your backend is a different domain.
+});
+
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  link,
 });
 
 ReactDOM.render(
   <React.StrictMode>
+    <HelmetProvider >
     <Helmet>
       <title>{APP_TITLE}</title>
       <meta name="description" content={APP_DESCRIPTION} />
@@ -30,6 +38,7 @@ ReactDOM.render(
     <ApolloProvider client={client}>
     <App />
   </ApolloProvider>
+  </HelmetProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -24,22 +24,23 @@ export const RouteItem = ({
     if (!route.isEnabled || hasChildren) e.preventDefault();
   };
 
-  //const isSelected = location.pathname === route.path || (hasChildren && route.subRoutes?.some((e) => location.pathname === e.path));
+  const isSelected =
+    location.pathname === route.path || (hasChildren && route.subRoutes?.some((e) => location.pathname === e.path));
 
   const item = (
-    <ListItemButton
-      //isEnabled={route.isEnabled}
+    <StyledListItemButton
+      isEnabled={route.isEnabled}
       sx={{ pl: nested ? 3 : 1 }}
       onClick={() => handleMenuClick(route)}
     >
       <ListItemIcon>
-        <IconButton size="small">
-          {route.icon && <Icon component={route.icon} />}
-        </IconButton>
+        <StyledIconButton size="small" isSelected={location.pathname === route.path}>
+          {route.icon && <StyledIcon component={route.icon} isSelected={isSelected || false} />}
+        </StyledIconButton>
       </ListItemIcon>
       <ListItemText primary={route.title} />
       {hasChildren && (route.expanded ? <ExpandLess /> : <ExpandMore />)}
-    </ListItemButton>
+    </StyledListItemButton>
   );
 
   return (
@@ -60,15 +61,15 @@ const StyledNavLink = styled(NavLink)`
   color: inherit;
 `;
 
-// const StyledListItemButton = styled(ListItemButton)<{ isEnabled: boolean }>(({ theme, isEnabled }) =>
-//   !isEnabled ? { '*': { cursor: 'not-allowed', color: theme.palette.text.secondary } } : {}
-// );
+const StyledListItemButton = styled(ListItemButton)<{ isEnabled: boolean }>(({ theme, isEnabled }) =>
+  !isEnabled ? { '*': { cursor: 'not-allowed', color: theme.palette.text.secondary } } : {}
+);
 
-// const StyledIconButton = styled(IconButton)<{ isSelected: boolean }>(({ isSelected, theme }) => ({
-//   boxShadow: isSelected ? `0 0 0 2px ${lighten(theme.palette.primary.main, 0.6)}` : 'default',
-//   transition: 'box-shadow 0.1s',
-// }));
+const StyledIconButton = styled(IconButton)<{ isSelected: boolean }>(({ isSelected, theme }) => ({
+  boxShadow: isSelected ? `0 0 0 2px ${lighten(theme.palette.primary.main, 0.6)}` : 'default',
+  transition: 'box-shadow 0.1s',
+}));
 
-// const StyledIcon = styled(Icon)<{ isSelected: boolean; component: ComponentType<{}> }>`
-//   ${({ isSelected, theme }) => isSelected && `color: ${theme.palette.primary.main};`}
-// `;
+const StyledIcon = styled(Icon)<{ isSelected: boolean; component: ComponentType<{}> }>`
+  ${({ isSelected, theme }) => isSelected && `color: ${theme.palette.primary.main};`}
+`;
