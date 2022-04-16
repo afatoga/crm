@@ -1,6 +1,6 @@
-import React, { ComponentType } from 'react';
+import React from 'react'; //{ ComponentType }
 import { NavLink, useLocation } from 'react-router-dom';
-import { Icon, IconButton, lighten, ListItemButton, ListItemIcon, ListItemText, styled, Tooltip } from '@mui/material';
+import { Icon, IconButton, ListItemButton, ListItemIcon, ListItemText, styled, Tooltip } from '@mui/material'; //lighten
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 import { Route } from '../../../../types';
@@ -18,7 +18,7 @@ export const RouteItem = ({
   hasChildren = false,
   handleMenuClick = () => {},
 }: RouteItemProps) => {
-  const location = useLocation();
+  //const location = useLocation();
 
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (!route.isEnabled || hasChildren) e.preventDefault();
