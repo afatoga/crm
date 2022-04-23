@@ -14,7 +14,7 @@ import {
 } from 'type-graphql'
 //import { Post } from './Post'
 import { APIResponse } from './GlobalObjects'
-import { AppUser } from './AppUser'
+import { AppUser, AppUserLoginResponse } from './AppUser'
 import { Context } from './context'
 import { Prisma } from '@prisma/client'
 import { IsEmail } from 'class-validator'
@@ -53,10 +53,10 @@ class AppUserInput {
   @Field({ nullable: true })
   nickname: string
 
-  @Field()
+  @Field({ nullable: true })
   appUserGroupId: number
 
-  @Field()
+  @Field({ nullable: true })
   appUserRoleId: number
 
   // @Field((type) => [PostCreateInput], { nullable: true })
@@ -152,33 +152,37 @@ export class AppUserResolver {
     }
 
   }
-  @Query(() => AppUser, { nullable: true })
+  @Query(() => AppUserLoginResponse)
   async login(
     @Arg("data") data: AppUserLogin,
     @Ctx() ctx: Context
-  ): Promise<AppUser | null> {
+  ): Promise<AppUserLoginResponse> {
     const user = await ctx.prisma.appUser.findFirst({ where: { email: data.email } });
 
     if (!user) {
-      return null;
+      throw new Error('invalid credentials')
     }
 
-    const valid = await bcrypt.compare(data.password, user.password);
+    const valid = await bcrypt.compare(data.password, user.password)
 
     if (!valid) {
-      return null;
+      throw new Error('invalid credentials')
     }
 
-    const { accessToken, refreshToken } = createTokens(user);
+    const { accessToken } = createTokens(user) //refreshToken TBI
 
-    ctx.res.cookie("refresh-token", refreshToken);
-    ctx.res.cookie("access-token", accessToken);
+    //ctx.res.cookie("refresh-token", refreshToken); // set cookies
+    //ctx.res.cookie("access-token", accessToken);
 
     const appUserGroupRelationships = await ctx.prisma.appUserGroupRelationship.findMany({ where: { appUserId: user.id } })
 
     return {
-      ...user,
-      appUserGroupRelationships: appUserGroupRelationships
+      appUser: { 
+        ...user,
+        appUserGroupRelationships: appUserGroupRelationships
+      },
+      accessToken
+      //refreshToken
     }
   }
 

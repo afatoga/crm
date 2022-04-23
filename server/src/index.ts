@@ -38,10 +38,10 @@ const app = async () => {
   });
 
   new ApolloServer({
-    cors: {
-      origin: "*", // <- allow request from all domains
-      credentials: true,
-    },
+    // cors: {
+    //   origin: "*", // <- allow request from all domains
+    //   credentials: true,
+    // },
     schema,
     context: context,
     plugins: [

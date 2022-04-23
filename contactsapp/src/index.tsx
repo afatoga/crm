@@ -10,21 +10,40 @@ import {
   //gql
 } from "@apollo/client";
 
+import { setContext } from '@apollo/client/link/context';
+
 import App from './App';
 
 //import reportWebVitals from './reportWebVitals';
 import { APP_TITLE, APP_DESCRIPTION } from './utils/constants';
 
 
-const link = createHttpLink({
+const httpLink = createHttpLink({
   uri: 'http://localhost:4000',
-  credentials: 'same-origin' //credentials: 'include' if your backend is a different domain.
+  //credentials: 'same-origin' //credentials: 'include' if your backend is a different domain.
+});
+
+const authLink = setContext((_, { headers }) => {
+  // get the authentication token from local storage if it exists
+  const accessToken = localStorage.getItem('accessToken');
+  // return the headers to the context so httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: accessToken ? `Bearer ${accessToken}` : "",
+    }
+  }
 });
 
 const client = new ApolloClient({
-  cache: new InMemoryCache(),
-  link,
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
 });
+
+// const client = new ApolloClient({
+//   cache: new InMemoryCache(),
+//   link,
+// });
 
 ReactDOM.render(
   <React.StrictMode>

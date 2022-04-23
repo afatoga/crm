@@ -55,6 +55,34 @@ export type Route = {
   component?: React.ComponentType
 
   /**
+   * For administrators
+   * 
+   * 
+   * @type {boolean}
+   * @memberof Route
+   * @required
+   * @example
+   * true
+   * @default
+   * false
+   */
+  isAdmin?: boolean;
+
+  /**
+   * For logged-in users only
+   * 
+   * 
+   * @type {boolean}
+   * @memberof Route
+   * @required
+   * @example
+   * true
+   * @default
+   * true
+   */
+  isProtected?: boolean;
+
+  /**
    * The status of the route
    * @type {boolean}
    * @memberof Route

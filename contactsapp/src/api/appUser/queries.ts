@@ -6,12 +6,18 @@ query(
         $password: String!
     ) {
   login(data: { email: $email, password: $password }) {
-    id
+    appUser {
+      id
+      email
+      nickname
     appUserGroupRelationships {
       appUserGroupId
       appUserId
       appUserRoleId
     }
+    }
+    accessToken
+    #refreshToken
   }
 }
 `;

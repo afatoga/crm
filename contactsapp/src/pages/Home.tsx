@@ -10,6 +10,7 @@ import { APP_TITLE, PAGE_TITLE_HOME } from '../utils/constants';
 export const Home = () => {
   const context = useContext(AppContext);
 
+  //undefined context.user
   return (
     <>
     <HelmetProvider>
@@ -19,7 +20,7 @@ export const Home = () => {
         </title>
       </Helmet>
       </HelmetProvider>
-      <Typography variant="h4">{`Hello, ${context.user.name} 🎃`}</Typography>
+      <Typography variant="h4">{`Hello, ${context.user?.email} 🎃`}</Typography>
       <LogoWrapper>
         <StyledLogo src={logo} alt="logo" />
       </LogoWrapper>

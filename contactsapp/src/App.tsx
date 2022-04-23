@@ -1,20 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, ReactNode } from 'react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import { Layout } from './components/Layout';
 import { PageDefault } from './components/PageDefault';
 
-import { AppContext, ThemeModeContext } from './contexts';
-import { AppClient } from './clients';
+import { ThemeModeContext } from './contexts';
+import { AppContextProvider } from './contexts/AppContext'
+//import { AppClient } from './clients';
 import { routes } from './config';
 import { Route as AppRoute } from './types';
 import { getAppTheme } from './styles/theme';
 import { DARK_MODE_THEME, LIGHT_MODE_THEME } from './utils/constants';
+import ProtectedRoute from './components/Router/ProtectedRoute';
 
 function App() {
   const [mode, setMode] = useState<typeof LIGHT_MODE_THEME | typeof DARK_MODE_THEME>(DARK_MODE_THEME);
-  const appClient = new AppClient();
+  // const appClient = new AppClient();
+  // console.log('client:',appClient);
 
   const themeMode = useMemo(
     () => ({
@@ -27,12 +30,18 @@ function App() {
 
   const theme = useMemo(() => getAppTheme(mode), [mode]);
 
-  const addRoute = (route: AppRoute) => (
-    <Route key={route.key} path={route.path} element={route.component ? <route.component /> : <PageDefault /> } />
-  );
+  const getRouteNode = (route:AppRoute):ReactNode => {
+    if (route.isProtected) return <ProtectedRoute isAdmin={!!route?.isAdmin}>{route.component ? <route.component /> : <PageDefault />}</ProtectedRoute>
+    return route.component ? <route.component /> : <PageDefault />
+  } 
+
+  const addRoute = (route: AppRoute) => {
+    //if(route.isProtected) return 
+    return <Route key={route.key} path={route.path} element={getRouteNode(route)} />
+  };
 
   return (
-    <AppContext.Provider value={appClient}>
+    <AppContextProvider>
       <ThemeModeContext.Provider value={themeMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
@@ -48,7 +57,7 @@ function App() {
           </Router>
         </ThemeProvider>
       </ThemeModeContext.Provider>
-    </AppContext.Provider>
+    </AppContextProvider>
   );
 }
 

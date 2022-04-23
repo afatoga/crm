@@ -6,10 +6,10 @@ import { PageTitle } from '../PageTitle';
 
 export const PageDefault = () => {
 
-  const {operations} = useParty();
-  const getAllPersons = operations.getAllPersons;
+  // const {operations} = useParty();
+  // const getAllPersons = operations.getAllPersons;
 
-  console.log(getAllPersons)
+  // console.log(getAllPersons)
 
   const location = useLocation();
   return (

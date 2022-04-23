@@ -1,20 +1,19 @@
-import { PrismaClient } from '@prisma/client'
-import { verify } from "jsonwebtoken"
-import {AppUser} from './AppUser'
+import { PrismaClient } from "@prisma/client";
+import { verify } from "jsonwebtoken";
+import { AppUser } from "./AppUser";
 
-const prisma = new PrismaClient(
-  // {
-  //   log: [
-  //     {
-  //       emit: "event",
-  //       level: "query",
-  //     },
-  //     "info",
-  //     "warn",
-  //     "error",
-  //   ],
-  // }
-)
+const prisma = new PrismaClient();
+// {
+//   log: [
+//     {
+//       emit: "event",
+//       level: "query",
+//     },
+//     "info",
+//     "warn",
+//     "error",
+//   ],
+// }
 
 // prisma.$on("query", e => {
 //   console.log("Query: " + e.query);
@@ -27,67 +26,76 @@ interface IappUserGroupRelationship {
   appUserRoleId: number;
 }
 
-export interface ICurrentUser extends Pick<AppUser, 'email'|'id'> {
+export interface ICurrentUser extends Pick<AppUser, "email" | "id"> {
   appUserGroupRelationships: IappUserGroupRelationship[];
   currentAppUserGroupId: number;
 }
 
 export interface Context {
-  prisma: PrismaClient
-  currentUser?: ICurrentUser
-  appRoles: string[],
+  prisma: PrismaClient;
+  currentUser?: ICurrentUser;
+  appRoles: string[];
   //req:any
-  res: any
+  res: any;
 }
 
 const parseCookie = (str: string) =>
   str
-    .split(';')
-    .map(v => v.split('='))
+    .split(";")
+    .map((v) => v.split("="))
     .reduce((acc: any, v) => {
       acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
       return acc;
     }, {});
 
-export const context = ({ req, res }: {req:any, res:Response}): Context => {
+export const context = ({ req, res }: { req: any; res: Response }): Context => {
+  //const cookies = (req.headers?.cookie) && parseCookie(req.headers.cookie);
+  const authHeader = req.headers?.authorization;
+  const accessSecret = process.env.ACCESS_TOKEN_SECRET
+    ? process.env.ACCESS_TOKEN_SECRET
+    : "";
 
-  const cookies = (req.headers?.cookie) && parseCookie(req.headers.cookie);
+  // const accessToken = cookies && cookies['access-token'];
+  if (authHeader && !authHeader.startsWith("Bearer ")) throw new Error("Invalid token");
 
+    console.log(authHeader);
 
-  const access_secret = process.env.ACCESS_TOKEN_SECRET ? process.env.ACCESS_TOKEN_SECRET : '';
+  const accessToken = authHeader && authHeader.substring(7, authHeader.length);
+  // To be implemented: refresh token has to be in request body
 
-  const accessToken = cookies && cookies['access-token'];
   let userData;
   if (accessToken) {
     try {
-      userData = verify(accessToken, access_secret) as any;
+      userData = verify(accessToken, accessSecret) as ICurrentUser; //any;
       //(req as any).userId = data.userId;
     } catch {
-      throw new Error('Authorization is invalid')
+      throw new Error("Authorization is invalid");
     }
   }
 
-  const appUserGroupId = cookies && cookies['current-group-id'];
+  //const appUserGroupId = cookies && cookies['current-group-id'];
 
   // development!
-  userData = {
-    id: 1,
-    email: 'fakemail@gmail.com', // could be ommitted
-    appUserGroupRelationships: [
-      {appUserGroupId: 1,
-        appUserId: 4, //could be ommited
-        appUserRoleId: 1}
-    ]
-  }
+  // userData = {
+  //   id: 1,
+  //   email: "fakemail@gmail.com",
+  //   currentAppUserGroupId: 1, // application sets this setting on login
+  //   appUserGroupRelationships: [
+  //     {
+  //       appUserGroupId: 1,
+  //       appUserId: 4, //could be ommited
+  //       appUserRoleId: 1,
+  //     },
+  //   ],
+  // };
 
-  userData = {...userData, currentAppUserGroupId: appUserGroupId ? appUserGroupId : userData.appUserGroupRelationships[0].appUserGroupId}
+  //userData = {...userData, currentAppUserGroupId: currentAppUserGroupId ? appUserGroupId : userData.appUserGroupRelationships[0].appUserGroupId}
 
   return {
     prisma: prisma,
     currentUser: userData ? userData : undefined,
-    appRoles: ['ANONYMOUS', 'ADMIN', 'MOD', 'MEMBER'], //retrieve like ctx.roles[ctx.currentUser.appUserRoleId]
+    appRoles: ["ANONYMOUS", "ADMIN", "MOD", "MEMBER"], //retrieve like ctx.roles[ctx.currentUser.appUserRoleId]
     //req,
-    res //to send cookies
-  }
-
-}
+    res, //to send cookies
+  };
+};

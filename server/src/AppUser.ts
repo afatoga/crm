@@ -33,3 +33,14 @@ export class AppUser {
   // @Field((type) => [Post], { nullable: true })
   // posts?: [Post] | null
 }
+
+@ObjectType()
+export class AppUserLoginResponse {
+  @Field((type) => AppUser)
+  appUser: AppUser
+
+  @Field((type) => String)
+  accessToken: string
+
+  //refreshToken TBI
+}
