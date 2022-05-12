@@ -61,7 +61,7 @@ export class NoteResolver {
   ): Promise<APIResponse> {
 
     if(!ctx.currentUser) throw new Error('Only for logged in users')
-    
+
     let target = null;
     if (data.noteTarget === 'tag') {
 
@@ -81,7 +81,7 @@ export class NoteResolver {
           })
     }
       //look for target object
-     
+
       if (!target) throw new Error('Note target is not defined')
 
         if (data.id) { //update
@@ -104,15 +104,15 @@ export class NoteResolver {
                             noteId: data.id}
                     }
                 })
-  
+
                 if (data.noteTarget === 'party') await ctx.prisma.noteParty.delete({
                   where: {
                       //partyId: data.noteTargetId,
                       partyId_noteId: {partyId: data.noteTargetId,
                         noteId: data.id}
                   }
-                })   
-                
+                })
+
                 // delete note
 
                 await ctx.prisma.note.delete({
@@ -122,9 +122,9 @@ export class NoteResolver {
                 });
 
                 return {result: 'success', message: 'note was deleted'}
-                
+
             }
-            
+
             await ctx.prisma.note.update({
                 where: {
                   id: data.id,
@@ -144,13 +144,13 @@ export class NoteResolver {
             data: {
               content: data.content,
               appUserId: ctx.currentUser.id,
-              appUserGroupId: data.isPrivate ? null : ctx.currentUser.currentAppUserGroupId 
+              appUserGroupId: data.isPrivate ? null : ctx.currentUser.currentAppUserGroupId
             },
           })
 
           if (!createdNote) throw new Error('note was not created')
               //const relTable = (data.noteTarget === 'tag') ? 'noteTag' : 'noteParty';
-              
+
               if (data.noteTarget === 'tag') await ctx.prisma.noteTag.create({
                   data: {
                       tagId: data.noteTargetId,
@@ -166,10 +166,10 @@ export class NoteResolver {
               })
 
               return {result: 'success', message: 'note was created'}
-          
+
         }
 
-    
+
   }
 
   public retrieveNotes = (foundItems:any, currentUserId:number) => {
@@ -178,7 +178,7 @@ export class NoteResolver {
         //this logic will go through every noteTag / noteParty item with certain noteTargetId
 
         return (item.note.appUserId === currentUserId) ? item.note : []
-      })    
+      })
   }
 
   @Authorized()
@@ -200,7 +200,7 @@ export class NoteResolver {
             include: {
                 note: true
             }
-        }).then(foundItems => this.retrieveNotes(foundItems, currentUserId))  
+        }).then(foundItems => this.retrieveNotes(foundItems, currentUserId))
 
     } else if (data.noteTarget === 'party') {
         return ctx.prisma.noteParty.findMany({
@@ -211,7 +211,7 @@ export class NoteResolver {
                 note: true
             }
         }).then(foundItems => this.retrieveNotes(foundItems, currentUserId))
-           
+
     }
   }
 
