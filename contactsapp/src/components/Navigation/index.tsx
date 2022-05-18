@@ -1,4 +1,4 @@
-import { Drawer, styled} from '@mui/material';
+import { Drawer, styled } from '@mui/material';
 
 import { Routes } from './Routes';
 
@@ -15,18 +15,19 @@ export const Navigation = ({ open, handleClose }: NavigationProps) => {
   return (
     // <Drawer variant="permanent" open={open} >
     <Drawer
-    sx={{
-      width: DRAWER_WIDTH,
-      flexShrink: 0,
-      '& .MuiDrawer-paper': {
+      sx={{
         width: DRAWER_WIDTH,
-        boxSizing: 'border-box',
-      },
-    }}
-    variant="persistent"
-    anchor="left"
-    open={open}
-  >      <DrawerHeader />
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: DRAWER_WIDTH,
+          boxSizing: 'border-box',
+        },
+      }}
+      variant="persistent"
+      anchor="left"
+      open={open}
+    >      
+      <DrawerHeader />
       <Routes />
     </Drawer>
   );

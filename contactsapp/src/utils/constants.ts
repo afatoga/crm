@@ -1,6 +1,6 @@
 // APP TEXT
 export const APP_TITLE = 'ContactsApp';
-export const APP_DESCRIPTION = 'React TypeScript Material-UI boilerplate by Welcome, Developer.';
+export const APP_DESCRIPTION = 'MADE IN 2022';
 export const FOOTER_TEXT = `${new Date().getFullYear()} ContactsApp`;
 // PAGES TITLE
 export const PAGE_TITLE_HOME = 'Home';

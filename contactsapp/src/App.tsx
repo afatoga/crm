@@ -1,6 +1,6 @@
 import { useMemo, useState, ReactNode } from 'react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import { Layout } from './components/Layout';
 import { PageDefault } from './components/PageDefault';
@@ -13,6 +13,8 @@ import { Route as AppRoute } from './types';
 import { getAppTheme } from './styles/theme';
 import { DARK_MODE_THEME, LIGHT_MODE_THEME } from './utils/constants';
 import ProtectedRoute from './components/Router/ProtectedRoute';
+import PublicRoute from './components/Router/PublicRoute';
+
 
 function App() {
   const [mode, setMode] = useState<typeof LIGHT_MODE_THEME | typeof DARK_MODE_THEME>(DARK_MODE_THEME);
@@ -30,9 +32,11 @@ function App() {
 
   const theme = useMemo(() => getAppTheme(mode), [mode]);
 
+
   const getRouteNode = (route:AppRoute):ReactNode => {
+
     if (route.isProtected) return <ProtectedRoute isAdmin={!!route?.isAdmin}>{route.component ? <route.component /> : <PageDefault />}</ProtectedRoute>
-    return route.component ? <route.component /> : <PageDefault />
+    return <PublicRoute>{route.component ? <route.component /> : <PageDefault />}</PublicRoute>
   } 
 
   const addRoute = (route: AppRoute) => {

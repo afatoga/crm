@@ -9,6 +9,7 @@ import {
   SettingsOutlined as SettingsIcon,
   ListAlt as ListIcon,
   CreditCard as BillingIcon,
+  Book as BookIcon
 } from '@mui/icons-material';
 
 import { Home } from '../pages/Home';
@@ -123,6 +124,15 @@ const routes: Array<Route> = [
     isEnabled: true,
     component: Login,
     icon: UserIcon,
+  },
+  {
+    key: 'register',
+    title: 'Register',
+    path: '/register',
+    isProtected: false,
+    isEnabled: true,
+    component: Login,
+    icon: BookIcon,
   }
 ];
 
