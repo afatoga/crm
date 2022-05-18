@@ -9,18 +9,9 @@ export class Note {
   @Field((type) => String)
   content: string
 
-  // @Field((type) => Date, {nullable:true})
-  // createdAt: string | null
-
-  // @Field((type) => Date, {nullable:true})
-  // updatedAt: string | null
-
   @Field((type) => Number)
   appUserId: number
 
   @Field((type) => Number, {nullable:true})
-  appUserGroupId: number | null
-
-  // @Field((type) => [Post], { nullable: true })
-  // posts?: [Post] | null
+  appUserGroupId: number// | null
 }
