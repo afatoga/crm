@@ -9,7 +9,7 @@ import React, {
 import { User } from '../types/User';
 
 export interface IAppContext {
-  user: User;
+  user: User | null;
   setState?: () => void; //User ?
   token: string;
   signin?: (token:string, user:User) => void;
@@ -24,7 +24,6 @@ export const initialState = {
   token: null,
   user: null,
   setState: () => {}
-  //profile: null
 };
 
 const createContextValue = ({ token, user, setState }) => {
@@ -32,9 +31,10 @@ const createContextValue = ({ token, user, setState }) => {
     token,
     user,
     signin: (token, user ) => setState({ token, user }),
-    signout: () =>
-      setState({ token: null, user: null }) &&
+    signout: () =>{
+      setState({ token: null, user: null })
       localStorage.removeItem(LOCAL_STORAGE_AUTH_KEY)
+    }
   };
 }
 
@@ -85,10 +85,10 @@ function getStorageState(defaultState) {
   }
 
   try {
-    const { token, user, profile } = JSON.parse(rawData);
+    const { token, user } = JSON.parse(rawData);
 
-    if (token && user && profile) {
-      return { token, user, profile };
+    if (token && user) {
+      return { token, user };
     }
   } catch (e) {}
 

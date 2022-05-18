@@ -23,7 +23,7 @@ const routes: Array<Route> = [
     description: 'Home',
     component: Home,
     path: '/',
-    isProtected: true,
+    isProtected: false,
     isEnabled: true,
     icon: HomeIcon,
     appendDivider: true,
@@ -42,7 +42,7 @@ const routes: Array<Route> = [
     title: 'GitHub',
     description: 'GitHub',
     path: '/gh',
-    //isProtected: true,
+    isProtected: true,
     isEnabled: true,
     icon: GitHubIcon,
     subRoutes: [
@@ -120,9 +120,9 @@ const routes: Array<Route> = [
     title: 'Login',
     path: '/login',
     isProtected: false,
-    isEnabled: false,
-    component: Login
-    //icon: UserIcon,
+    isEnabled: true,
+    component: Login,
+    icon: UserIcon,
   }
 ];
 

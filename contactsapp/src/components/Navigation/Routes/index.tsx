@@ -6,6 +6,8 @@ import { SignOutRoute } from './SignOutRoute';
 
 import { routes } from '../../../config';
 import { Route } from '../../../types';
+import { useAuth } from '../../../hooks/useAuth';
+
 
 export const Routes = () => {
   const [routesState, setRoutesStage] = useState<Route[]>(routes);
@@ -20,10 +22,16 @@ export const Routes = () => {
     setRoutesStage(items);
   };
 
+  const {token} = useAuth();
+
   return (
     <>
       <List component="nav" sx={{ height: '100%' }}>
-        {routesState.map((route: Route) => (
+        {routesState.flatMap((route: Route) => {
+          if (route.isProtected && !token) return [];
+          if (!route.isProtected && token) return [];
+
+          return (
           <div key={route.key}>
             {route.subRoutes ? (
               <>
@@ -37,13 +45,13 @@ export const Routes = () => {
                 </Collapse>
               </>
             ) : (
-              <RouteItem key={route.key} route={route} nested={false} />
+               <RouteItem key={route.key} route={route} nested={false} />
             )}
             {route.appendDivider && <Divider />}
           </div>
-        ))}
+        )})}
       </List>
-      <SignOutRoute />
+      {token && <SignOutRoute />}
     </>
   );
 };

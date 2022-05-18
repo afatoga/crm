@@ -75,7 +75,7 @@ export const context = ({ req, res }: { req: any; res: Response }): Context => {
 
   //const appUserGroupId = cookies && cookies['current-group-id'];
 
-  // development!
+  // local development!
   // userData = {
   //   id: 1,
   //   email: "fakemail@gmail.com",

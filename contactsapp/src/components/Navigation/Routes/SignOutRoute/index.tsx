@@ -1,9 +1,13 @@
 import { ListItemButton, ListItemIcon, ListItemText, IconButton, styled } from '@mui/material';
 import ExitToApp from '@mui/icons-material/ExitToApp';
+import { useAuth } from '../../../../hooks/useAuth';
 
 export const SignOutRoute = () => {
+
+  const {signout} = useAuth();
+
   const handleSignOutClick = () => {
-    alert('Signing Out...');
+    signout();
   };
 
   return (
