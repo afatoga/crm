@@ -17,6 +17,7 @@ import {
 import { Home } from '../pages/Home';
 import { Login } from '../pages/Login';
 import { People } from '../pages/People';
+import { NewRecord } from '../pages/NewRecord';
 
 import { Route } from '../types/Route';
 
@@ -59,6 +60,16 @@ const routes: Array<Route> = [
     isProtected: true,
     isEnabled: true,
     icon: StoreIcon,
+  },
+  {
+    key: 'router-new',
+    title: 'New',
+    //description: 'People',
+    path: '/new',
+    isProtected: true,
+    isEnabled: false,
+    //icon: PeopleIcon,
+    component: NewRecord
   },
   {
     key: 'router-gh',

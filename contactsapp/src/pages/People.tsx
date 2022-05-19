@@ -1,5 +1,5 @@
 import * as React from "react";
-import { GroupedVirtuoso  } from 'react-virtuoso'
+import { GroupedVirtuoso } from 'react-virtuoso'
 import List from '@mui/material/List'
 import ListSubheader from '@mui/material/ListSubheader'
 import ListItem from '@mui/material/ListItem'
@@ -14,7 +14,6 @@ import { useAuth } from "../hooks/useAuth";
 import { DataGrid } from '@mui/x-data-grid';
 
 import { PageTitle } from "../components/PageTitle";
-//import { Email } from '@mui/icons-material';
 import { appRoles } from "../config";
 import { groupBy } from "../utils/utilityFunctions";
 //import * as yup from "yup";
@@ -39,10 +38,10 @@ const userSorter = (a, b) => {
 }
 
 export function getGroupedPeople(data) {
-  
+
   const people = [...data].sort(userSorter)
   const groupedUsers = groupBy(people, (person) => person.surname[0])
-  const groupCounts = Object.values(groupedUsers).map((persons:any) => persons.length)
+  const groupCounts = Object.values(groupedUsers).map((persons: any) => persons.length)
   const groups = Object.keys(groupedUsers)
 
   return { people, groupCounts, groups }
@@ -67,7 +66,7 @@ export const People = () => {
 
   // React.useEffect(() => {
   //   if (getAllPersonsRequest.data) {
-      
+
   //   }
   // }, [getAllPersonsRequest]);
 
@@ -92,12 +91,7 @@ export const People = () => {
   //   )
   // }
 
-  //const listRef = React.useRef<GroupedVirtuosoHandle>(null)
-
-  
-
   const peopleData = getAllPersonsRequest.data ? getGroupedPeople(getAllPersonsRequest.data.allPersons) : false;
-  console.log(peopleData)
 
   return (
     <>
@@ -112,13 +106,14 @@ export const People = () => {
         }}
       >
         <PageTitle title={location.pathname.replaceAll("/", " ").trimStart()} />
-       
-        <Box
+
+
+        <Stack
           sx={{
             width: {
               xs: "100%", // theme.breakpoints.up('xs')
               //sm: 400, // theme.breakpoints.up('sm')
-              
+
               md: 800, // theme.breakpoints.up('md')
               //lg: 600, // theme.breakpoints.up('lg')
               xl: 680, // theme.breakpoints.up('xl')
@@ -126,40 +121,38 @@ export const People = () => {
             //margin: "1.5rem auto 0",
           }}
         >
-          
-          {/* <Virtuoso
-      style={{ height: 300 }}
-      data={users}
-      endReached={loadMore}
-      overscan={200}
-      itemContent={(index, user) => {
-        return <div style={{ backgroundColor: user.bgColor }}>{user.name}</div>
-      }}
-      components={{ Footer }}
-    /> */}
-{peopleData &&
-  <GroupedVirtuoso
-      style={{ height: 400 }}
-      groupCounts={peopleData.groupCounts}
-      components={MUIComponents as any}
-      groupContent={(index) => {
-        return <div>{peopleData.groups[index]}</div>
-      }}
-      itemContent={(index) => {
-        const user = peopleData.people[index]
-        return (
-          <>
-            <ListItemAvatar>
-              <Avatar>{user.initials}</Avatar>
-            </ListItemAvatar>
 
-            <ListItemText primary={user.surname + ' ' + user.name} secondary={<span>{user.description}</span>} />
-          </>
-        )
-      }}
-    />}
+      
+        <Button variant={"contained"} sx={{my: 3 ,width: '120px'}} onClick={() =>  navigate('/new', {state: {from: {pathname: location.pathname}}})}>
+                Add new
+        </Button>
        
-        </Box>
+
+        <Box sx={{displa:'block'}}>
+          {peopleData &&
+            <GroupedVirtuoso
+              style={{ height: 400 }}
+              groupCounts={peopleData.groupCounts}
+              components={MUIComponents as any}
+              groupContent={(index) => {
+                return <div>{peopleData.groups[index]}</div>
+              }}
+              itemContent={(index) => {
+                const user = peopleData.people[index]
+                return (
+                  <>
+                    <ListItemAvatar>
+                      <Avatar>{user.initials}</Avatar>
+                    </ListItemAvatar>
+
+                    <ListItemText primary={user.surname + ' ' + user.name} secondary={<span>{user.description}</span>} />
+                  </>
+                )
+              }}
+            />}
+          </Box>
+
+        </Stack>
       </Box>
     </>
   );

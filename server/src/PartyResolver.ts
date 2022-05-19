@@ -8,6 +8,7 @@ import {
   InputType,
   Field,
   Authorized,
+  Int,
 } from "type-graphql";
 import { Party, Person, PartyRelationship, Organization } from "./Party";
 import { Context } from "./context";
@@ -20,10 +21,10 @@ class PersonInput {
   @Field({ nullable: true })
   partyId: number;
 
-  @Field({ nullable: true })
-  typeId: number;
+  // @Field({ nullable: true })
+  // typeId: number;
 
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   statusId: number;
 
   @Field({ nullable: true })
@@ -39,7 +40,7 @@ class PersonInput {
   postDegree: string;
 
   @Field({ nullable: true })
-  birthday: Date;
+  birthday: string; //Date?
 
   @Field({ nullable: true })
   appUserGroupId: number;

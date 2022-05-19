@@ -28,6 +28,7 @@ export const Routes = () => {
     <>
       <List component="nav" sx={{ height: '100%' }}>
         {routesState.flatMap((route: Route) => {
+          if (!route.isEnabled) return [];
           if (route.isProtected && !token) return [];
           if (!route.isProtected && token) return [];
 
