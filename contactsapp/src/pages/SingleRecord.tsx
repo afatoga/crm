@@ -12,7 +12,7 @@ import {
   FormControlLabel,
   Radio,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
 
@@ -35,7 +35,7 @@ import { useParty } from "../hooks/useParty";
 
 // }
 
-export const NewRecord = () => {
+export const SingleRecord = () => {
   // Local state
   const [recordType, setRecordType] = React.useState<string>("person");
 
@@ -44,35 +44,17 @@ export const NewRecord = () => {
     operations.createUpdatePerson;
 
   const location: any = useLocation();
+  const { id } = useParams();
+  
 
   React.useEffect(() => {
-    if (location.state?.from.pathname.length) {
-      let recordTypeToSelect = "";
-      const prevPage = location.state.from.pathname;
-
-      switch (prevPage) {
-        case "/people":
-          recordTypeToSelect = "person";
-          break;
-        case "/organizations":
-          recordTypeToSelect = "organization";
-          break;
-        case "/tags":
-          recordTypeToSelect = "tag";
-          break;
-        default:
-          recordTypeToSelect = "person";
-      }
-
-      setRecordType(recordTypeToSelect);
-    }
-  }, [location]);
+    //get person's data
+  }, [id]);
 
   let navigate = useNavigate(); //save and view detail
   const { user } = useAuth();
 
-  const customFields = {
-    person: [
+  const customFields = [
       {
         label: "Firstname",
         name: "name",
@@ -109,21 +91,12 @@ export const NewRecord = () => {
         type: "number", //"select",
         required: true,
       },
-    ],
-    organization: [
-      {
-        label: "Name",
-        name: "name",
-        type: "text",
-        required: true,
-      },
-    ],
-    tag: [],
-  };
+    
+  ];
 
   // Extend customFields with validation based on type
   const useCustomFieldsExtendValidation = (customFields) => {
-    return customFields[recordType].map((customField) => {
+    return customFields.map((customField) => {
       switch (customField.type) {
         case "text":
           return {
@@ -194,9 +167,7 @@ export const NewRecord = () => {
   });
 
   const onSubmit = React.useCallback((values) => {
-    console.log(recordType);
-
-    if (recordType === "person")
+ 
       createUpdatePersonHandler({
         variables: {
           ...values,
@@ -205,29 +176,8 @@ export const NewRecord = () => {
           appUserGroupId: user.currentAppUserGroupId,
         },
       });
-  }, [recordType]);
+  }, []);
 
-  //   {
-  //     "login": {
-  //         "appUser": {
-  //             "id": "2",
-  //             "appUserGroupRelationships": [],
-  //             "__typename": "AppUser"
-  //         },
-  //         "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZmF0b2dhQGdtYWlsLmNvbSIsImlhdCI6MTY1MDY0MDI3NiwiZXhwIjoxNjUwNjQxMTc2fQ.f4tMiTcAx-LdvDC_-TiyMBQxMFEt0HKgd603LxGoVa4",
-  //         "__typename": "AppUserLoginResponse"
-  //     }
-  // }
-
-  const handleChangeRecordType = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRecordType((event.target as HTMLInputElement).value);
-  };
-  
-  React.useEffect(() => {
-    reset();
-  }, [recordType])
 
   return (
     <>
@@ -242,36 +192,10 @@ export const NewRecord = () => {
           justifyContent: "center",
         }}
       >
-        <Box margin={"0 0 2rem"}>
-          <Typography margin={"0 0 0.5rem"}>Switch to: </Typography>
-          <FormControl>
-            <RadioGroup
-              row
-              aria-labelledby="demo-row-radio-buttons-group-label"
-              name="row-radio-buttons-group"
-              value={recordType}
-              onChange={handleChangeRecordType}
-            >
-              <FormControlLabel
-                value="person"
-                control={<Radio />}
-                label="Person"
-              />
-              <FormControlLabel
-                value="organization"
-                control={<Radio />}
-                label="Organization"
-              />
-              <FormControlLabel value="tag" control={<Radio />} label="Tag" />
-            </RadioGroup>
-          </FormControl>
-        </Box>
 
         <PageTitle
           title={
-            location.pathname.replaceAll("/", " ").trimStart() +
-            " " +
-            recordType
+            "Person XY"
           }
         />
         {/* <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
@@ -292,7 +216,7 @@ export const NewRecord = () => {
         >
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={2}>
-              {customFields[recordType].map((item, index) => (
+              {customFields.map((item, index) => (
                 <Controller
                   key={index}
                   render={({ field: { name, value, onChange, onBlur } }) => (

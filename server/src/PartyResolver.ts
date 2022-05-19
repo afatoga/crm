@@ -40,9 +40,9 @@ class PersonInput {
   postDegree: string;
 
   @Field({ nullable: true })
-  birthday: string; //Date?
+  birthday: Date; //Date?
 
-  @Field({ nullable: true })
+  @Field(type => Int,{ nullable: true })
   appUserGroupId: number;
 }
 
@@ -102,7 +102,12 @@ export class PartyResolver {
     @Arg("data") data: PersonInput,
     @Ctx() ctx: Context
   ): Promise<Person> {
-    if (!ctx.currentUser) throw new Error();
+  
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
 
     if (data.partyId) {
       //update
@@ -133,7 +138,7 @@ export class PartyResolver {
       data: {
         typeId: 1,
         statusId: data.statusId && data.statusId,
-        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        appUserGroupId: data.appUserGroupId,
       },
     });
 

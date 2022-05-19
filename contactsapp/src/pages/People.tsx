@@ -28,13 +28,16 @@ import { groupBy } from "../utils/utilityFunctions";
 // }
 
 const userSorter = (a, b) => {
-  if (a.surname < b.surname) {
-    return -1
-  }
-  if (a.surname > b.surname) {
-    return 1
-  }
-  return 0
+
+  return a.surname.localeCompare(b.surname);
+
+  // if (a.surname < b.surname) {
+  //   return -1
+  // }
+  // if (a.surname > b.surname) {
+  //   return 1
+  // }
+  // return 0
 }
 
 export function getGroupedPeople(data) {
@@ -64,11 +67,13 @@ export const People = () => {
 
 
 
-  // React.useEffect(() => {
-  //   if (getAllPersonsRequest.data) {
+  React.useEffect(() => {
+    if (getAllPersonsRequest.called) {
 
-  //   }
-  // }, [getAllPersonsRequest]);
+      getAllPersonsRequest.refetch();
+
+    }
+  }, [getAllPersonsRequest]);
 
 
   // React.useEffect(() => {
@@ -131,7 +136,7 @@ export const People = () => {
         <Box sx={{displa:'block'}}>
           {peopleData &&
             <GroupedVirtuoso
-              style={{ height: 400 }}
+              style={{ height: 800 }}
               groupCounts={peopleData.groupCounts}
               components={MUIComponents as any}
               groupContent={(index) => {

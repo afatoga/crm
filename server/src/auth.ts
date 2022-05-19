@@ -15,7 +15,7 @@ export const createTokens = (user: Pick<AppUser,'email'|'id'|'count' >) => {
     }
   );
   const accessToken = sign({ id: user.id, email: user.email },access_secret , {
-    expiresIn: "50min"//"15min"
+    expiresIn: "7d"//"50min"//"15min"
   });
 
   return { refreshToken, accessToken };

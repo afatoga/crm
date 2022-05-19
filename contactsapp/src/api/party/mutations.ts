@@ -6,7 +6,7 @@ export const CREATE_UPDATE_PERSON = gql`
     $surname: String!
     $preDegree: String
     $postDegree: String
-    $birthday: String
+    $birthday: DateTime
     $appUserGroupId: Int!
     $statusId: Int!
   ) {

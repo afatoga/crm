@@ -19,10 +19,10 @@ export const authChecker: AuthChecker<Context> = ({ args, context: { currentUser
 
   // if (args.data.appUserGroupId !== user.appUserGroupId) return false;
   for (let i = 0; i<currentUser.appUserGroupRelationships.length; i++) {
-    if (currentUser.appUserGroupRelationships[i].appUserGroupId === currentUser.currentAppUserGroupId) {
+    
       if (roles.includes(appRoles[currentUser.appUserGroupRelationships[i].appUserRoleId])) return true;
       break;
-    }
+    
   }
 
   // no roles matched, restrict access

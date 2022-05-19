@@ -48,7 +48,7 @@ const parseCookie = (str: string) =>
       return acc;
     }, {});
 
-export const context = ({ req, res }: { req: any; res: Response }): Context => {
+export const context = async ({ req, res }: { req: any; res: Response }): Promise<Context> => {
   //const cookies = (req.headers?.cookie) && parseCookie(req.headers.cookie);
   const authHeader = req.headers?.authorization;
   const accessSecret = process.env.ACCESS_TOKEN_SECRET
@@ -57,8 +57,6 @@ export const context = ({ req, res }: { req: any; res: Response }): Context => {
 
   // const accessToken = cookies && cookies['access-token'];
   if (authHeader && !authHeader.startsWith("Bearer ")) throw new Error("Invalid token");
-
-    console.log(authHeader);
 
   const accessToken = authHeader && authHeader.substring(7, authHeader.length);
   // To be implemented: refresh token has to be in request body
@@ -89,7 +87,12 @@ export const context = ({ req, res }: { req: any; res: Response }): Context => {
   //   ],
   // };
 
-  //userData = {...userData, currentAppUserGroupId: currentAppUserGroupId ? appUserGroupId : userData.appUserGroupRelationships[0].appUserGroupId}
+  if (authHeader && !userData) throw new Error("Invalid token");
+  
+  if (authHeader && userData) {
+    const appUserGroupRelationships = await prisma.appUserGroupRelationship.findMany({ where: { appUserId: userData.id } })
+    userData = {...userData, appUserGroupRelationships}; //ensure object is up to date
+  }
 
   return {
     prisma: prisma,

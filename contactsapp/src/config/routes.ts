@@ -18,6 +18,7 @@ import { Home } from '../pages/Home';
 import { Login } from '../pages/Login';
 import { People } from '../pages/People';
 import { NewRecord } from '../pages/NewRecord';
+import { SingleRecord } from '../pages/SingleRecord';
 
 import { Route } from '../types/Route';
 
@@ -50,7 +51,17 @@ const routes: Array<Route> = [
     isProtected: true,
     isEnabled: true,
     icon: PeopleIcon,
-    component: People
+    component: People,
+  },
+  {
+    key: 'router-singlePerson',
+    title: 'Person\'s Profile',
+    description: 'Person\'s profile',
+    path: '/people/:id',
+    isProtected: true,
+    isEnabled: false,
+    //icon: PublicIcon,
+    component: SingleRecord
   },
   {
     key: 'router-organizations',
