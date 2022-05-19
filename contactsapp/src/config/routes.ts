@@ -9,11 +9,14 @@ import {
   SettingsOutlined as SettingsIcon,
   ListAlt as ListIcon,
   CreditCard as BillingIcon,
-  Book as BookIcon
+  Book as BookIcon,
+  People as PeopleIcon,
+  Store as StoreIcon
 } from '@mui/icons-material';
 
 import { Home } from '../pages/Home';
 import { Login } from '../pages/Login';
+import { People } from '../pages/People';
 
 import { Route } from '../types/Route';
 
@@ -37,6 +40,25 @@ const routes: Array<Route> = [
     isProtected: true,
     isEnabled: true,
     icon: DashboardIcon,
+  },
+  {
+    key: 'router-people',
+    title: 'People',
+    description: 'People',
+    path: '/people',
+    isProtected: true,
+    isEnabled: true,
+    icon: PeopleIcon,
+    component: People
+  },
+  {
+    key: 'router-organizations',
+    title: 'Organizations',
+    description: 'Organizations',
+    path: '/organizations',
+    isProtected: true,
+    isEnabled: true,
+    icon: StoreIcon,
   },
   {
     key: 'router-gh',

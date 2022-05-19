@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect } from "react";
-import { Typography, Box, TextField, Stack, Button } from "@mui/material";
+import { Typography, Box, TextField, Stack, Button, Alert, AlertTitle } from "@mui/material";
 import { useLocation, useNavigate } from "react-router";
 import { useAppUser } from "../hooks/useAppUser";
 import { Controller, useForm } from "react-hook-form";
@@ -230,8 +230,12 @@ export const Login = () => {
               <Button variant={"contained"} type="submit">
                 Login
               </Button>
+              {!isSubmitting && loginRequest.error && <Alert severity="error">
+                <AlertTitle>Error</AlertTitle>
+                {loginRequest.error.message}
+              </Alert>}
             </Stack>
-            {!isSubmitting && loginRequest.error && loginRequest.error.message}
+       
           </form>
         </Box>
       </Box>
