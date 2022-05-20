@@ -10,7 +10,7 @@ import {
   Authorized,
   Int,
 } from "type-graphql";
-import { Party, Person, PartyRelationship, Organization } from "./Party";
+import { Party, Person, ExtendedPerson, ExtendedOrganization, PartyRelationship, Organization } from "./Party";
 import { Context } from "./context";
 import { Prisma } from "@prisma/client";
 import { isUserAuthorized } from "./authChecker";
@@ -18,7 +18,7 @@ import { isUserAuthorized } from "./authChecker";
 
 @InputType()
 class PersonInput {
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   partyId: number;
 
   // @Field({ nullable: true })
@@ -83,14 +83,17 @@ class PartyRelationshipInput {
 }
 @InputType()
 class PartyByAppUserGroupInput {
-  @Field()
+  @Field(type => Int)
+  appUserGroupId: number;
+
+  @Field({nullable: true})
+  partyTypeId: number;
+
+  @Field(type => Int, { nullable: true })
   id: number;
 
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   statusId: number;
-
-  @Field()
-  partyTypeId: number;
 }
 
 //@Service()
@@ -110,8 +113,18 @@ export class PartyResolver {
       throw new Error("Not authorized");
 
     if (data.partyId) {
+
+      if (data.statusId) await ctx.prisma.party.update({
+        where: {
+          id: data.partyId
+        },
+        data: {
+          statusId: data.statusId
+        }
+      })
+
       //update
-      return ctx.prisma.person.update({
+      return await ctx.prisma.person.update({
         where: {
           partyId: data.partyId,
         },
@@ -142,7 +155,7 @@ export class PartyResolver {
       },
     });
 
-    return ctx.prisma.person.create({
+    return await ctx.prisma.person.create({
       data: {
         partyId: party.id,
         preDegree: data?.preDegree,
@@ -314,6 +327,7 @@ export class PartyResolver {
     throw new Error("invalid request");
   }
 
+  @Authorized()
   @Query((returns) => [Person], { nullable: true })
   async personsByAppUserGroup(
     @Arg("data") data: PartyByAppUserGroupInput,
@@ -327,7 +341,7 @@ export class PartyResolver {
       SELECT "Person".* 
       FROM "Party"
       INNER JOIN "Person" ON "Party"."id" = "Person"."partyId"
-      WHERE "Party"."appUserGroupId" = ${data.id}
+      WHERE "Party"."appUserGroupId" = ${data.appUserGroupId}
       ${statusCondition}
     `);
   }
@@ -348,7 +362,7 @@ export class PartyResolver {
     return ctx.prisma.appUserGroup
       .findUnique({
         where: {
-          id: data.id,
+          id: data.appUserGroupId,
         },
       })
       .parties({
@@ -365,5 +379,48 @@ export class PartyResolver {
           return item.organization;
         });
       });
+  }
+
+  @Authorized()
+  @Query((returns) => ExtendedPerson, { nullable: true })
+  async personById(
+    @Arg("data") data: PartyByAppUserGroupInput,
+    @Ctx() ctx: Context
+  ) {
+    //let partyTypeName = data.partyTypeId === 1 ? `"Person"` : `"Organization"`
+
+    const queryResultArray = await ctx.prisma.$queryRaw<[ExtendedPerson]>(Prisma.sql`
+      SELECT "Person".*, "Party"."statusId"
+      FROM "Party"
+      INNER JOIN "Person" ON "Party"."id" = "Person"."partyId"
+      WHERE "Party"."appUserGroupId" = ${data.appUserGroupId}
+      AND "Party"."id" = ${data.id}
+    `);
+
+    if (!queryResultArray.length) return null;
+    return queryResultArray[0];
+
+  }
+
+  @Authorized()
+  @Query((returns) => ExtendedOrganization, { nullable: true })
+  async organizationById(
+    @Arg("data") data: PartyByAppUserGroupInput,
+    @Ctx() ctx: Context
+  ) {
+    //let partyTypeName = data.partyTypeId === 1 ? `"Person"` : `"Organization"`
+
+    const queryResultArray = await ctx.prisma.$queryRaw<[ExtendedOrganization]>(Prisma.sql`
+      SELECT "Organization".*, "Party"."statusId"
+      FROM "Party"
+      INNER JOIN "Organization" ON "Party"."id" = "Organization"."partyId"
+      WHERE "Party"."appUserGroupId" = ${data.appUserGroupId}
+      AND "Party"."id" = ${data.id}
+    `);
+
+    if (!queryResultArray.length) return null;
+
+    return queryResultArray[0];
+
   }
 }

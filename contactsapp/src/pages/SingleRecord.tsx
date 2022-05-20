@@ -10,7 +10,7 @@ import {
   FormControl,
   RadioGroup,
   FormControlLabel,
-  Radio,
+  Radio
 } from "@mui/material";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { Controller, useForm } from "react-hook-form";
@@ -24,37 +24,42 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParty } from "../hooks/useParty";
 
-// interface ILocation {
-//   hash: string;
-//   key: string;
-//   pathname: string;
-//   search: string;
-//   state: {
-//     from: { pathname: string }
-//   }
-
-// }
 
 export const SingleRecord = () => {
   // Local state
-  const [recordType, setRecordType] = React.useState<string>("person");
+  const [recordType, setRecordType] = React.useState<string>("");
+  const [recordLoaded, setRecordLoaded] = React.useState<boolean>(false);
 
   const { operations } = useParty();
+  const [getPersonByIdHandler, getPersonByIdRequest] =
+    operations.getPersonById;
+
+  const getRecordData = (attrName: string = null) => {
+    if (!recordLoaded) return null;
+
+    let recordData = {};
+    if (recordType === 'person') {
+      recordData = getPersonByIdRequest.data.personById;
+    }
+    if (!attrName) return recordData;
+
+    return (recordData[attrName]) ? recordData[attrName] : "";
+  } 
+
   const [createUpdatePersonHandler, createUpdatePersonRequest] =
     operations.createUpdatePerson;
 
   const location: any = useLocation();
-  const { id } = useParams();
-  
-
-  React.useEffect(() => {
-    //get person's data
-  }, [id]);
+  const { id: recordIdString } = useParams();
+  const recordId = parseInt(recordIdString);
 
   let navigate = useNavigate(); //save and view detail
   const { user } = useAuth();
+  
+  // console.log(user);
 
-  const customFields = [
+  const customFields = {
+    person: [
       {
         label: "Firstname",
         name: "name",
@@ -91,12 +96,24 @@ export const SingleRecord = () => {
         type: "number", //"select",
         required: true,
       },
-    
-  ];
+    ],
+    organization: [
+      {
+        label: "Name",
+        name: "name",
+        type: "text",
+        required: true,
+      },
+    ],
+    tag: [],
+  };
 
   // Extend customFields with validation based on type
-  const useCustomFieldsExtendValidation = (customFields) => {
-    return customFields.map((customField) => {
+  const useCustomFieldsExtendValidation = (recordType: string, customFields: any) => {
+
+    if (!recordType.length) return {};
+
+    return customFields[recordType].map((customField) => {
       switch (customField.type) {
         case "text":
           return {
@@ -145,10 +162,10 @@ export const SingleRecord = () => {
   // Split out for readability
 
   // First extend the data with our validations
-  const dynamicFormData = useCustomFieldsExtendValidation(customFields);
+  const dynamicFormData = useCustomFieldsExtendValidation(recordType, customFields);
 
   // Create schema based on added validations
-  const customFieldsSchema = dynamicFormData.reduce(
+  const customFieldsSchema = !isEmptyObject(dynamicFormData) && dynamicFormData.reduce(
     useCustomFieldsDynamicSchema,
     {}
   );
@@ -167,17 +184,69 @@ export const SingleRecord = () => {
   });
 
   const onSubmit = React.useCallback((values) => {
- 
+    
+    if (recordType === 'person') {
       createUpdatePersonHandler({
         variables: {
           ...values,
+          partyId: recordId,
           birthday: values.birthday.length ? values.birthday : null,
           statusId: values.statusId.length ? parseInt(values.statusId) : null,
+          preDegree: values.preDegree.length ? values.preDegree : null,
+          postDegree: values.postDegree.length ? values.postDegree : null,
           appUserGroupId: user.currentAppUserGroupId,
         },
       });
-  }, []);
+    }
+  }, [recordType]);
 
+  
+  React.useEffect(() => {
+    //get person's data
+
+    if (recordType === 'person') {
+      getPersonByIdHandler({variables:{
+        id: recordId,
+        appUserGroupId: user.currentAppUserGroupId
+      }})
+    }
+
+  }, [recordId, recordType]);
+
+  React.useEffect(() => {
+
+    if (!recordLoaded && getPersonByIdRequest.data?.personById) { //exists
+
+      const personData = getPersonByIdRequest.data.personById;
+      setRecordLoaded(true);
+      console.log(personData);
+
+      reset({values:{
+        name: personData.name,
+        statusId: personData.statusid
+      }})
+    }
+
+  }, [getPersonByIdRequest])
+
+  React.useEffect(() => {
+
+      let recordTypeToSelect = "";
+      const pathname = location.pathname;
+      
+      if (pathname.indexOf('/people/') === 0) {
+        recordTypeToSelect = "person";
+      }
+      else if (pathname.indexOf('/organizations/') === 0) {
+        recordTypeToSelect = "organization";
+      }
+      else if (pathname.indexOf('/tags/') === 0) {
+        recordTypeToSelect = "tag";
+      }
+
+      setRecordType(recordTypeToSelect);
+    
+  }, [location]);
 
   return (
     <>
@@ -195,7 +264,7 @@ export const SingleRecord = () => {
 
         <PageTitle
           title={
-            "Person XY"
+            "Person"
           }
         />
         {/* <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
@@ -214,9 +283,9 @@ export const SingleRecord = () => {
             margin: "1.5rem 0",
           }}
         >
-          <form onSubmit={handleSubmit(onSubmit)}>
+          {recordType.length && recordLoaded && <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={2}>
-              {customFields.map((item, index) => (
+              {customFields[recordType].map((item, index) => (
                 <Controller
                   key={index}
                   render={({ field: { name, value, onChange, onBlur } }) => (
@@ -231,11 +300,13 @@ export const SingleRecord = () => {
                       helperText={
                         errors[item.name] ? errors[item.name].message : ""
                       }
+                      disabled={user.currentRole !== 'ADMIN' && user.currentRole !== "MOD"}
+                      //size={(item.name === 'name' || item.name === 'surname' ) ? 'medium' : 'small'}
                     />
                   )}
                   control={control}
                   name={item.name}
-                  defaultValue=""
+                  defaultValue={getRecordData(item.name)}
                 />
               ))}
 
@@ -253,7 +324,7 @@ export const SingleRecord = () => {
                 </Alert>
               )}
             </Stack>
-          </form>
+          </form>}
         </Box>
       </Box>
     </>

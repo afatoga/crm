@@ -9,7 +9,7 @@ export class Party {
   @Field((type) => Number, { nullable: true })
   typeId: number | null
 
-  @Field((type) => Number, { nullable: true })
+  @Field((type) => Number,  { nullable: true })
   statusId: number | null
 
   // @Field((type) => Date, {nullable:true})
@@ -42,8 +42,14 @@ export class Person {
   @Field((type) => String, { nullable: true })
   postDegree: string | null
 
-  @Field((type) => Date, { nullable: true })
+  @Field((type) => String, { nullable: true })
   birthday: Date | null
+}
+
+@ObjectType()
+export class ExtendedPerson extends Person {
+  @Field((type) => Number, { nullable: true })
+  statusId: number | null
 }
 
 @ObjectType()
@@ -57,6 +63,14 @@ export class Organization {
   @Field((type) => Number,  { nullable: true })
   typeId: number | null
 }
+
+@ObjectType()
+export class ExtendedOrganization extends Organization {
+  @Field((type) => Number, { nullable: true })
+  statusId: number | null
+}
+
+
 
 @ObjectType()
 export class PartyRelationship {

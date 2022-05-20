@@ -1,7 +1,9 @@
-import {  useMutation, useQuery  } from '@apollo/client'; /*makeVar,useLazyQuery*/
+import {  useMutation, useLazyQuery, useQuery  } from '@apollo/client'; /*makeVar,useLazyQuery*/
 
 import {
-    GET_ALL_PERSONS
+    //GET_ALL_PERSONS,
+    GET_PERSONS_BY_APPUSERGROUP,
+    GET_PERSON_BY_ID
 } from '../api/party/queries';
 import {
     CREATE_UPDATE_PERSON
@@ -14,8 +16,11 @@ import {
 export function useParty() {
 
 
-    const getAllPersons = useQuery(GET_ALL_PERSONS, {
-    });
+    //const getAllPersons = useLazyQuery(GET_ALL_PERSONS);
+
+    const getPersonsByAppUserGroup = useLazyQuery(GET_PERSONS_BY_APPUSERGROUP);
+
+    const getPersonById = useLazyQuery(GET_PERSON_BY_ID);
 
     const createUpdatePerson = useMutation(CREATE_UPDATE_PERSON, {
         fetchPolicy: 'network-only',
@@ -30,7 +35,9 @@ export function useParty() {
 
     return {
         operations: {
-            getAllPersons,
+            // getAllPersons,
+            getPersonsByAppUserGroup,
+            getPersonById,
             createUpdatePerson
         }
     }

@@ -52,10 +52,11 @@ export function getGroupedPeople(data) {
 
 export const People = () => {
   const { operations } = useParty();
-  const getAllPersonsRequest = operations.getAllPersons;
+  const [getPersonsByAppUserGroupHandler, getPersonsByAppUserGroupRequest] = operations.getPersonsByAppUserGroup;
 
   const location = useLocation();
   let navigate = useNavigate();
+  const {user} = useAuth()
   //const { signin } = useAuth();
 
   // const loadMore = React.useCallback(() => {
@@ -65,15 +66,17 @@ export const People = () => {
   //   }, 200)
   // }, []) //setUsers
 
+ React.useEffect(() => {
+  getPersonsByAppUserGroupHandler({variables:{appUserGroupId: user.currentAppUserGroupId}})
+ }, [])
 
+  // React.useEffect(() => {
+  //   if (getPersonsByAppUserGroupRequest.called) {
 
-  React.useEffect(() => {
-    if (getAllPersonsRequest.called) {
+  //     getPersonsByAppUserGroupRequest.refetch();
 
-      getAllPersonsRequest.refetch();
-
-    }
-  }, [getAllPersonsRequest]);
+  //   }
+  // }, [getPersonsByAppUserGroupRequest]);
 
 
   // React.useEffect(() => {
@@ -96,7 +99,7 @@ export const People = () => {
   //   )
   // }
 
-  const peopleData = getAllPersonsRequest.data ? getGroupedPeople(getAllPersonsRequest.data.allPersons) : false;
+  const peopleData = getPersonsByAppUserGroupRequest.data ? getGroupedPeople(getPersonsByAppUserGroupRequest.data.personsByAppUserGroup) : false;
 
   return (
     <>
@@ -133,7 +136,7 @@ export const People = () => {
         </Button>
        
 
-        <Box sx={{displa:'block'}}>
+        <Box sx={{display:'block'}}>
           {peopleData &&
             <GroupedVirtuoso
               style={{ height: 800 }}
@@ -145,13 +148,13 @@ export const People = () => {
               itemContent={(index) => {
                 const user = peopleData.people[index]
                 return (
-                  <>
+                  <Box sx={{display:'flex', cursor: 'pointer'}} onClick={() => navigate(`/people/${user.partyId}`)}>
                     <ListItemAvatar>
                       <Avatar>{user.initials}</Avatar>
                     </ListItemAvatar>
 
                     <ListItemText primary={user.surname + ' ' + user.name} secondary={<span>{user.description}</span>} />
-                  </>
+                  </Box>
                 )
               }}
             />}
@@ -178,7 +181,7 @@ const MUIComponents = {
 
   Item: ({ children, ...props }) => {
     return (
-      <ListItem component="div" {...props} style={{ margin: 0 }}>
+      <ListItem component="div" {...props} style={{ margin: 0 }} >
         {children}
       </ListItem>
     )
