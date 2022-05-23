@@ -17,6 +17,7 @@ import { ErrorLoggerMiddleware } from "./middleware/errorLogger";
 import { NoteResolver } from "./NoteResolver";
 import { TagResolver } from "./TagResolver";
 import { ContactResolver } from "./ContactResolver";
+import { StatusResolver } from "./StatusResolver";
 
 const app = async () => {
   //   tq.registerEnumType(SortOrder, {
@@ -30,6 +31,7 @@ const app = async () => {
       PartyResolver,
       NoteResolver,
       TagResolver,
+      StatusResolver,
     ],
     scalarsMap: [{ type: GraphQLScalarType, scalar: DateTimeResolver }],
     authChecker, // register auth checking function

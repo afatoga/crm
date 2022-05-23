@@ -6,6 +6,9 @@ import {
     GET_PERSON_BY_ID
 } from '../api/party/queries';
 import {
+    GET_STATUS_LIST
+} from '../api/status/queries';
+import {
     CREATE_UPDATE_PERSON
 } from '../api/party/mutations';
 
@@ -21,6 +24,8 @@ export function useParty() {
     const getPersonsByAppUserGroup = useLazyQuery(GET_PERSONS_BY_APPUSERGROUP);
 
     const getPersonById = useLazyQuery(GET_PERSON_BY_ID);
+
+    const getStatusList = useLazyQuery(GET_STATUS_LIST);
 
     const createUpdatePerson = useMutation(CREATE_UPDATE_PERSON, {
         fetchPolicy: 'network-only',
@@ -38,6 +43,7 @@ export function useParty() {
             // getAllPersons,
             getPersonsByAppUserGroup,
             getPersonById,
+            getStatusList,
             createUpdatePerson
         }
     }

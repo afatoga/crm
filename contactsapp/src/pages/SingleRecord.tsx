@@ -10,7 +10,10 @@ import {
   FormControl,
   RadioGroup,
   FormControlLabel,
-  Radio
+  Radio,
+  MenuItem,
+  Autocomplete,
+  CircularProgress
 } from "@mui/material";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { Controller, useForm } from "react-hook-form";
@@ -29,10 +32,13 @@ export const SingleRecord = () => {
   // Local state
   const [recordType, setRecordType] = React.useState<string>("");
   const [recordLoaded, setRecordLoaded] = React.useState<boolean>(false);
+  const [open, setOpen] = React.useState<boolean>(false);
 
   const { operations } = useParty();
   const [getPersonByIdHandler, getPersonByIdRequest] =
     operations.getPersonById;
+  const [getStatusListHandler, getStatusListRequest] =
+    operations.getStatusList;
 
   const getRecordData = (attrName: string = null) => {
     if (!recordLoaded) return null;
@@ -93,7 +99,7 @@ export const SingleRecord = () => {
       {
         label: "Status",
         name: "statusId",
-        type: "number", //"select",
+        type: "autocomplete", //"select",
         required: true,
       },
     ],
@@ -184,14 +190,14 @@ export const SingleRecord = () => {
   });
 
   const onSubmit = React.useCallback((values) => {
-    
+    console.log(values)
     if (recordType === 'person') {
       createUpdatePersonHandler({
         variables: {
           ...values,
           partyId: recordId,
           birthday: values.birthday.length ? values.birthday : null,
-          statusId: values.statusId.length ? parseInt(values.statusId) : null,
+          statusId: values.statusId ? values.statusId : null,
           preDegree: values.preDegree.length ? values.preDegree : null,
           postDegree: values.postDegree.length ? values.postDegree : null,
           appUserGroupId: user.currentAppUserGroupId,
@@ -200,11 +206,15 @@ export const SingleRecord = () => {
     }
   }, [recordType]);
 
+  React.useEffect(() => {
+    getStatusListHandler();
+  }, [])
+
   
   React.useEffect(() => {
     //get person's data
 
-    if (recordType === 'person') {
+    if (recordType === 'person') { //hook for getStatusListRequest.data ?
       getPersonByIdHandler({variables:{
         id: recordId,
         appUserGroupId: user.currentAppUserGroupId
@@ -219,7 +229,6 @@ export const SingleRecord = () => {
 
       const personData = getPersonByIdRequest.data.personById;
       setRecordLoaded(true);
-      console.log(personData);
 
       reset({values:{
         name: personData.name,
@@ -247,6 +256,107 @@ export const SingleRecord = () => {
       setRecordType(recordTypeToSelect);
     
   }, [location]);
+
+
+  const getSelectOptions = (fieldName: string) => {
+
+    if (fieldName === 'statusId') {
+      if (getStatusListRequest.data?.statusList?.length) {
+        const statusList = getStatusListRequest.data.statusList;
+        return statusList.map((item:any) => ({name:item.name, id:item.id}))
+      }
+
+      //return [];
+    }
+
+  }
+
+  const getOptionLabel = (option: number | {id:string, name: string}) => {
+
+    if (!option || !getStatusListRequest.data) return '';
+
+    if (typeof option === 'number') {
+      if (getStatusListRequest.data?.statusList?.length) {
+        const statusList = getStatusListRequest.data.statusList;
+        const found = statusList.find((item:any) => (option === parseInt(item.id)))
+        if (found) return found.name;
+      }
+    }
+
+    else return option.name;
+
+    
+  }
+
+  const CustomFormField = ({controllerProps, fieldData}) => {
+    
+    if (fieldData.type === 'text') {
+      return (
+              <TextField
+                name={fieldData.name}
+                type={fieldData.type}
+                value={controllerProps.value}
+                onChange={controllerProps.onChange}
+                onBlur={controllerProps.onBlur}
+                label={fieldData.label}
+                error={Boolean(errors[fieldData.name])}
+                helperText={
+                  errors[fieldData.name] ? errors[fieldData.name].message : ""
+                }
+                disabled={user.currentRole !== 'ADMIN' && user.currentRole !== "MOD"}
+                //size={(item.name === 'name' || item.name === 'surname' ) ? 'medium' : 'small'}
+              />
+      )
+    } 
+
+        
+        
+
+    else if (fieldData.type === 'autocomplete') {
+      return (
+        <Autocomplete 
+        id={fieldData.name}
+        // sx={{ width: 300 }}
+        open={open}
+        onOpen={() => {
+          setOpen(true);
+        }}
+        onClose={() => {
+          setOpen(false);
+        }}
+        value={controllerProps.value ? controllerProps.value : ""}
+        onChange={(event: any, newValue: {id: string, name: string;}) => {
+          if (newValue) controllerProps.onChange(parseInt(newValue.id))}}
+        isOptionEqualToValue={(option:any, value) => {if (!value.length) return true; return parseInt(option.id) === value}}
+        getOptionLabel={getOptionLabel}
+        //getOptionLabel={(option:any) => {return option.name}}
+        options={getSelectOptions(fieldData.name)}
+        loading={getStatusListRequest.loading}
+        renderInput={(params) => {
+          
+          return(
+          <TextField
+            {...params}
+            label={fieldData.label}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <React.Fragment>
+                  {getStatusListRequest.loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              ),
+            }}
+          />
+          )}
+        }
+        />
+      )
+    }
+
+    return null;
+
+  }
 
   return (
     <>
@@ -283,26 +393,13 @@ export const SingleRecord = () => {
             margin: "1.5rem 0",
           }}
         >
-          {recordType.length && recordLoaded && <form onSubmit={handleSubmit(onSubmit)}>
+          {recordType.length && recordLoaded && getStatusListRequest.data &&  <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={2}>
               {customFields[recordType].map((item, index) => (
                 <Controller
                   key={index}
-                  render={({ field: { name, value, onChange, onBlur } }) => (
-                    <TextField
-                      name={name}
-                      type={item.type}
-                      value={value}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      label={item.label}
-                      error={Boolean(errors[item.name])}
-                      helperText={
-                        errors[item.name] ? errors[item.name].message : ""
-                      }
-                      disabled={user.currentRole !== 'ADMIN' && user.currentRole !== "MOD"}
-                      //size={(item.name === 'name' || item.name === 'surname' ) ? 'medium' : 'small'}
-                    />
+                  render={({ field }) => (
+                    <CustomFormField controllerProps={field} fieldData={item} />
                   )}
                   control={control}
                   name={item.name}
