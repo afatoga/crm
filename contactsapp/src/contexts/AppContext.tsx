@@ -8,7 +8,7 @@ import React, {
 
 import { User } from '../types/User';
 
-export interface IAppContext {
+interface IAppContext {
   user: User | null;
   setState?: () => void; //User ?
   token: string;

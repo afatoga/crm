@@ -6,7 +6,8 @@ import { Layout } from './components/Layout';
 import { PageDefault } from './components/PageDefault';
 
 import { ThemeModeContext } from './contexts';
-import { AppContextProvider } from './contexts/AppContext'
+import { AppContextProvider } from './contexts/AppContext';
+import { ModalProvider } from './contexts/ModalContext';
 //import { AppClient } from './clients';
 import { routes } from './config';
 import { Route as AppRoute } from './types';
@@ -14,6 +15,7 @@ import { getAppTheme } from './styles/theme';
 import { DARK_MODE_THEME, LIGHT_MODE_THEME } from './utils/constants';
 import ProtectedRoute from './components/Router/ProtectedRoute';
 import PublicRoute from './components/Router/PublicRoute';
+// import { makeVar } from '@apollo/client';
 
 
 function App() {
@@ -32,7 +34,6 @@ function App() {
 
   const theme = useMemo(() => getAppTheme(mode), [mode]);
 
-
   const getRouteNode = (route:AppRoute):ReactNode => {
 
     if (route.isProtected) return <ProtectedRoute isAdmin={!!route?.isAdmin}>{route.component ? <route.component /> : <PageDefault />}</ProtectedRoute>
@@ -46,6 +47,7 @@ function App() {
 
   return (
     <AppContextProvider>
+      <ModalProvider>
       <ThemeModeContext.Provider value={themeMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
@@ -61,6 +63,7 @@ function App() {
           </Router>
         </ThemeProvider>
       </ThemeModeContext.Provider>
+      </ModalProvider>
     </AppContextProvider>
   );
 }

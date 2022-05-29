@@ -11,7 +11,7 @@ import { APP_TITLE, PAGE_TITLE_HOME } from '../utils/constants';
 export const Home = () => {
   const context = useContext(AppContext);
 
-  console.log('homepageContext:', context);
+  // console.log('homepageContext:', context);
 
   return (
     <>

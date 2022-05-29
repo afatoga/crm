@@ -9,8 +9,10 @@ import {
   //useQuery,
   //gql
 } from "@apollo/client";
+import { useNavigate } from 'react-router-dom';
 
 import { setContext } from '@apollo/client/link/context';
+import { onError } from "@apollo/client/link/error";
 
 import App from './App';
 
@@ -40,8 +42,26 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors)
+    graphQLErrors.forEach(({ message, locations, path }) => {
+      if (message === 'Context creation failed: Authorization is invalid') {
+        //logout
+        localStorage.clear();
+        (window as any).location.href = '/login';
+      }
+
+      // console.log(
+      //   `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+      // )
+    }
+      
+    );
+  if (networkError) console.log(`[Network error]: ${networkError}`);
+});
+
 const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: errorLink.concat(authLink.concat(httpLink)),
   cache: new InMemoryCache()
 });
 

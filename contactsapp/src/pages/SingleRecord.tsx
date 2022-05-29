@@ -26,6 +26,7 @@ import { isEmptyObject } from "../utils/utilityFunctions";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParty } from "../hooks/useParty";
+import { PartyRelationships } from "../components/Templates/PartyRelationships";
 
 
 export const SingleRecord = () => {
@@ -374,23 +375,30 @@ export const SingleRecord = () => {
 
         <PageTitle
           title={
-            "Person"
+            recordType
           }
         />
         {/* <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
           Welcome to ContactsApp.
         </Typography> */}
 
+        {/* this is row for md, col for  */}
+        <Box sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          paddingTop: '1rem'
+        }}>
+
+
         <Box
           sx={{
             width: {
               xs: "100%", // theme.breakpoints.up('xs')
-              sm: 400, // theme.breakpoints.up('sm')
+              sm: "60%", //400, // theme.breakpoints.up('sm')
               // md: 300, // theme.breakpoints.up('md')
               lg: 360, // theme.breakpoints.up('lg')
               //xl: 500, // theme.breakpoints.up('xl')
-            },
-            margin: "1.5rem 0",
+            }
           }}
         >
           {recordType.length && recordLoaded && getStatusListRequest.data &&  <form onSubmit={handleSubmit(onSubmit)}>
@@ -422,6 +430,10 @@ export const SingleRecord = () => {
               )}
             </Stack>
           </form>}
+        </Box>
+
+          {(recordType === 'person' || recordType === 'organization') && <PartyRelationships />}
+
         </Box>
       </Box>
     </>
