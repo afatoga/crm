@@ -9,7 +9,8 @@ import {
     GET_STATUS_LIST
 } from '../api/status/queries';
 import {
-    CREATE_UPDATE_PERSON
+    CREATE_UPDATE_PERSON,
+    CREATE_UPDATE_PARTYRELATIONSHIP
 } from '../api/party/mutations';
 
 
@@ -29,11 +30,9 @@ export function useParty() {
 
     const createUpdatePerson = useMutation(CREATE_UPDATE_PERSON, {
         fetchPolicy: 'network-only',
-         // onCompleted: (data) => {
-        //     if (data.exportOverstockCsv.download_url) {
-        //         downloadFileData({ name: 'InventoryOverview', url: data.exportOverstockCsv.download_url, type: 'text/csv' })
-        //     }
-        // },
+    })
+    const createUpdatePartyRelationship = useMutation(CREATE_UPDATE_PARTYRELATIONSHIP, {
+        fetchPolicy: 'network-only',
     })
 
 

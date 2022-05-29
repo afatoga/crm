@@ -228,6 +228,14 @@ export const NewRecord = () => {
   React.useEffect(() => {
     reset();
   }, [recordType])
+  React.useEffect(() => {
+    if (createUpdatePersonRequest.data?.createUpdatePerson.partyId) {
+      const newRecordId = createUpdatePersonRequest.data?.createUpdatePerson.partyId;
+      navigate('/people/' + newRecordId);
+    }
+  }, [createUpdatePersonRequest])
+
+
 
   return (
     <>

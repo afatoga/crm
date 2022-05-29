@@ -119,7 +119,7 @@ export class TagResolver {
 
 
 
-      return { result: "success", message: "tag was updated" };
+      return { status: 'SUCCESS', message: "tag was updated" };
     } else if (data.operation === 'CREATE') {
       if (!data.name || !data.name.length) throw new Error("tag name is required");
 
@@ -164,7 +164,7 @@ export class TagResolver {
       }
 
       return currentTag;
-      //return { result: "success", message: "tag was created" };
+      //return { status: "SUCCESS", message: "tag was created" };
     }
 
     else  if (data.operation === 'DELETE') {
@@ -193,7 +193,7 @@ export class TagResolver {
       });
 
       // return {
-      //   result: "success",
+      //   status: "SUCCESS",
       //   message: "tag and its relations were deleted",
       // };
     }

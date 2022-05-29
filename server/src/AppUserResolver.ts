@@ -88,7 +88,7 @@ export class AppUserResolver {
         }
       })
 
-      return { result: 'success', message: 'account details updated' }
+      return { status: 'SUCCESS', message: 'account details updated' }
 
     } else if (ctx.currentUser) {
       // admin is setting a membership & role to regular user
@@ -123,7 +123,7 @@ export class AppUserResolver {
         }
       })
 
-      return { result: 'success', message: 'membership and role were set' }
+      return { status: 'SUCCESS', message: 'membership and role were set' }
     }
 
     else {
@@ -148,7 +148,7 @@ export class AppUserResolver {
       //   }
       // })
 
-      return { result: 'success', message: 'account created' }
+      return { status: 'SUCCESS', message: 'account created' }
     }
 
   }

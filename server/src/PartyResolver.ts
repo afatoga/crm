@@ -14,6 +14,7 @@ import { Party, Person, ExtendedPerson, ExtendedOrganization, PartyRelationship,
 import { Context } from "./context";
 import { Prisma } from "@prisma/client";
 import { isUserAuthorized } from "./authChecker";
+import { APIResponse } from "./GlobalObjects";
 //import { Service } from 'typedi'
 
 @InputType()
@@ -67,6 +68,18 @@ class OrganizationInput {
 @InputType()
 class PartyRelationshipInput {
   @Field({ nullable: true })
+  firstPartyId: number;
+
+  @Field({ nullable: true })
+  secondPartyId: number;
+
+  @Field({ nullable: true })
+  typeId: number;
+}
+
+@InputType()
+class UpdatePartyRelationshipInput {
+  @Field({ nullable: true })
   id: number;
 
   @Field({ nullable: true })
@@ -77,10 +90,8 @@ class PartyRelationshipInput {
 
   @Field({ nullable: true })
   typeId: number;
-
-  @Field({ nullable: true })
-  operation: "CREATE" | "UPDATE" | "DELETE";
 }
+
 @InputType()
 class PartyByAppUserGroupInput {
   @Field(type => Int)
@@ -219,16 +230,15 @@ export class PartyResolver {
 
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => PartyRelationship)
-  async createUpdatePartyRelationship(
+  async createPartyRelationship(
     @Arg("data") data: PartyRelationshipInput,
     @Ctx() ctx: Context
   ): Promise<PartyRelationship> {
-    if (!data.operation) throw new Error("Invalid");
+   
     if (!ctx.currentUser) throw new Error("Only for logged in users");
     if (data.firstPartyId === data.secondPartyId)
       throw new Error("use two different parties");
 
-    if (data.operation === "CREATE") {
       if (!data.firstPartyId || !data.firstPartyId)
         throw new Error("provide first and second party");
 
@@ -266,7 +276,25 @@ export class PartyResolver {
           secondPartyId: secondParty.id,
         },
       });
-    } else if (data.operation === "UPDATE") {
+
+  }
+
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => PartyRelationship)
+  async updatePartyRelationship(
+    @Arg("data") data: UpdatePartyRelationshipInput,
+    @Ctx() ctx: Context
+  ): Promise<PartyRelationship> {
+    // if (!data.operation) throw new Error("Invalid");
+    if (!ctx.currentUser) throw new Error("Only for logged in users");
+    if (data.firstPartyId === data.secondPartyId)
+      throw new Error("use two different parties");
+
+    // if (data.operation === "CREATE") {
+      
+    // } 
+    
+    
       if (!data.id) throw new Error("provide id to update");
       const existingRelationship = await ctx.prisma.partyRelationship.findFirst(
         {
@@ -306,25 +334,37 @@ export class PartyResolver {
           secondPartyId: secondParty.id,
         },
       });
-    } else if (data.operation === "DELETE") {
-      if (!data.id) throw new Error("provide id for removal");
+  }
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => APIResponse)
+  async deletePartyRelationship(
+    @Arg("data") data: UpdatePartyRelationshipInput,
+    @Ctx() ctx: Context
+  ): Promise<APIResponse> {
+    // if (!data.operation) throw new Error("Invalid");
+    if (!ctx.currentUser) throw new Error("Only for logged in users");
 
-      //remove all contacts
-      await ctx.prisma.contact.deleteMany({
+      if (!data.id) throw new Error("provide id for removal");
+      // transaction!
+      //at first, remove connected contacts
+      const deleteContacts = ctx.prisma.contact.deleteMany({
         where: {
           partyRelationshipId: data.id,
           appUserGroupId: ctx.currentUser.currentAppUserGroupId,
         },
       });
 
-      return await ctx.prisma.partyRelationship.delete({
+      const deletePartyRelationship = ctx.prisma.partyRelationship.delete({
         where: {
           id: data.id,
         },
       });
-    }
 
-    throw new Error("invalid request");
+      const response = await ctx.prisma.$transaction([deleteContacts, deletePartyRelationship]);
+      console.log(response);//debug
+      return {
+        status: 'SUCCESS'
+      }
   }
 
   @Authorized()

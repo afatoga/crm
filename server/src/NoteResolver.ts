@@ -121,7 +121,7 @@ export class NoteResolver {
                     }
                 });
 
-                return {result: 'success', message: 'note was deleted'}
+                return {status: 'SUCCESS', message: 'note was deleted'}
 
             }
 
@@ -135,7 +135,7 @@ export class NoteResolver {
                 }
               })
 
-            return {result: 'success', message: 'note was updated'}
+            return {status: 'SUCCESS', message: 'note was updated'}
         }
 
         else { //create
@@ -165,7 +165,7 @@ export class NoteResolver {
                 }
               })
 
-              return {result: 'success', message: 'note was created'}
+              return {status: 'SUCCESS', message: 'note was created'}
 
         }
 
