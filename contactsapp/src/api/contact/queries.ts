@@ -34,9 +34,9 @@ export const GET_PERSON_BY_ID = gql`
   }
 `;
 
-export const GET_PARTYRELATIONSHIPS = gql`
-  query ($partyId: Int!) {
-    partyRelationships(partyId: $partyId) {
+export const GET_PARTYRELATIONSHIPS_BY_PARTYID = gql`
+  query ($id: Int!) {
+    partyRelationshipsByPartyId(data: { id: $id }) {
       id
       firstPartyId
       secondPartyId

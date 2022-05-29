@@ -38,7 +38,6 @@ export const CREATE_PARTYRELATIONSHIP = gql`
         firstPartyId: $firstPartyId,
         secondPartyId: $secondPartyId,
         typeId: $typeId
-      }
     ) {
       id
       typeId
@@ -51,11 +50,10 @@ export const CREATE_PARTYRELATIONSHIP = gql`
 export const DELETE_PARTYRELATIONSHIP = gql`
   mutation (
     $id: Int!
-    $appUserGroupId: Int!
   ) {
     deletePartyRelationship(
-      id: $id,
-      appUserGroupId: $appUserGroupId
+      data: {
+        id: $id
     ) {
       status
     }

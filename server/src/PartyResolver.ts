@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import {
+  //ArgsType,
   Resolver,
   Query,
   Mutation,
@@ -64,6 +65,7 @@ class OrganizationInput {
   @Field({ nullable: true })
   appUserGroupId: number;
 }
+
 
 @InputType()
 class PartyRelationshipInput {
@@ -338,25 +340,31 @@ export class PartyResolver {
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => APIResponse)
   async deletePartyRelationship(
-    @Arg("data") data: UpdatePartyRelationshipInput,
+    @Arg("id") id: number,
+    @Arg("appUserGroupId") appUserGroupId: number,
     @Ctx() ctx: Context
   ): Promise<APIResponse> {
     // if (!data.operation) throw new Error("Invalid");
-    if (!ctx.currentUser) throw new Error("Only for logged in users");
+    //if (!ctx.currentUser) throw new Error("Only for logged in users");
 
-      if (!data.id) throw new Error("provide id for removal");
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
       // transaction!
       //at first, remove connected contacts
       const deleteContacts = ctx.prisma.contact.deleteMany({
         where: {
-          partyRelationshipId: data.id,
+          partyRelationshipId: id,
           appUserGroupId: ctx.currentUser.currentAppUserGroupId,
         },
       });
 
       const deletePartyRelationship = ctx.prisma.partyRelationship.delete({
         where: {
-          id: data.id,
+          id: id,
         },
       });
 
@@ -461,6 +469,25 @@ export class PartyResolver {
     if (!queryResultArray.length) return null;
 
     return queryResultArray[0];
+
+  }
+
+  @Authorized()
+  @Query((returns) => [PartyRelationship])
+  async partyRelationships(
+    @Arg("partyId") partyId: number,
+    @Ctx() ctx: Context
+  ) {
+
+    return await ctx.prisma.partyRelationship.findMany({
+      where: {
+        OR: [
+          {firstPartyId: partyId},
+          {secondPartyId: partyId}
+        ]
+        
+      }
+    });
 
   }
 }

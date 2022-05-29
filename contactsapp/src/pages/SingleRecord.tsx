@@ -27,13 +27,13 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParty } from "../hooks/useParty";
 import { PartyRelationships } from "../components/Templates/PartyRelationships";
-
+import {CustomFormField} from '../components/Form/CustomFormField';
 
 export const SingleRecord = () => {
   // Local state
   const [recordType, setRecordType] = React.useState<string>("");
   const [recordLoaded, setRecordLoaded] = React.useState<boolean>(false);
-  const [open, setOpen] = React.useState<boolean>(false);
+ 
 
   const { operations } = useParty();
   const [getPersonByIdHandler, getPersonByIdRequest] =
@@ -102,6 +102,7 @@ export const SingleRecord = () => {
         name: "statusId",
         type: "autocomplete", //"select",
         required: true,
+        apiRequest: getStatusListRequest
       },
     ],
     organization: [
@@ -259,105 +260,9 @@ export const SingleRecord = () => {
   }, [location]);
 
 
-  const getSelectOptions = (fieldName: string) => {
+  
 
-    if (fieldName === 'statusId') {
-      if (getStatusListRequest.data?.statusList?.length) {
-        const statusList = getStatusListRequest.data.statusList;
-        return statusList.map((item:any) => ({name:item.name, id:item.id}))
-      }
 
-      //return [];
-    }
-
-  }
-
-  const getOptionLabel = (option: number | {id:string, name: string}) => {
-
-    if (!option || !getStatusListRequest.data) return '';
-
-    if (typeof option === 'number') {
-      if (getStatusListRequest.data?.statusList?.length) {
-        const statusList = getStatusListRequest.data.statusList;
-        const found = statusList.find((item:any) => (option === parseInt(item.id)))
-        if (found) return found.name;
-      }
-    }
-
-    else return option.name;
-
-    
-  }
-
-  const CustomFormField = ({controllerProps, fieldData}) => {
-    
-    if (fieldData.type === 'text') {
-      return (
-              <TextField
-                name={fieldData.name}
-                type={fieldData.type}
-                value={controllerProps.value}
-                onChange={controllerProps.onChange}
-                onBlur={controllerProps.onBlur}
-                label={fieldData.label}
-                error={Boolean(errors[fieldData.name])}
-                helperText={
-                  errors[fieldData.name] ? errors[fieldData.name].message : ""
-                }
-                disabled={user.currentRole !== 'ADMIN' && user.currentRole !== "MOD"}
-                //size={(item.name === 'name' || item.name === 'surname' ) ? 'medium' : 'small'}
-              />
-      )
-    } 
-
-        
-        
-
-    else if (fieldData.type === 'autocomplete') {
-      return (
-        <Autocomplete 
-        id={fieldData.name}
-        // sx={{ width: 300 }}
-        open={open}
-        onOpen={() => {
-          setOpen(true);
-        }}
-        onClose={() => {
-          setOpen(false);
-        }}
-        value={controllerProps.value ? controllerProps.value : ""}
-        onChange={(event: any, newValue: {id: string, name: string;}) => {
-          if (newValue) controllerProps.onChange(parseInt(newValue.id))}}
-        isOptionEqualToValue={(option:any, value) => {if (!value.length) return true; return parseInt(option.id) === value}}
-        getOptionLabel={getOptionLabel}
-        //getOptionLabel={(option:any) => {return option.name}}
-        options={getSelectOptions(fieldData.name)}
-        loading={getStatusListRequest.loading}
-        renderInput={(params) => {
-          
-          return(
-          <TextField
-            {...params}
-            label={fieldData.label}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <React.Fragment>
-                  {getStatusListRequest.loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </React.Fragment>
-              ),
-            }}
-          />
-          )}
-        }
-        />
-      )
-    }
-
-    return null;
-
-  }
 
   return (
     <>
@@ -407,7 +312,7 @@ export const SingleRecord = () => {
                 <Controller
                   key={index}
                   render={({ field }) => (
-                    <CustomFormField controllerProps={field} fieldData={item} />
+                    <CustomFormField controllerProps={field} fieldData={item} errors={errors} />
                   )}
                   control={control}
                   name={item.name}

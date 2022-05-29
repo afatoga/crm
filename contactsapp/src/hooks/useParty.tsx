@@ -1,6 +1,7 @@
 import {  useMutation, useLazyQuery, useQuery  } from '@apollo/client'; /*makeVar,useLazyQuery*/
 
 import {
+    GET_PARTYRELATIONSHIPS,
     //GET_ALL_PERSONS,
     GET_PERSONS_BY_APPUSERGROUP,
     GET_PERSON_BY_ID
@@ -10,7 +11,9 @@ import {
 } from '../api/status/queries';
 import {
     CREATE_UPDATE_PERSON,
-    CREATE_UPDATE_PARTYRELATIONSHIP
+    CREATE_PARTYRELATIONSHIP,
+    // UPDATE_PARTYRELATIONSHIP,
+    DELETE_PARTYRELATIONSHIP
 } from '../api/party/mutations';
 
 
@@ -23,15 +26,21 @@ export function useParty() {
     //const getAllPersons = useLazyQuery(GET_ALL_PERSONS);
 
     const getPersonsByAppUserGroup = useLazyQuery(GET_PERSONS_BY_APPUSERGROUP);
+    // const getParties = useLazyQuery(GET_PARTIES);
 
     const getPersonById = useLazyQuery(GET_PERSON_BY_ID);
 
     const getStatusList = useLazyQuery(GET_STATUS_LIST);
 
+    const getPartyRelationships = useLazyQuery(GET_PARTYRELATIONSHIPS)
+
     const createUpdatePerson = useMutation(CREATE_UPDATE_PERSON, {
         fetchPolicy: 'network-only',
     })
-    const createUpdatePartyRelationship = useMutation(CREATE_UPDATE_PARTYRELATIONSHIP, {
+    const createPartyRelationship = useMutation(CREATE_PARTYRELATIONSHIP, {
+        fetchPolicy: 'network-only',
+    })
+    const deletePartyRelationship = useMutation(DELETE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',
     })
 
@@ -43,7 +52,10 @@ export function useParty() {
             getPersonsByAppUserGroup,
             getPersonById,
             getStatusList,
-            createUpdatePerson
+            getPartyRelationships,
+            createUpdatePerson,
+            createPartyRelationship,
+            deletePartyRelationship
         }
     }
 }
