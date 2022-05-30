@@ -48,7 +48,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       if (message === 'Context creation failed: Authorization is invalid') {
         //logout
         localStorage.clear();
-        (window as any).location.href = '/login';
+        //(window as any).location.href = '/login';
       }
 
       // console.log(

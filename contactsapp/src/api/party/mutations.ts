@@ -1,8 +1,7 @@
 import { gql } from "@apollo/client";
 
-export const CREATE_UPDATE_PERSON = gql`
+export const CREATE_PERSON = gql`
   mutation (
-    $partyId: Int
     $name: String!
     $surname: String!
     $preDegree: String
@@ -11,7 +10,33 @@ export const CREATE_UPDATE_PERSON = gql`
     $appUserGroupId: Int!
     $statusId: Int
   ) {
-    createUpdatePerson(
+    createPerson(
+      data: {
+        name: $name
+        surname: $surname
+        preDegree: $preDegree
+        postDegree: $postDegree
+        birthday: $birthday
+        appUserGroupId: $appUserGroupId
+        statusId: $statusId
+      }
+    ) {
+      partyId
+    }
+  }
+`;
+export const UPDATE_PERSON = gql`
+  mutation (
+    $partyId: Int!
+    $name: String!
+    $surname: String!
+    $preDegree: String
+    $postDegree: String
+    $birthday: DateTime
+    $appUserGroupId: Int!
+    $statusId: Int
+  ) {
+    updatePerson(
       data: {
         partyId: $partyId
         name: $name
@@ -24,6 +49,22 @@ export const CREATE_UPDATE_PERSON = gql`
       }
     ) {
       partyId
+    }
+  }
+`;
+export const DELETE_PERSON = gql`
+  mutation (
+    $partyId: Int!
+    $appUserGroupId: Int!
+  ) {
+    deletePerson(
+        data: {
+          partyId: $partyId,
+          appUserGroupId: $appUserGroupId
+        }
+    ) {
+      status
+      message
     }
   }
 `;

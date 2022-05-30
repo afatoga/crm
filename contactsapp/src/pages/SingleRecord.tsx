@@ -53,8 +53,10 @@ export const SingleRecord = () => {
     return (recordData[attrName]) ? recordData[attrName] : "";
   } 
 
-  const [createUpdatePersonHandler, createUpdatePersonRequest] =
-    operations.createUpdatePerson;
+  const [updatePersonHandler, updatePersonRequest] =
+    operations.updatePerson;
+  const [deletePersonHandler, deletePersonRequest] =
+    operations.deletePerson;
 
   const location: any = useLocation();
   const { id: recordIdString } = useParams();
@@ -63,7 +65,14 @@ export const SingleRecord = () => {
   let navigate = useNavigate(); //save and view detail
   const { user } = useAuth();
   
-  // console.log(user);
+  const deleteRecord = () => {
+    if (recordType === 'person') {
+      deletePersonHandler({variables: {
+        partyId: recordId,
+        appUserGroupId: user.currentAppUserGroupId
+      }})
+    }
+  }
 
   const customFields = {
     person: [
@@ -194,7 +203,7 @@ export const SingleRecord = () => {
   const onSubmit = React.useCallback((values) => {
     console.log(values)
     if (recordType === 'person') {
-      createUpdatePersonHandler({
+      updatePersonHandler({
         variables: {
           ...values,
           partyId: recordId,
@@ -327,10 +336,18 @@ export const SingleRecord = () => {
               >
                 Save
               </Button>
-              {!isSubmitting && createUpdatePersonRequest.error && (
+              <Button
+                //variant={"contained"}
+                type="button"
+                sx={{ width: "120px" }}
+                onClick={deleteRecord}
+              >
+                Delete
+              </Button>
+              {!isSubmitting && updatePersonRequest.error && (
                 <Alert severity="error">
                   <AlertTitle>Error</AlertTitle>
-                  {createUpdatePersonRequest.error.message}
+                  {updatePersonRequest.error.message}
                 </Alert>
               )}
             </Stack>

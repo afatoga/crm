@@ -10,7 +10,9 @@ import {
     GET_STATUS_LIST
 } from '../api/status/queries';
 import {
-    CREATE_UPDATE_PERSON,
+    CREATE_PERSON,
+    UPDATE_PERSON,
+    DELETE_PERSON,
     CREATE_PARTYRELATIONSHIP,
     // UPDATE_PARTYRELATIONSHIP,
     DELETE_PARTYRELATIONSHIP
@@ -34,7 +36,13 @@ export function useParty() {
 
     const getPartyRelationships = useLazyQuery(GET_PARTYRELATIONSHIPS)
 
-    const createUpdatePerson = useMutation(CREATE_UPDATE_PERSON, {
+    const createPerson = useMutation(CREATE_PERSON, {
+        fetchPolicy: 'network-only',
+    })
+    const updatePerson = useMutation(UPDATE_PERSON, {
+        fetchPolicy: 'network-only',
+    })
+    const deletePerson = useMutation(DELETE_PERSON, {
         fetchPolicy: 'network-only',
     })
     const createPartyRelationship = useMutation(CREATE_PARTYRELATIONSHIP, {
@@ -53,7 +61,9 @@ export function useParty() {
             getPersonById,
             getStatusList,
             getPartyRelationships,
-            createUpdatePerson,
+            createPerson,
+            updatePerson,
+            deletePerson,
             createPartyRelationship,
             deletePartyRelationship
         }

@@ -49,6 +49,15 @@ class PersonInput {
 }
 
 @InputType()
+class DeletePersonInput {
+  @Field(type => Int)
+  partyId: number;
+
+  @Field(type => Int)
+  appUserGroupId: number;
+}
+
+@InputType()
 class OrganizationInput {
   @Field({ nullable: true })
   partyId: number;
@@ -114,18 +123,49 @@ class PartyByAppUserGroupInput {
 export class PartyResolver {
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Person)
-  async createUpdatePerson(
+  async createPerson(
     @Arg("data") data: PersonInput,
     @Ctx() ctx: Context
   ): Promise<Person> {
-  
+
     if (
       !ctx.currentUser ||
       !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
     )
       throw new Error("Not authorized");
 
-    if (data.partyId) {
+
+    const party = await ctx.prisma.party.create({
+      data: {
+        typeId: 1,
+        statusId: data.statusId && data.statusId,
+        appUserGroupId: data.appUserGroupId,
+      },
+    });
+
+    return await ctx.prisma.person.create({
+      data: {
+        partyId: party.id,
+        preDegree: data?.preDegree,
+        name: data.name,
+        surname: data.surname,
+        postDegree: data?.postDegree,
+        birthday: data?.birthday,
+      },
+    });
+
+  }
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => Person)
+  async updatePerson(
+    @Arg("data") data: PersonInput,
+    @Ctx() ctx: Context
+  ): Promise<Person> {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
 
       if (data.statusId) await ctx.prisma.party.update({
         where: {
@@ -149,37 +189,35 @@ export class PartyResolver {
           birthday: data?.birthday,
         },
       });
-    }
 
-    // const person = await ctx.prisma.person.findFirst({
-    //   where: {
-    //     name: data.name,
-    //     surname: data.surname,
-    //   }
-    // })
+  }
 
-    //if (!person) {
-    //create
-    const party = await ctx.prisma.party.create({
-      data: {
-        typeId: 1,
-        statusId: data.statusId && data.statusId,
-        appUserGroupId: data.appUserGroupId,
-      },
-    });
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => APIResponse)
+  async deletePerson(
+    @Arg("data") data: DeletePersonInput,
+    @Ctx() ctx: Context
+  ) {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
 
-    return await ctx.prisma.person.create({
-      data: {
-        partyId: party.id,
-        preDegree: data?.preDegree,
-        name: data.name,
-        surname: data.surname,
-        postDegree: data?.postDegree,
-        birthday: data?.birthday,
-      },
-    });
+      await ctx.prisma.party.update({
+        where: {
+          id: data.partyId
+        },
+        data: {
+          statusId: 4 //archive CONST
+        }
+      })
 
-    //return person; //or return error that user exists
+      return {
+        status: 'SUCCESS',
+        message: 'person was archived'
+      }
+
   }
 
   @Query(() => [Person])
@@ -390,6 +428,7 @@ export class PartyResolver {
       FROM "Party"
       INNER JOIN "Person" ON "Party"."id" = "Person"."partyId"
       WHERE "Party"."appUserGroupId" = ${data.appUserGroupId}
+      AND "Party"."statusId" != 4
       ${statusCondition}
     `);
   }

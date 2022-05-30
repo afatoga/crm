@@ -40,8 +40,8 @@ export const NewRecord = () => {
   const [recordType, setRecordType] = React.useState<string>("person");
 
   const { operations } = useParty();
-  const [createUpdatePersonHandler, createUpdatePersonRequest] =
-    operations.createUpdatePerson;
+  const [createPersonHandler, createPersonRequest] =
+    operations.createPerson;
 
   const location: any = useLocation();
 
@@ -197,7 +197,7 @@ export const NewRecord = () => {
     console.log(recordType);
 
     if (recordType === "person")
-      createUpdatePersonHandler({
+      createPersonHandler({
         variables: {
           ...values,
           birthday: values.birthday.length ? values.birthday : null,
@@ -229,11 +229,11 @@ export const NewRecord = () => {
     reset();
   }, [recordType])
   React.useEffect(() => {
-    if (createUpdatePersonRequest.data?.createUpdatePerson.partyId) {
-      const newRecordId = createUpdatePersonRequest.data?.createUpdatePerson.partyId;
+    if (createPersonRequest.data?.createPerson.partyId) {
+      const newRecordId = createPersonRequest.data?.createPerson.partyId;
       navigate('/people/' + newRecordId);
     }
-  }, [createUpdatePersonRequest])
+  }, [createPersonRequest])
 
 
 
@@ -330,10 +330,10 @@ export const NewRecord = () => {
               >
                 Save
               </Button>
-              {!isSubmitting && createUpdatePersonRequest.error && (
+              {!isSubmitting && createPersonRequest.error && (
                 <Alert severity="error">
                   <AlertTitle>Error</AlertTitle>
-                  {createUpdatePersonRequest.error.message}
+                  {createPersonRequest.error.message}
                 </Alert>
               )}
             </Stack>
