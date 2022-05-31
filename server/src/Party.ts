@@ -86,3 +86,12 @@ export class PartyRelationship {
   @Field((type) => Number)
   secondPartyId: number
 }
+
+@ObjectType()
+export class PartyRelationshipType {
+  @Field((type) => ID)
+  id: number
+
+  @Field((type) => String)
+  name: string
+}

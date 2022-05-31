@@ -44,3 +44,11 @@ export const GET_PARTYRELATIONSHIPS = gql`
     }
   }
 `;
+export const GET_PARTYRELATIONSHIP_TYPE_LIST = gql`
+  query {
+    partyRelationshipTypeList {
+      id
+      name
+    }
+  }
+`;

@@ -41,7 +41,6 @@ function App() {
   } 
 
   const addRoute = (route: AppRoute) => {
-    //if(route.isProtected) return 
     return <Route key={route.key} path={route.path} element={getRouteNode(route)} />
   };
 

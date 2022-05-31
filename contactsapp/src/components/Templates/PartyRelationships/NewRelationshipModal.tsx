@@ -19,27 +19,28 @@ export const NewRelationshipModal = () => {
     const {operations} = useParty();
     const [createPartyRelationshipHandler, createPartyRelationshipRequest] = operations.createPartyRelationship;
     const [getPartiesHandler, getPartiesRequest] = operations.getPersonsByAppUserGroup;
+    const [getPartyRelationshipTypeListHandler, getPartyRelationshipTypeListRequest] = operations.getPartyRelationshipTypeList;
 
     const fields = [
         {
-            label: "Main party",
-            name: "firstPartyId",
+            label: "Other party",
+            name: "otherPartyId",
             type: "autocomplete",
             required: true,
             apiRequest: getPartiesRequest
           },
           {
-            label: "Second party",
-            name: "secondPartyId",
-            type: "autocomplete",
-            required: true,
-            apiRequest: getPartiesRequest
+            label: "Above party is of higher priority",
+            name: "isMainParty",
+            type: "checkbox",
+            // required: true,
           },
           {
             label: "Relation type",
-            name: "typeId",
+            name: "partyRelationshipTypeId",
             type: "autocomplete",
             required: true,
+            apiRequest: getPartyRelationshipTypeListRequest
           }
     ]
 
@@ -72,6 +73,7 @@ export const NewRelationshipModal = () => {
 
       React.useEffect(() => {
         getPartiesHandler();
+        getPartyRelationshipTypeListHandler();
       }, [])
 
   return (

@@ -11,32 +11,54 @@ export const CustomFormField = ({controllerProps, fieldData, errors}) => {
     const {user} = useAuth();
     const [open, setOpen] = React.useState<boolean>(false);
 
-    const getSelectOptions = (fieldName: string) => {
+    const getSelectOptions = () => {
 
-        if (fieldName === 'statusId') {
+        if (fieldData.name === 'statusId') {
           if (fieldData.apiRequest.data?.statusList?.length) {
             const statusList = fieldData.apiRequest.data.statusList;
             return statusList.map((item:any) => ({name:item.name, id:item.id}))
           }
     
-          //return [];
         }
+        
+        if (fieldData.name === 'otherPartyId') {
+          if (fieldData.apiRequest.data?.personsByAppUserGroup?.length) {
+            const partyList = fieldData.apiRequest.data.personsByAppUserGroup;
+            return partyList.map((item:any) => ({name:item.surname, id:item.id}))
+          }
     
+        }
+
+        if (fieldData.name === 'partyRelationshipTypeId') {
+          if (fieldData.apiRequest.data?.partyRelationshipTypeList?.length) {
+            const partyRelationshipTypeList = fieldData.apiRequest.data.partyRelationshipTypeList;
+            return partyRelationshipTypeList.map((item:any) => ({name:item.name, id:item.id}))
+          }
+    
+        }
+
       }
     
       const getOptionLabel = (option: number | {id:string, name: string}) => {
     
         if (!option || !fieldData.apiRequest.data) return '';
     
-        if (typeof option === 'number') {
-          if (fieldData.apiRequest.data?.statusList?.length) {
-            const statusList = fieldData.apiRequest.data.statusList;
-            const found = statusList.find((item:any) => (option === parseInt(item.id)))
-            if (found) return found.name;
-          }
+        if ( typeof option === 'number') {
+          
+
+          if (fieldData.name === 'statusId') {
+            if (fieldData.apiRequest.data?.statusList?.length) {
+              const statusList = fieldData.apiRequest.data.statusList;
+              const found = statusList.find((item:any) => (option === parseInt(item.id)))
+              if (found) return found.name;
+            }
         }
-    
+
+          
+        }
+        
         else return option.name;
+       
     
         
       }
@@ -81,7 +103,7 @@ export const CustomFormField = ({controllerProps, fieldData, errors}) => {
         isOptionEqualToValue={(option:any, value) => {if (!value.length) return true; return parseInt(option.id) === value}}
         getOptionLabel={getOptionLabel}
         //getOptionLabel={(option:any) => {return option.name}}
-        options={getSelectOptions(fieldData.name)}
+        options={getSelectOptions()}
         loading={fieldData.apiRequest.loading}
         renderInput={(params) => {
           

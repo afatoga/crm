@@ -11,7 +11,7 @@ import {
   Authorized,
   Int,
 } from "type-graphql";
-import { Party, Person, ExtendedPerson, ExtendedOrganization, PartyRelationship, Organization } from "./Party";
+import { Party, Person, ExtendedPerson, ExtendedOrganization, Organization, PartyRelationship, PartyRelationshipType } from "./Party";
 import { Context } from "./context";
 import { Prisma } from "@prisma/client";
 import { isUserAuthorized } from "./authChecker";
@@ -527,6 +527,19 @@ export class PartyResolver {
         
       }
     });
+
+  }
+
+  @Authorized()
+  @Query((returns) => [PartyRelationshipType])
+  async partyRelationshipTypeList(
+    @Ctx() ctx: Context,
+  ): Promise<PartyRelationshipType[]> {
+
+    if(!ctx.currentUser) throw new Error('Only for logged in users')
+
+    return await ctx.prisma.partyRelationshipType.findMany();
+
 
   }
 }

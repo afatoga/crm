@@ -4,7 +4,8 @@ import {
     GET_PARTYRELATIONSHIPS,
     //GET_ALL_PERSONS,
     GET_PERSONS_BY_APPUSERGROUP,
-    GET_PERSON_BY_ID
+    GET_PERSON_BY_ID,
+    GET_PARTYRELATIONSHIP_TYPE_LIST
 } from '../api/party/queries';
 import {
     GET_STATUS_LIST
@@ -34,7 +35,9 @@ export function useParty() {
 
     const getStatusList = useLazyQuery(GET_STATUS_LIST);
 
-    const getPartyRelationships = useLazyQuery(GET_PARTYRELATIONSHIPS)
+    const getPartyRelationships = useLazyQuery(GET_PARTYRELATIONSHIPS);
+
+    const getPartyRelationshipTypeList = useLazyQuery(GET_PARTYRELATIONSHIP_TYPE_LIST);
 
     const createPerson = useMutation(CREATE_PERSON, {
         fetchPolicy: 'network-only',
@@ -61,6 +64,7 @@ export function useParty() {
             getPersonById,
             getStatusList,
             getPartyRelationships,
+            getPartyRelationshipTypeList,
             createPerson,
             updatePerson,
             deletePerson,
