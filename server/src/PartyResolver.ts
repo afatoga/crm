@@ -587,21 +587,21 @@ export class PartyResolver {
     // });
 
     const queryResultArray = await ctx.prisma.$queryRaw<[ExtendedPartyRelationship]>(Prisma.sql`
-      SELECT "PartyRelationship"."firstPartyId", "PartyRelationship"."secondPartyId", "FirstPartyPerson"."name" AS "firstPartyPersonName", "SecondPartyPerson"."name" AS "secondPartyPersonName", "FirstPartyOrganization"."name" AS "firstPartyOrganizationName", "SecondPartyOrganization"."name" AS "secondPartyOrganizationName" 
+      SELECT "PartyRelationship"."id", "PartyRelationship"."firstPartyId", "PartyRelationship"."secondPartyId", "FirstPartyPerson"."name" AS "firstPartyPersonName", "SecondPartyPerson"."name" AS "secondPartyPersonName", "FirstPartyOrganization"."name" AS "firstPartyOrganizationName", "SecondPartyOrganization"."name" AS "secondPartyOrganizationName" 
       FROM "PartyRelationship"
-      INNER JOIN 
+      LEFT JOIN 
         (SELECT "Person"."partyId", CONCAT ("Person"."surname", ' ', "Person"."name") as "name"
         FROM "Person")
       AS "FirstPartyPerson" ON "FirstPartyPerson"."partyId" = "PartyRelationship"."firstPartyId"
-      INNER JOIN 
+      LEFT JOIN 
         (SELECT "Person"."partyId", CONCAT ("Person"."surname", ' ', "Person"."name") as "name"
         FROM "Person")
-      AS "SecondPartyPerson" ON "SecondPartyPerson"."partyId" = "PartyRelationship"."firstPartyId"
-      INNER JOIN 
+      AS "SecondPartyPerson" ON "SecondPartyPerson"."partyId" = "PartyRelationship"."secondPartyId"
+      LEFT JOIN 
         (SELECT "Organization"."partyId", "Organization"."name"
         FROM "Organization")
-      AS "FirstPartyOrganization" ON "FirstPartyOrganization"."partyId" = "PartyRelationship"."secondPartyId"
-      INNER JOIN 
+      AS "FirstPartyOrganization" ON "FirstPartyOrganization"."partyId" = "PartyRelationship"."firstPartyId"
+      LEFT JOIN 
       (SELECT "Organization"."partyId", "Organization"."name"
       FROM "Organization")
       AS "SecondPartyOrganization" ON "SecondPartyOrganization"."partyId" = "PartyRelationship"."secondPartyId"
