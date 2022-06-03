@@ -10,8 +10,9 @@ import {
   Field,
   Authorized,
   Int,
+  ID,
 } from "type-graphql";
-import { Party, Person, ExtendedPerson, ExtendedOrganization, Organization, PartyRelationship, PartyRelationshipType } from "./Party";
+import { Party, Person, ExtendedPerson, ExtendedOrganization, Organization, PartyWithName, PartyRelationship, ExtendedPartyRelationship, PartyRelationshipType } from "./Party";
 import { Context } from "./context";
 import { Prisma } from "@prisma/client";
 import { isUserAuthorized } from "./authChecker";
@@ -78,14 +79,26 @@ class OrganizationInput {
 
 @InputType()
 class PartyRelationshipInput {
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   firstPartyId: number;
 
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   secondPartyId: number;
 
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   typeId: number;
+}
+
+@InputType()
+class PartyByNameInput {
+  @Field()
+  searchedName: string;
+
+  @Field(type => Int)
+  appUserGroupId: number;
+
+  @Field(type => Int, { nullable: true })
+  statusId: number;
 }
 
 @InputType()
@@ -512,21 +525,92 @@ export class PartyResolver {
   }
 
   @Authorized()
-  @Query((returns) => [PartyRelationship])
-  async partyRelationships(
-    @Arg("partyId") partyId: number,
+  @Query((returns) => [PartyWithName])
+  async partiesByName(
+    @Arg("data") data: PartyByNameInput,
     @Ctx() ctx: Context
   ) {
 
-    return await ctx.prisma.partyRelationship.findMany({
-      where: {
-        OR: [
-          {firstPartyId: partyId},
-          {secondPartyId: partyId}
-        ]
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    if (!data.searchedName.length) return [];
+
+    const searchText = `%${data.searchedName}%`;
+
+    const queryResultArray = await ctx.prisma.$queryRaw<[PartyWithName]>(Prisma.sql`
+      SELECT "Organization"."partyId" as "id", "Organization"."name"
+      FROM "Organization"
+      INNER JOIN "Party" ON "Party"."id" = "Organization"."partyId"
+      WHERE "Party"."appUserGroupId" = ${data.appUserGroupId} 
+      AND LOWER("Organization"."name") LIKE ${searchText}
+        UNION ALL
+      SELECT "Person"."partyId" as "id", CONCAT ("Person"."surname", ' ', "Person"."name") as "name"
+      FROM "Person"
+      INNER JOIN "Party" ON "Party"."id" = "Person"."partyId"
+      WHERE "Party"."appUserGroupId" = ${data.appUserGroupId} 
+      AND (LOWER("Person"."name") LIKE ${searchText}
+        OR LOWER("Person"."surname") LIKE ${searchText}
+      )
+    `);
+
+    return queryResultArray;
+
+  }
+
+  @Authorized()
+  @Query((returns) => [ExtendedPartyRelationship])
+  async partyRelationships(
+    @Arg("partyId", type => Int) partyId: number,
+    @Arg("appUserGroupId", type => Int) appUserGroupId: number,
+    @Ctx() ctx: Context
+  ) {
+
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+      
+    // const unsortedList = await ctx.prisma.partyRelationship.findMany({
+    //   where: {
+    //     OR: [
+    //       {firstPartyId: partyId},
+    //       {secondPartyId: partyId}
+    //     ]
         
-      }
-    });
+    //   }
+    // });
+
+    const queryResultArray = await ctx.prisma.$queryRaw<[ExtendedPartyRelationship]>(Prisma.sql`
+      SELECT "PartyRelationship"."firstPartyId", "PartyRelationship"."secondPartyId", "FirstPartyPerson"."name" AS "firstPartyPersonName", "SecondPartyPerson"."name" AS "secondPartyPersonName", "FirstPartyOrganization"."name" AS "firstPartyOrganizationName", "SecondPartyOrganization"."name" AS "secondPartyOrganizationName" 
+      FROM "PartyRelationship"
+      INNER JOIN 
+        (SELECT "Person"."partyId", CONCAT ("Person"."surname", ' ', "Person"."name") as "name"
+        FROM "Person")
+      AS "FirstPartyPerson" ON "FirstPartyPerson"."partyId" = "PartyRelationship"."firstPartyId"
+      INNER JOIN 
+        (SELECT "Person"."partyId", CONCAT ("Person"."surname", ' ', "Person"."name") as "name"
+        FROM "Person")
+      AS "SecondPartyPerson" ON "SecondPartyPerson"."partyId" = "PartyRelationship"."firstPartyId"
+      INNER JOIN 
+        (SELECT "Organization"."partyId", "Organization"."name"
+        FROM "Organization")
+      AS "FirstPartyOrganization" ON "FirstPartyOrganization"."partyId" = "PartyRelationship"."secondPartyId"
+      INNER JOIN 
+      (SELECT "Organization"."partyId", "Organization"."name"
+      FROM "Organization")
+      AS "SecondPartyOrganization" ON "SecondPartyOrganization"."partyId" = "PartyRelationship"."secondPartyId"
+      WHERE "PartyRelationship"."firstPartyId" = ${partyId}
+      OR "PartyRelationship"."secondPartyId" = ${partyId}
+    `);
+
+    return queryResultArray;
+
 
   }
 

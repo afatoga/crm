@@ -64,6 +64,16 @@ export class Organization {
   typeId: number | null
 }
 
+// returned after query partiesByName
+@ObjectType()
+export class PartyWithName {
+  @Field((type) => ID)
+  id: number //renamed partyId
+
+  @Field((type) => String, { nullable: true })
+  name: string | null
+}
+
 @ObjectType()
 export class ExtendedOrganization extends Organization {
   @Field((type) => Number, { nullable: true })
@@ -85,6 +95,21 @@ export class PartyRelationship {
 
   @Field((type) => Number)
   secondPartyId: number
+}
+
+// returned after query partyRelationships
+// Organization.name or (Person.surname + Person.name)
+@ObjectType()
+export class ExtendedPartyRelationship extends PartyRelationship {
+
+  @Field((type) => String) 
+  firstPartyPersonName: string | null 
+  @Field((type) => String) 
+  secondPartyPersonName: string | null 
+  @Field((type) => String) 
+  firstPartyOrganizationName: string | null 
+  @Field((type) => String) 
+  secondPartyOrganizationName: string | null 
 }
 
 @ObjectType()

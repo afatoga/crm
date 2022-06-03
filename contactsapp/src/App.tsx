@@ -46,11 +46,12 @@ function App() {
 
   return (
     <AppContextProvider>
-      <ModalProvider>
+     
       <ThemeModeContext.Provider value={themeMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Router>
+          <ModalProvider>
             <Routes>
                 <Route path="/" element={<Layout />} >
                 {routes.map((route: AppRoute) =>
@@ -59,10 +60,11 @@ function App() {
                 </ Route>
               
             </Routes>
+            </ModalProvider>
           </Router>
         </ThemeProvider>
       </ThemeModeContext.Provider>
-      </ModalProvider>
+     
     </AppContextProvider>
   );
 }

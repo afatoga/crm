@@ -2,7 +2,10 @@ import * as React from 'react';
 import {
     TextField,
     Autocomplete,
-    CircularProgress
+    CircularProgress,
+    Checkbox,
+    FormControlLabel,
+    FormGroup
   } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -21,18 +24,23 @@ export const CustomFormField = ({controllerProps, fieldData, errors}) => {
     
         }
         
-        if (fieldData.name === 'otherPartyId') {
-          if (fieldData.apiRequest.data?.personsByAppUserGroup?.length) {
-            const partyList = fieldData.apiRequest.data.personsByAppUserGroup;
-            return partyList.map((item:any) => ({name:item.surname, id:item.id}))
-          }
-    
-        }
+        // if (fieldData.name === 'otherPartyId') {
+        //   if (fieldData.apiRequest.called) {
+        //     if (fieldData.apiRequest.data?.partiesByName?.length) {
+        //       const partyList = fieldData.apiRequest.data.partiesByName;
+        //       return partyList.map((item:any) => ({name:item.name, id:item.id}))
+        //     }
+        //   }
+
+        //   else return [];    
+        // }
 
         if (fieldData.name === 'partyRelationshipTypeId') {
-          if (fieldData.apiRequest.data?.partyRelationshipTypeList?.length) {
+         
+          if (fieldData.apiRequest.data?.partyRelationshipTypeList?.length) {  
             const partyRelationshipTypeList = fieldData.apiRequest.data.partyRelationshipTypeList;
-            return partyRelationshipTypeList.map((item:any) => ({name:item.name, id:item.id}))
+            const options = partyRelationshipTypeList.map((item:any) => ({name:item.name, id:item.id}));
+            return [{id: undefined, name: " - "}, ...options];
           }
     
         }
@@ -52,7 +60,15 @@ export const CustomFormField = ({controllerProps, fieldData, errors}) => {
               const found = statusList.find((item:any) => (option === parseInt(item.id)))
               if (found) return found.name;
             }
-        }
+          }
+          
+          else if (fieldData.name === 'partyRelationshipTypeId') {
+            if (fieldData.apiRequest.data?.partyRelationshipTypeList?.length) {
+              const partyRelationshipTypeList = fieldData.apiRequest.data.partyRelationshipTypeList;
+              const found = partyRelationshipTypeList.find((item:any) => (option === parseInt(item.id)))
+              if (found) return found.name;
+            }
+          }
 
           
         }
@@ -82,6 +98,23 @@ export const CustomFormField = ({controllerProps, fieldData, errors}) => {
       )
     } 
 
+    if (fieldData.type === 'checkbox') {
+      return (
+        <FormGroup>
+  <FormControlLabel control={ <Checkbox
+                name={fieldData.name}
+                //type={fieldData.type}
+                value={controllerProps.value}
+                onChange={controllerProps.onChange}
+                onBlur={controllerProps.onBlur}
+                //disabled={user.currentRole !== 'ADMIN' && user.currentRole !== "MOD"}
+                //size={(item.name === 'name' || item.name === 'surname' ) ? 'medium' : 'small'}
+              />} label={fieldData.label} />
+</FormGroup>
+             
+      )
+    } 
+
         
         
 
@@ -99,7 +132,10 @@ export const CustomFormField = ({controllerProps, fieldData, errors}) => {
         }}
         value={controllerProps.value ? controllerProps.value : ""}
         onChange={(event: any, newValue: {id: string, name: string;}) => {
-          if (newValue) controllerProps.onChange(parseInt(newValue.id))}}
+          if (newValue) {
+            newValue?.id ? controllerProps.onChange(parseInt(newValue.id)) : controllerProps.onChange(undefined)
+          }
+        }}
         isOptionEqualToValue={(option:any, value) => {if (!value.length) return true; return parseInt(option.id) === value}}
         getOptionLabel={getOptionLabel}
         //getOptionLabel={(option:any) => {return option.name}}

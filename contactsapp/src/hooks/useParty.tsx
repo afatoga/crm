@@ -1,9 +1,10 @@
-import {  useMutation, useLazyQuery, useQuery  } from '@apollo/client'; /*makeVar,useLazyQuery*/
+import {  useMutation, useLazyQuery, makeVar  } from '@apollo/client'; /*makeVar,useLazyQuery*/
 
 import {
     GET_PARTYRELATIONSHIPS,
     //GET_ALL_PERSONS,
-    GET_PERSONS_BY_APPUSERGROUP,
+    GET_PEOPLE,
+    GET_PARTIES_BY_NAME,
     GET_PERSON_BY_ID,
     GET_PARTYRELATIONSHIP_TYPE_LIST
 } from '../api/party/queries';
@@ -19,17 +20,39 @@ import {
     DELETE_PARTYRELATIONSHIP
 } from '../api/party/mutations';
 
+export type PartyOption = {
+    id: string;
+    name: string;
+}
+
+interface IPartyByName extends PartyOption {
+    __typename: string;
+}
 
 // export const reportsQueueVar = makeVar<string[]>([]);
-// export const downloadActiveVar = makeVar<boolean>(false);
+export const filteredPartiesVar = makeVar<PartyOption[]>([]);
 
 export function useParty() {
 
 
     //const getAllPersons = useLazyQuery(GET_ALL_PERSONS);
 
-    const getPersonsByAppUserGroup = useLazyQuery(GET_PERSONS_BY_APPUSERGROUP);
-    // const getParties = useLazyQuery(GET_PARTIES);
+    const getPeople = useLazyQuery(GET_PEOPLE);
+
+    const getPartiesByName = useLazyQuery(GET_PARTIES_BY_NAME, {
+        onCompleted: (data) => {
+            let preparedOptions = [];
+
+            if(data.partiesByName.length > 0) {
+                preparedOptions = data.partiesByName.map((item: IPartyByName) => ({
+                    id: item.id,
+                    name: item.name
+                }))
+            }
+
+            filteredPartiesVar(preparedOptions);
+        }
+    });
 
     const getPersonById = useLazyQuery(GET_PERSON_BY_ID);
 
@@ -50,6 +73,11 @@ export function useParty() {
     })
     const createPartyRelationship = useMutation(CREATE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',
+        refetchQueries: [
+            {
+                query: GET_PARTYRELATIONSHIPS,
+            }
+        ]
     })
     const deletePartyRelationship = useMutation(DELETE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',
@@ -60,7 +88,8 @@ export function useParty() {
     return {
         operations: {
             // getAllPersons,
-            getPersonsByAppUserGroup,
+            getPeople,
+            getPartiesByName,
             getPersonById,
             getStatusList,
             getPartyRelationships,

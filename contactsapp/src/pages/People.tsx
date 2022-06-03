@@ -52,7 +52,7 @@ export function getGroupedPeople(data) {
 
 export const People = () => {
   const { operations } = useParty();
-  const [getPersonsByAppUserGroupHandler, getPersonsByAppUserGroupRequest] = operations.getPersonsByAppUserGroup;
+  const [getPeopleHandler, getPeopleRequest] = operations.getPeople;
 
   const location = useLocation();
   let navigate = useNavigate();
@@ -67,16 +67,16 @@ export const People = () => {
   // }, []) //setUsers
 
  React.useEffect(() => {
-  getPersonsByAppUserGroupHandler({variables:{appUserGroupId: user.currentAppUserGroupId}})
+  getPeopleHandler({variables:{appUserGroupId: user.currentAppUserGroupId}})
  }, [])
 
   // React.useEffect(() => {
-  //   if (getPersonsByAppUserGroupRequest.called) {
+  //   if (getPeopleRequest.called) {
 
-  //     getPersonsByAppUserGroupRequest.refetch();
+  //     getPeopleRequest.refetch();
 
   //   }
-  // }, [getPersonsByAppUserGroupRequest]);
+  // }, [getPeopleRequest]);
 
 
   // React.useEffect(() => {
@@ -99,7 +99,7 @@ export const People = () => {
   //   )
   // }
 
-  const peopleData = getPersonsByAppUserGroupRequest.data ? getGroupedPeople(getPersonsByAppUserGroupRequest.data.personsByAppUserGroup) : false;
+  const peopleData = getPeopleRequest.data ? getGroupedPeople(getPeopleRequest.data.personsByAppUserGroup) : false;
 
   return (
     <>

@@ -9,7 +9,7 @@ export const GET_ALL_PERSONS = gql`
     }
   }
 `;
-export const GET_PERSONS_BY_APPUSERGROUP = gql`
+export const GET_PEOPLE = gql`
   query ($appUserGroupId: Int!, $statusId: Int) {
     personsByAppUserGroup(
       data: { appUserGroupId: $appUserGroupId, statusId: $statusId }
@@ -17,6 +17,16 @@ export const GET_PERSONS_BY_APPUSERGROUP = gql`
       partyId
       name
       surname
+    }
+  }
+`;
+export const GET_PARTIES_BY_NAME = gql`
+  query ($searchedName: String!, $appUserGroupId: Int!, $statusId: Int) {
+    partiesByName(
+      data: { appUserGroupId: $appUserGroupId, statusId: $statusId, searchedName: $searchedName }
+    ) {
+      id
+      name
     }
   }
 `;
@@ -35,8 +45,8 @@ export const GET_PERSON_BY_ID = gql`
 `;
 
 export const GET_PARTYRELATIONSHIPS = gql`
-  query ($partyId: Int!) {
-    partyRelationships(partyId: $partyId) {
+  query ($partyId: Int!, $appUserGroupId: Int!) {
+    partyRelationships(partyId: $partyId, appUserGroupId: $appUserGroupId) {
       id
       firstPartyId
       secondPartyId
