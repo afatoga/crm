@@ -10,7 +10,7 @@ import { Alert, AlertTitle, Stack, TextField,
 
 import Autocomplete from '@mui/material/Autocomplete';
 
-import {useParams } from "react-router";
+import {useParams, useLocation } from "react-router";
 import {ModalContext} from '../../../contexts/ModalContext';
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -37,8 +37,11 @@ function debounce(func, wait) {
 
 
 export const NewRelationshipModal = () => {
-
-    const { id: recordIdString } = useParams();
+    
+    const location = useLocation();
+    let wholePath = location.pathname;
+    const recordIdString = wholePath.replace(/^(?:[^\/]*\/){2}\s*/, '');
+    //const { id: recordIdString } = useParams();
 
     const {user} = useAuth();
     let { handleModal } = React.useContext(ModalContext);  
@@ -64,6 +67,14 @@ export const NewRelationshipModal = () => {
           {
             //label: "Other party",
             name: "otherPartyId",
+            type: "hidden",
+            required: true,
+            // apiHandler: getPartiesByNameHandler,
+            // apiRequest: getPartiesByNameRequest
+          },
+          {
+            //label: "Other party",
+            name: "otherPartyTypeId",
             type: "hidden",
             required: true,
             // apiHandler: getPartiesByNameHandler,
@@ -104,7 +115,8 @@ export const NewRelationshipModal = () => {
       let dataToSubmit = {
         firstPartyId: parseInt(recordIdString),
         secondPartyId: values.otherPartyId,
-        typeId: values.partyRelationshipTypeId 
+        otherPartyTypeId: values.otherPartyTypeId,
+        partyRelationshipTypeId: values.partyRelationshipTypeId,
       }
 
       if (values?.isMainParty === true) {
@@ -179,8 +191,14 @@ export const NewRelationshipModal = () => {
         onChange={(_event, newValue) => {
           controllerProps.onChange(newValue);
           
-          if(newValue && newValue !== "string") setValue('otherPartyId', parseInt(newValue.id));
-          else if(!newValue) setValue('otherPartyId', null);
+          if(newValue && newValue !== "string") {
+            setValue('otherPartyId', parseInt(newValue.id));
+            setValue('otherPartyTypeId', parseInt(newValue.typeId));
+          }
+          else if(!newValue) { //reset
+            setValue('otherPartyId', null);
+            setValue('otherPartyTypeId', null);
+          }
         }}
         onInputChange={(_event, newInputValue) => {
           

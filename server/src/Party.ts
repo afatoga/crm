@@ -70,6 +70,9 @@ export class PartyWithName {
   @Field((type) => ID)
   id: number //renamed partyId
 
+  @Field((type) => Number)
+  typeId: number //partyTypeId to save into PartyRelationship table
+
   @Field((type) => String, { nullable: true })
   name: string | null
 }
@@ -102,13 +105,13 @@ export class PartyRelationship {
 @ObjectType()
 export class ExtendedPartyRelationship extends PartyRelationship {
 
-  @Field((type) => String) 
+  @Field((type) => String, { nullable: true }) 
   firstPartyPersonName: string | null 
-  @Field((type) => String) 
+  @Field((type) => String, { nullable: true }) 
   secondPartyPersonName: string | null 
-  @Field((type) => String) 
+  @Field((type) => String, { nullable: true }) 
   firstPartyOrganizationName: string | null 
-  @Field((type) => String) 
+  @Field((type) => String, { nullable: true }) 
   secondPartyOrganizationName: string | null 
 }
 

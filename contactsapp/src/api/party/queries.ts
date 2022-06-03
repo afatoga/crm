@@ -26,6 +26,7 @@ export const GET_PARTIES_BY_NAME = gql`
       data: { appUserGroupId: $appUserGroupId, statusId: $statusId, searchedName: $searchedName }
     ) {
       id
+      typeid
       name
     }
   }
@@ -51,6 +52,10 @@ export const GET_PARTYRELATIONSHIPS = gql`
       firstPartyId
       secondPartyId
       typeId
+      firstPartyPersonName,
+      firstPartyOrganizationName,
+      secondPartyPersonName,
+      secondPartyOrganizationName
     }
   }
 `;

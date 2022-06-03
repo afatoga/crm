@@ -391,8 +391,8 @@ export class PartyResolver {
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => APIResponse)
   async deletePartyRelationship(
-    @Arg("id") id: number,
-    @Arg("appUserGroupId") appUserGroupId: number,
+    @Arg("id", type => Int) id: number,
+    @Arg("appUserGroupId", type => Int) appUserGroupId: number,
     @Ctx() ctx: Context
   ): Promise<APIResponse> {
     // if (!data.operation) throw new Error("Invalid");
@@ -441,7 +441,7 @@ export class PartyResolver {
       FROM "Party"
       INNER JOIN "Person" ON "Party"."id" = "Person"."partyId"
       WHERE "Party"."appUserGroupId" = ${data.appUserGroupId}
-      AND "Party"."statusId" != 4
+      AND ("Party"."statusId" != 4 OR "Party"."statusId" IS NULL)
       ${statusCondition}
     `);
   }
@@ -542,13 +542,13 @@ export class PartyResolver {
     const searchText = `%${data.searchedName}%`;
 
     const queryResultArray = await ctx.prisma.$queryRaw<[PartyWithName]>(Prisma.sql`
-      SELECT "Organization"."partyId" as "id", "Organization"."name"
+      SELECT "Organization"."partyId" as "id", "Organization"."name", "Party"."typeId"
       FROM "Organization"
       INNER JOIN "Party" ON "Party"."id" = "Organization"."partyId"
       WHERE "Party"."appUserGroupId" = ${data.appUserGroupId} 
       AND LOWER("Organization"."name") LIKE ${searchText}
         UNION ALL
-      SELECT "Person"."partyId" as "id", CONCAT ("Person"."surname", ' ', "Person"."name") as "name"
+      SELECT "Person"."partyId" as "id", CONCAT ("Person"."surname", ' ', "Person"."name") as "name", "Party"."typeId"
       FROM "Person"
       INNER JOIN "Party" ON "Party"."id" = "Person"."partyId"
       WHERE "Party"."appUserGroupId" = ${data.appUserGroupId} 

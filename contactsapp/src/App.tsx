@@ -1,6 +1,6 @@
 import { useMemo, useState, ReactNode } from 'react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import { Layout } from './components/Layout';
 import { PageDefault } from './components/PageDefault';

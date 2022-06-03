@@ -73,11 +73,11 @@ export function useParty() {
     })
     const createPartyRelationship = useMutation(CREATE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',
-        refetchQueries: [
-            {
-                query: GET_PARTYRELATIONSHIPS,
-            }
-        ]
+        // refetchQueries: [
+        //     {
+        //         query: GET_PARTYRELATIONSHIPS,
+        //     }
+        // ]
     })
     const deletePartyRelationship = useMutation(DELETE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',
