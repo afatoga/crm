@@ -26,7 +26,7 @@ export const GET_PARTIES_BY_NAME = gql`
       data: { appUserGroupId: $appUserGroupId, statusId: $statusId, searchedName: $searchedName }
     ) {
       id
-      typeid
+      typeId
       name
     }
   }
@@ -48,14 +48,30 @@ export const GET_PERSON_BY_ID = gql`
 export const GET_PARTYRELATIONSHIPS = gql`
   query ($partyId: Int!, $appUserGroupId: Int!) {
     partyRelationships(partyId: $partyId, appUserGroupId: $appUserGroupId) {
-      id
-      firstPartyId
-      secondPartyId
-      typeId
-      firstPartyPersonName,
-      firstPartyOrganizationName,
-      secondPartyPersonName,
-      secondPartyOrganizationName
+      organizationToOrganization{
+        id
+        typeId #type of relationship
+        firstPartyId
+        firstPartyName
+        secondPartyId
+        secondPartyName
+      }
+      personToOrganization{
+        id
+        typeId
+        firstPartyId
+        firstPartyName
+        secondPartyId
+        secondPartyName
+      }
+      personToPerson{
+        id
+        typeId
+        firstPartyId
+        firstPartyName
+        secondPartyId
+        secondPartyName
+      }
     }
   }
 `;

@@ -95,9 +95,15 @@ export class PartyRelationship {
 
   @Field((type) => Number)
   firstPartyId: number
+  
+  @Field((type) => Number)
+  firstPartyTypeId: number
 
   @Field((type) => Number)
   secondPartyId: number
+
+  @Field((type) => Number)
+  secondPartyTypeId: number
 }
 
 // returned after query partyRelationships
@@ -111,10 +117,23 @@ export class ExtendedPartyRelationship extends PartyRelationship {
 }
 
 @ObjectType()
+export class SortedPartyRelationships {
+  @Field(type => [ExtendedPartyRelationship])
+  organizationToOrganization: ExtendedPartyRelationship[];
+  @Field(type => [ExtendedPartyRelationship])
+  personToOrganization: ExtendedPartyRelationship[];
+  @Field(type => [ExtendedPartyRelationship])
+  personToPerson: ExtendedPartyRelationship[];
+}
+
+@ObjectType()
 export class PartyRelationshipType {
   @Field((type) => ID)
   id: number
 
   @Field((type) => String)
   name: string
+
+  @Field((type) => String, { nullable: true })
+  category: string | null
 }

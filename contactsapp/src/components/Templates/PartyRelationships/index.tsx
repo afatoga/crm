@@ -3,32 +3,26 @@ import * as React from "react";
 import {
   Typography,
   Box,
-  Button,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
+  Button
 } from "@mui/material";
-
-import DeleteIcon from "@mui/icons-material/Delete";
 
 import { ModalContext } from "../../../contexts/ModalContext";
 import { useParty } from "../../../hooks/useParty";
 import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../../../hooks/useAuth";
+import { MultiLevelList } from "../../List";
 
-type PartyRelationship = {
-  id: string,
-  otherPartyId: number,
-  name: string,
-  typeName: string
-}
+// type PartyRelationship = {
+//   id: string,
+//   otherPartyId: number,
+//   name: string,
+//   typeName: string
+// }
 
 
 export const PartyRelationships = () => {
   const { id: recordIdString } = useParams();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const { user } = useAuth();
   // actions: create or delete (update is unnecessary)
   const { operations } = useParty();
@@ -106,58 +100,29 @@ export const PartyRelationships = () => {
           Relationships
         </Typography> */}
         {/* <Demo> */}
-        {getPartyRelationshipsRequest.data?.partyRelationships.length > 0 && (
-          <List dense={false}>
-            {getPartyRelationshipsRequest.data.partyRelationships.map((item:any) => {
-              const recordId = parseInt(recordIdString);
-              let itemToDisplay:PartyRelationship = {
-                id: item.id,
-                otherPartyId: 0,
-                name: '',
-                typeName: item.typeId ? item.typeId : '', // to retrieve!
-              };
-
-              if (item.firstPartyId === recordId) { //current record entity is priviledged.
-                itemToDisplay = {
-                  ...itemToDisplay,
-                  otherPartyId: item.secondPartyId,
-                  name: item.secondPartyPersonName
-                    ? item.secondPartyPersonName
-                    : item.secondPartyOrganizationName,
-                };
-              } else if (item.secondPartyId === recordId) {
-                itemToDisplay = {
-                  ...itemToDisplay,
-                  otherPartyId: item.firstPartyId,
-                  name: item.firstPartyPersonName
-                    ? item.firstPartyPersonName
-                    : item.firstPartyOrganizationName,
-                };
-              }
-
-              return (
-                <ListItem
-                  key={itemToDisplay.id}
-                  secondaryAction={
-                    <IconButton edge="end" aria-label="delete" onClick={() => deleteRelationship(item.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                >
-                  {/* <ListItemAvatar>
-                  <Avatar>
-                    <FolderIcon />
-                  </Avatar>
-                </ListItemAvatar> */}
-                  <ListItemText
-                    primary={itemToDisplay.name}
-                    onClick={() => navigate('')}
-                    //secondary={secondary ? 'Secondary text' : null}
-                  />
-                </ListItem>
-              );
-            })}
-          </List>
+        {getPartyRelationshipsRequest.data?.partyRelationships.organizationToOrganization.length > 0 && (
+          <>
+            <Typography variant="subtitle1">
+              Organizations
+            </Typography>
+            <MultiLevelList currentRecordId={recordIdString} data={getPartyRelationshipsRequest.data?.partyRelationships.organizationToOrganization} listName="organizationToOrganizationRelationships" deleteItem={deleteRelationship} />
+          </>
+        )}
+        {getPartyRelationshipsRequest.data?.partyRelationships.personToOrganization.length > 0 && (
+          <>
+            <Typography variant="subtitle1">
+              Organizations
+            </Typography>
+            <MultiLevelList currentRecordId={recordIdString} data={getPartyRelationshipsRequest.data?.partyRelationships.personToOrganization} listName="personToOrganizationRelationships" deleteItem={deleteRelationship} />
+          </>
+        )}
+        {getPartyRelationshipsRequest.data?.partyRelationships.personToPerson.length > 0 && (
+          <>
+            <Typography variant="subtitle1">
+              People
+            </Typography>
+            <MultiLevelList currentRecordId={recordIdString} data={getPartyRelationshipsRequest.data?.partyRelationships.personToPerson} listName="personToPersonRelationships" deleteItem={deleteRelationship} />
+          </>
         )}
         {/* </Demo> */}
       {/* </Grid> */}
