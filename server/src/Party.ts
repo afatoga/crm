@@ -103,13 +103,17 @@ export class PartyRelationship {
 export class ExtendedPartyRelationship extends PartyRelationship {
 
   @Field((type) => String) 
-  firstPartyPersonName: string | null 
+  firstPartyName: string | null 
   @Field((type) => String) 
-  secondPartyPersonName: string | null 
-  @Field((type) => String) 
-  firstPartyOrganizationName: string | null 
-  @Field((type) => String) 
-  secondPartyOrganizationName: string | null 
+  secondPartyName: string | null  
+}
+
+@ObjectType()
+export class AllPartyRelationships {
+
+  personToPerson: ExtendedPartyRelationship[],
+  personToOrganization: ExtendedPartyRelationship[],
+  organizationToOrganization: organizationToOrganization[],
 }
 
 @ObjectType()
