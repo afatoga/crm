@@ -42,6 +42,7 @@ export const CustomFormField = ({controllerProps, fieldData, errors}) => {
             const options = partyRelationshipTypeList.map((item:any) => ({name:item.name, id:item.id}));
             return [{id: undefined, name: " - "}, ...options];
           }
+          else return [{id: undefined, name: " - "}];
     
         }
 
