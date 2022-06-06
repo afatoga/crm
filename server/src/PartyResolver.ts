@@ -432,9 +432,22 @@ export class PartyResolver {
       deleteContacts,
       deletePartyRelationship,
     ]);
-    console.log(response); //debug
+
+    // [
+    //   { count: 0 }, //deleteContacts
+    //   {
+    //     id: 23,
+    //     firstPartyId: 15,
+    //     secondPartyId: 8,
+    //     firstPartyTypeId: 1,
+    //     secondPartyTypeId: 1,
+    //     typeId: 3
+    //   } // deletePartyRelationship
+    // ]
+
+
     return {
-      status: "SUCCESS",
+      status: (typeof response[1].id === 'number') ? "SUCCESS" : "ERROR",
     };
   }
 
