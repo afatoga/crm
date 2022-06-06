@@ -23,6 +23,7 @@ import {
 export type PartyOption = {
     id: string;
     name: string;
+    typeId: string;
 }
 
 interface IPartyByName extends PartyOption {
@@ -53,7 +54,8 @@ export function useParty() {
             if(data.partiesByName.length > 0) {
                 preparedOptions = data.partiesByName.map((item: IPartyByName) => ({
                     id: item.id,
-                    name: item.name
+                    name: item.name,
+                    typeId: item.typeId
                 }))
             }
 
@@ -84,12 +86,17 @@ export function useParty() {
         // }
     );
 
-    const retrievePartyRelationshipTypesFromCache = () => {
+    const retrievePartyRelationshipTypesFromCache = (optionCategories: string[] = []) => {
         const { partyRelationshipTypeList } = client.readQuery({
             query: GET_PARTYRELATIONSHIP_TYPE_LIST
         });
 
-        return partyRelationshipTypeList;
+        if (!optionCategories.length) return partyRelationshipTypeList;
+        else {
+            return partyRelationshipTypeList.filter((item:any) => {
+                if (optionCategories.includes(item.category)) return true;
+            })
+        }
     }
 
     const createPerson = useMutation(CREATE_PERSON, {

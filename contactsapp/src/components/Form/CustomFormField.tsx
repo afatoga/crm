@@ -12,6 +12,7 @@ import { useAuth } from "../../hooks/useAuth";
 export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
   const { user } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
+  const [searchText, setSearchText] = React.useState<string>('');
 
   const partyRelationshipTypeList = (fieldData.name === "partyRelationshipTypeId") ?
           fieldData.apiRequest() : [];
@@ -39,24 +40,23 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
     // }
 
     if (fieldData.name === "partyRelationshipTypeId") {
-      if (partyRelationshipTypeList.length) {
+      if (partyRelationshipTypeList.length > 0) {
 
         const options = partyRelationshipTypeList.map((item: any) => ({
-          id: parseInt(item.id),
-          name: item.name,
+          id: item.id,
+          name: item.name
         }));
 
-        console.log(options)
+        return [{ id: 0, name: " - " }, ...options];
 
-        return [{ id: undefined, name: " - " }, ...options];
-
-      } else return [{ id: undefined, name: " - " }];
+      } else return [{ id: 0, name: " - " }];
     }
   };
 
   const getOptionLabel = (option: number | { id: string; name: string }) => {
-    if (!option || !fieldData.apiRequest.data) return "";
+    if (!option || (!fieldData.apiRequest.data && fieldData.name !== "partyRelationshipTypeId")) return "";
 
+    // console.log(option);
     if (typeof option === "number") {
       if (fieldData.name === "statusId") {
         if (fieldData.apiRequest.data?.statusList?.length) {
@@ -67,7 +67,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
           if (found) return found.name;
         }
       } else if (fieldData.name === "partyRelationshipTypeId") {
-        
+
         if (partyRelationshipTypeList.length > 0) {
           
           const found = partyRelationshipTypeList.find(
@@ -78,6 +78,24 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
       }
     } else return option.name;
   };
+
+  const filterOptions = (optionList) => {
+    
+    return optionList.filter((option) => {
+     
+      if (typeof option.name === "string" && searchText.length > 0) {
+      const optionName = option.name.toLowerCase();
+      const inputValue = searchText.toLowerCase();
+
+      if (optionName.indexOf(inputValue) >= 0) return true;
+      }
+
+      else if (!searchText.length) return true;
+
+      return false;
+    })
+  }
+
 
   if (fieldData.type === "text") {
     return (
@@ -131,12 +149,18 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         }}
         value={controllerProps.value ? controllerProps.value : ""}
         onChange={(event: any, newValue: { id: string; name: string }) => {
+      
           if (newValue) {
-            console.log(newValue);
             newValue?.id
               ? controllerProps.onChange(parseInt(newValue.id))
               : controllerProps.onChange(undefined);
           }
+        }}
+        onInputChange={(_event, newInputValue) => {
+          if (typeof newInputValue === 'string' && !newInputValue.length) {
+            controllerProps.onChange(undefined)
+          }
+          setSearchText(newInputValue);
         }}
         isOptionEqualToValue={(option: any, value) => {
           if (!value.length) return true;
@@ -145,9 +169,10 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         getOptionLabel={getOptionLabel}
         //getOptionLabel={(option:any) => {return option.name}}
         options={getSelectOptions()}
-        loading={fieldData.apiRequest.loading}
+        loading={fieldData.apiRequest?.loading}
+        filterOptions={filterOptions}
         renderInput={(params) => {
-          console.log(params)
+
           return (
             <TextField
               {...params}
@@ -164,6 +189,13 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
                 ),
               }}
             />
+          );
+        }}
+        renderOption={(props, option) => {
+          return (
+            <li {...props} key={option.id}>
+              {option.name}
+            </li>
           );
         }}
       />

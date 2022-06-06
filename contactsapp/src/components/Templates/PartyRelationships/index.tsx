@@ -7,6 +7,8 @@ import { useParty } from "../../../hooks/useParty";
 import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../../../hooks/useAuth";
 import { MultiLevelList } from "../../List";
+import { useReactiveVar } from "@apollo/client";
+import { actionResultVar } from "../../../App";
 
 // type PartyRelationship = {
 //   id: string,
@@ -19,6 +21,8 @@ export const PartyRelationships = () => {
   const { id: recordIdString } = useParams();
   //const navigate = useNavigate();
   const { user } = useAuth();
+  const [selectedRelationshipId,setSelectedRelationshipId] = React.useState<string>('');
+
   // actions: create or delete (update is unnecessary)
   const { operations } = useParty();
   const [getPartyRelationshipsHandler, getPartyRelationshipsRequest] =
@@ -37,13 +41,11 @@ export const PartyRelationships = () => {
   };
 
   const deleteRelationship = (partyRelationshipId: string) => {
-    deletePartyRelationshipHandler({
-      variables: {
-        id: parseInt(partyRelationshipId),
-        appUserGroupId: user.currentAppUserGroupId,
-      },
-    });
+    handleModal("ConfirmDialog");
+    setSelectedRelationshipId(partyRelationshipId);
   };
+
+  const actionResult = useReactiveVar(actionResultVar);
 
   React.useEffect(() => {
     getPartyRelationshipsHandler({
@@ -64,11 +66,33 @@ export const PartyRelationships = () => {
   }, [isShown]);
 
   React.useEffect(() => {
+    if (actionResult.code === "CONFIRM" && selectedRelationshipId.length) {
+
+      deletePartyRelationshipHandler({
+        variables: {
+          id: parseInt(selectedRelationshipId),
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
+
+      actionResultVar({});
+  
+    }
+
+    else if (actionResult.code === "CANCEL" && selectedRelationshipId.length) {
+
+      setSelectedRelationshipId(''); //reset
+  
+    }
+  }, [actionResult]);
+
+  React.useEffect(() => {
     if (deletePartyRelationshipRequest.data) {
       if (
         deletePartyRelationshipRequest.data.deletePartyRelationship.status ===
         "SUCCESS"
       ) {
+        setSelectedRelationshipId(''); //reset
         getPartyRelationshipsRequest.refetch();
       } else {
         console.warn("error: removal request failed");

@@ -4,13 +4,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Typography from '@mui/material/Typography';
 import { Alert, AlertTitle, Stack, TextField,
-  
-  CircularProgress,   
+  //CircularProgress,   
   FormGroup} from '@mui/material';
 
 import Autocomplete from '@mui/material/Autocomplete';
 
-import {useParams, useLocation } from "react-router";
+import {useLocation } from "react-router"; //useParams
 import {ModalContext} from '../../../contexts/ModalContext';
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -20,6 +19,10 @@ import {CustomFormField} from '../../Form/CustomFormField';
 import {useParty, filteredPartiesVar, PartyOption} from '../../../hooks/useParty';
 import { useAuth } from '../../../hooks/useAuth';
 import { useReactiveVar } from '@apollo/client';
+import {ORGANIZATION_PARTY_TYPE_ID, PERSON_PARTY_TYPE_ID,
+  PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_ORGANIZATION, 
+  PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON, 
+  PARTY_RELATIONSHIP_CATEGORY_PERSON_PERSON} from '../../../utils/constants';
 
 // const _filterOptions = createFilterOptions();
 
@@ -40,6 +43,7 @@ export const NewRelationshipModal = () => {
     
     const location = useLocation();
     let wholePath = location.pathname;
+    const recordsPath = wholePath.split('/')[1]; // 'people' | 'organizations'
     const recordIdString = wholePath.replace(/^(?:[^\/]*\/){2}\s*/, '');
     //const { id: recordIdString } = useParams();
 
@@ -55,6 +59,34 @@ export const NewRelationshipModal = () => {
     //const inputRef = React.useRef(null);
 
     const filteredParties = useReactiveVar(filteredPartiesVar);
+
+    const getPartyRelationshipTypesByCategory = () => {
+      
+      let config = [];
+
+      if (recordsPath === 'people' && getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID) {
+        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON] 
+      }
+      else if (recordsPath === 'people' && getValues('otherPartyTypeId') === PERSON_PARTY_TYPE_ID) {
+        config =[PARTY_RELATIONSHIP_CATEGORY_PERSON_PERSON] 
+      }
+
+      else if (recordsPath === 'organizations' && getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID) {
+        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_ORGANIZATION] 
+      }
+      else if (recordsPath === 'organizations' && getValues('otherPartyTypeId') === PERSON_PARTY_TYPE_ID) {
+        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON] 
+      }
+
+      else if (recordsPath === 'people') {
+        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON, PARTY_RELATIONSHIP_CATEGORY_PERSON_PERSON] 
+      }
+      else if (recordsPath === 'organizations' ) {
+        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_ORGANIZATION, PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON]
+      }
+
+      return operations.retrievePartyRelationshipTypesFromCache(config);
+    }
 
     const fields = [
           {
@@ -89,7 +121,8 @@ export const NewRelationshipModal = () => {
             label: "Relation type",
             name: "partyRelationshipTypeId",
             type: "autocomplete",
-            apiRequest: operations.retrievePartyRelationshipTypesFromCache
+            //optionCategories: , 
+            apiRequest: () => getPartyRelationshipTypesByCategory()
           }
     ]
 
@@ -103,6 +136,7 @@ export const NewRelationshipModal = () => {
         control,
         handleSubmit,
         formState: { isSubmitting, errors },
+        getValues,
         setValue
       } = useForm({
         resolver: yupResolver(schema),
@@ -111,6 +145,8 @@ export const NewRelationshipModal = () => {
     
     const onSubmit = React.useCallback((values) => {
 
+      const isMainParty = (recordsPath === 'people' && values.otherPartyTypeId === ORGANIZATION_PARTY_TYPE_ID) ? true : values?.isMainParty;
+
       let dataToSubmit = {
         firstPartyId: parseInt(recordIdString),
         secondPartyId: values.otherPartyId,
@@ -118,13 +154,10 @@ export const NewRelationshipModal = () => {
         typeId: values.partyRelationshipTypeId,
       }
 
-      if (values?.isMainParty === true) {
+      if (isMainParty) {
         dataToSubmit.firstPartyId = values.otherPartyId;
         dataToSubmit.secondPartyId = parseInt(recordIdString);
       }
-
-     
-
           createPartyRelationshipHandler({
             variables: dataToSubmit,
         });
@@ -132,7 +165,6 @@ export const NewRelationshipModal = () => {
     }, []);
 
     React.useEffect(() => {
-      // getPartyRelationshipTypeListHandler();
       filteredPartiesVar([]) //reset
     }, [])
 
@@ -268,7 +300,11 @@ export const NewRelationshipModal = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={2}>
-              {fields.map((item, index) => (
+              {fields.map((item, index) => {
+
+                if (item.name === 'isMainParty' && getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID && recordsPath === 'people') return null;
+
+                return (
                 <Controller
                   key={index}
                   render={({ field }) => {
@@ -284,7 +320,7 @@ export const NewRelationshipModal = () => {
                   name={item.name}
                   //defaultValue={getRecordData(item.name)}
                 />
-              ))}
+              )})}
 
               <Button
                 variant={"contained"}

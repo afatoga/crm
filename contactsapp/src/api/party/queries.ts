@@ -80,6 +80,7 @@ export const GET_PARTYRELATIONSHIP_TYPE_LIST = gql`
     partyRelationshipTypeList {
       id
       name
+      category
     }
   }
 `;
