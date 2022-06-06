@@ -1,10 +1,6 @@
 import * as React from "react";
 
-import {
-  Typography,
-  Box,
-  Button
-} from "@mui/material";
+import { Typography, Box, Button } from "@mui/material";
 
 import { ModalContext } from "../../../contexts/ModalContext";
 import { useParty } from "../../../hooks/useParty";
@@ -19,7 +15,6 @@ import { MultiLevelList } from "../../List";
 //   typeName: string
 // }
 
-
 export const PartyRelationships = () => {
   const { id: recordIdString } = useParams();
   //const navigate = useNavigate();
@@ -30,6 +25,11 @@ export const PartyRelationships = () => {
     operations.getPartyRelationships;
   const [deletePartyRelationshipHandler, deletePartyRelationshipRequest] =
     operations.deletePartyRelationship;
+  const [
+    getPartyRelationshipTypeListHandler,
+    getPartyRelationshipTypeListRequest,
+  ] = operations.getPartyRelationshipTypeList;
+
   let { handleModal, isShown } = React.useContext(ModalContext);
 
   const toggleNewRelationshipModal = () => {
@@ -40,10 +40,10 @@ export const PartyRelationships = () => {
     deletePartyRelationshipHandler({
       variables: {
         id: parseInt(partyRelationshipId),
-        appUserGroupId: user.currentAppUserGroupId
-      }
-    })
-  }
+        appUserGroupId: user.currentAppUserGroupId,
+      },
+    });
+  };
 
   React.useEffect(() => {
     getPartyRelationshipsHandler({
@@ -52,27 +52,31 @@ export const PartyRelationships = () => {
         appUserGroupId: user.currentAppUserGroupId,
       },
     });
+
+    getPartyRelationshipTypeListHandler();
   }, []);
 
   React.useEffect(() => {
-    if (getPartyRelationshipsRequest.called && !isShown) { //refetches on every modal closing
+    if (getPartyRelationshipsRequest.called && !isShown) {
+      //refetches on every modal closing
       getPartyRelationshipsRequest.refetch();
     }
   }, [isShown]);
 
   React.useEffect(() => {
     if (deletePartyRelationshipRequest.data) {
-      if (deletePartyRelationshipRequest.data.deletePartyRelationship.status === 'SUCCESS') {
+      if (
+        deletePartyRelationshipRequest.data.deletePartyRelationship.status ===
+        "SUCCESS"
+      ) {
         getPartyRelationshipsRequest.refetch();
-      }
-      else {
-        console.warn('error: removal request failed')
+      } else {
+        console.warn("error: removal request failed");
       }
 
       deletePartyRelationshipRequest.reset();
     }
   }, [deletePartyRelationshipRequest]);
-
 
   return (
     <Box
@@ -90,41 +94,60 @@ export const PartyRelationships = () => {
         },
       }}
     >
-
-
       {/* <Grid item xs={12} md={6}> */}
-      <Typography variant="h6">
-            Relationships
-            </Typography>
-        {/* <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
+      <Typography variant="h6">Relationships</Typography>
+      {/* <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
           Relationships
         </Typography> */}
-        {/* <Demo> */}
-        {getPartyRelationshipsRequest.data?.partyRelationships.organizationToOrganization.length > 0 && (
-          <>
-            <Typography variant="subtitle1">
-              Organizations
-            </Typography>
-            <MultiLevelList currentRecordId={recordIdString} data={getPartyRelationshipsRequest.data?.partyRelationships.organizationToOrganization} listName="organizationToOrganizationRelationships" deleteItem={deleteRelationship} />
-          </>
-        )}
-        {getPartyRelationshipsRequest.data?.partyRelationships.personToOrganization.length > 0 && (
-          <>
-            <Typography variant="subtitle1">
-              Organizations
-            </Typography>
-            <MultiLevelList currentRecordId={recordIdString} data={getPartyRelationshipsRequest.data?.partyRelationships.personToOrganization} listName="personToOrganizationRelationships" deleteItem={deleteRelationship} />
-          </>
-        )}
-        {getPartyRelationshipsRequest.data?.partyRelationships.personToPerson.length > 0 && (
-          <>
-            <Typography variant="subtitle1">
-              People
-            </Typography>
-            <MultiLevelList currentRecordId={recordIdString} data={getPartyRelationshipsRequest.data?.partyRelationships.personToPerson} listName="personToPersonRelationships" deleteItem={deleteRelationship} />
-          </>
-        )}
-        {/* </Demo> */}
+      {/* <Demo> */}
+      {getPartyRelationshipTypeListRequest.data && <>
+      {getPartyRelationshipsRequest.data?.partyRelationships
+        .organizationToOrganization.length > 0 && (
+        <>
+          <Typography variant="subtitle1">Organizations</Typography>
+          <MultiLevelList
+            currentRecordId={recordIdString}
+            data={
+              getPartyRelationshipsRequest.data?.partyRelationships
+                .organizationToOrganization
+            }
+            listName="organizationToOrganizationRelationships"
+            deleteItem={deleteRelationship}
+          />
+        </>
+      )}
+      {getPartyRelationshipsRequest.data?.partyRelationships
+        .personToOrganization.length > 0 && (
+        <>
+          <Typography variant="subtitle1">Organizations</Typography>
+          <MultiLevelList
+            currentRecordId={recordIdString}
+            data={
+              getPartyRelationshipsRequest.data?.partyRelationships
+                .personToOrganization
+            }
+            listName="personToOrganizationRelationships"
+            deleteItem={deleteRelationship}
+          />
+        </>
+      )}
+      {getPartyRelationshipsRequest.data?.partyRelationships.personToPerson
+        .length > 0 && (
+        <>
+          <Typography variant="subtitle1">People</Typography>
+          <MultiLevelList
+            currentRecordId={recordIdString}
+            data={
+              getPartyRelationshipsRequest.data?.partyRelationships
+                .personToPerson
+            }
+            listName="personToPersonRelationships"
+            deleteItem={deleteRelationship}
+          />
+        </>
+      )}
+      </>}
+      {/* </Demo> */}
       {/* </Grid> */}
 
       <Button

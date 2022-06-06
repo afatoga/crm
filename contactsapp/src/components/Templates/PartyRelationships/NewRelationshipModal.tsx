@@ -48,7 +48,6 @@ export const NewRelationshipModal = () => {
     const {operations} = useParty();
     const [createPartyRelationshipHandler, createPartyRelationshipRequest] = operations.createPartyRelationship;
     const [getPartiesByNameHandler, getPartiesByNameRequest] = operations.getPartiesByName;
-    const [getPartyRelationshipTypeListHandler, getPartyRelationshipTypeListRequest] = operations.getPartyRelationshipTypeList;
 
     const [open, setOpen] = React.useState<boolean>(false);
     const [searchedName, setSearchedName] = React.useState<string>('');
@@ -90,7 +89,7 @@ export const NewRelationshipModal = () => {
             label: "Relation type",
             name: "partyRelationshipTypeId",
             type: "autocomplete",
-            apiRequest: getPartyRelationshipTypeListRequest
+            apiRequest: operations.retrievePartyRelationshipTypesFromCache
           }
     ]
 
@@ -116,7 +115,7 @@ export const NewRelationshipModal = () => {
         firstPartyId: parseInt(recordIdString),
         secondPartyId: values.otherPartyId,
         otherPartyTypeId: values.otherPartyTypeId,
-        partyRelationshipTypeId: values.partyRelationshipTypeId,
+        typeId: values.partyRelationshipTypeId,
       }
 
       if (values?.isMainParty === true) {
@@ -133,7 +132,7 @@ export const NewRelationshipModal = () => {
     }, []);
 
     React.useEffect(() => {
-      getPartyRelationshipTypeListHandler();
+      // getPartyRelationshipTypeListHandler();
       filteredPartiesVar([]) //reset
     }, [])
 
@@ -267,7 +266,7 @@ export const NewRelationshipModal = () => {
    <>
         <DialogContent dividers>
 
-        {getPartyRelationshipTypeListRequest.data && <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={2}>
               {fields.map((item, index) => (
                 <Controller
@@ -302,7 +301,7 @@ export const NewRelationshipModal = () => {
                 </Alert>
               )}
             </Stack>
-          </form>}
+          </form>
         
           {/* <Typography gutterBottom>
             Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus

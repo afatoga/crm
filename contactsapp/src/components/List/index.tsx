@@ -13,6 +13,7 @@ import {
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
+import {useParty} from '../../hooks/useParty';
 
 interface IMultiLevelList {
     currentRecordId?: string,
@@ -26,15 +27,22 @@ interface IMultiLevelList {
 export const MultiLevelList = ({currentRecordId = undefined, data, deleteItem, listName}: IMultiLevelList) => {
     const navigate = useNavigate();
 
-    const navigateToItem = (id: string) => {
-        if (listName === 'personToPersonRelationships') {
-            return navigate('/people/'+id);
-        }
+    const {operations} = useParty();
+
+    const navigateToItem = (item: any) => {
+        if (listName === 'organizationToOrganizationRelationships' 
+         || listName === 'personToOrganizationRelationships'
+         || listName === 'personToPersonRelationships' ) {
+            const otherPartyId = parseInt(currentRecordId) === item.firstPartyId ? item.secondPartyId : item.firstPartyId;
+            return navigate('/people/'+otherPartyId);
+         }
+            
+        
         return false;
     }
 
     const getLabel = (item: any) => {
-        console.log(item, currentRecordId)
+        // console.log(item, currentRecordId)
 
         if (listName === 'organizationToOrganizationRelationships' 
          || listName === 'personToOrganizationRelationships'
@@ -43,6 +51,20 @@ export const MultiLevelList = ({currentRecordId = undefined, data, deleteItem, l
          }
 
         return item.name;
+    }
+    const getSubtitle = (item: any) => {
+        // console.log(item, currentRecordId)
+
+        if (listName === 'organizationToOrganizationRelationships' 
+         || listName === 'personToOrganizationRelationships'
+         || listName === 'personToPersonRelationships' ) {
+             const relationshipTypeList = operations.retrievePartyRelationshipTypesFromCache();
+             const found = relationshipTypeList.find((relationshipType:any) => parseInt(relationshipType.id) === item.typeId);
+             return found?.name;
+
+        }
+
+        return undefined;
     }
 
     return (
@@ -91,7 +113,8 @@ export const MultiLevelList = ({currentRecordId = undefined, data, deleteItem, l
             </ListItemAvatar> */}
               <ListItemText
                 primary={getLabel(item)}
-                onClick={() => navigateToItem(item.id)}
+                secondary={getSubtitle(item)}
+                onClick={() => navigateToItem(item)}
                 //secondary={secondary ? 'Secondary text' : null}
               />
             </ListItem>
