@@ -2,6 +2,7 @@ import React, { FC, useEffect } from "react";
 // import FocusLock from "react-focus-lock";
 import ReactDOM from "react-dom";
 import { ModalContext } from "../../contexts/ModalContext";
+import {ConfirmDialog} from './ConfirmDialog';
 import { NewRelationshipModal } from "../Templates/PartyRelationships/NewRelationshipModal";
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
@@ -66,6 +67,7 @@ export const Modal: FC = () => {
 
   const getModalContent = (): JSX.Element => {
     if (template === "NewRelationship") return <NewRelationshipModal />;
+    if (template === "ConfirmDialog") return <ConfirmDialog />;
     return null;
   };
 

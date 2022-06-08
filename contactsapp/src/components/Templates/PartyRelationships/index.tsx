@@ -1,41 +1,39 @@
 import * as React from "react";
 
-import {
-  Typography,
-  Box,
-  Button,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-} from "@mui/material";
-
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Typography, Box, Button } from "@mui/material";
 
 import { ModalContext } from "../../../contexts/ModalContext";
 import { useParty } from "../../../hooks/useParty";
 import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../../../hooks/useAuth";
+import { MultiLevelList } from "../../List";
+import { useReactiveVar } from "@apollo/client";
+import { actionResultVar } from "../../../App";
 
-type PartyRelationship = {
-  id: string,
-  otherPartyId: number,
-  name: string,
-  typeName: string
-}
-
+// type PartyRelationship = {
+//   id: string,
+//   otherPartyId: number,
+//   name: string,
+//   typeName: string
+// }
 
 export const PartyRelationships = () => {
   const { id: recordIdString } = useParams();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const { user } = useAuth();
+  const [selectedRelationshipId,setSelectedRelationshipId] = React.useState<string>('');
+
   // actions: create or delete (update is unnecessary)
   const { operations } = useParty();
   const [getPartyRelationshipsHandler, getPartyRelationshipsRequest] =
     operations.getPartyRelationships;
   const [deletePartyRelationshipHandler, deletePartyRelationshipRequest] =
     operations.deletePartyRelationship;
+  const [
+    getPartyRelationshipTypeListHandler,
+    getPartyRelationshipTypeListRequest,
+  ] = operations.getPartyRelationshipTypeList;
+
   let { handleModal, isShown } = React.useContext(ModalContext);
 
   const toggleNewRelationshipModal = () => {
@@ -43,13 +41,11 @@ export const PartyRelationships = () => {
   };
 
   const deleteRelationship = (partyRelationshipId: string) => {
-    deletePartyRelationshipHandler({
-      variables: {
-        id: parseInt(partyRelationshipId),
-        appUserGroupId: user.currentAppUserGroupId
-      }
-    })
-  }
+    handleModal("ConfirmDialog");
+    setSelectedRelationshipId(partyRelationshipId);
+  };
+
+  const actionResult = useReactiveVar(actionResultVar);
 
   React.useEffect(() => {
     getPartyRelationshipsHandler({
@@ -58,27 +54,53 @@ export const PartyRelationships = () => {
         appUserGroupId: user.currentAppUserGroupId,
       },
     });
+
+    getPartyRelationshipTypeListHandler();
   }, []);
 
   React.useEffect(() => {
-    if (getPartyRelationshipsRequest.called && !isShown) { //refetches on every modal closing
+    if (getPartyRelationshipsRequest.called && !isShown) {
+      //refetches on every modal closing
       getPartyRelationshipsRequest.refetch();
     }
   }, [isShown]);
 
   React.useEffect(() => {
+    if (actionResult.code === "CONFIRM" && selectedRelationshipId.length) {
+
+      deletePartyRelationshipHandler({
+        variables: {
+          id: parseInt(selectedRelationshipId),
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
+
+      actionResultVar({});
+  
+    }
+
+    else if (actionResult.code === "CANCEL" && selectedRelationshipId.length) {
+
+      setSelectedRelationshipId(''); //reset
+  
+    }
+  }, [actionResult]);
+
+  React.useEffect(() => {
     if (deletePartyRelationshipRequest.data) {
-      if (deletePartyRelationshipRequest.data.deletePartyRelationship.status === 'SUCCESS') {
+      if (
+        deletePartyRelationshipRequest.data.deletePartyRelationship.status ===
+        "SUCCESS"
+      ) {
+        setSelectedRelationshipId(''); //reset
         getPartyRelationshipsRequest.refetch();
-      }
-      else {
-        console.warn('error: removal request failed')
+      } else {
+        console.warn("error: removal request failed");
       }
 
       deletePartyRelationshipRequest.reset();
     }
   }, [deletePartyRelationshipRequest]);
-
 
   return (
     <Box
@@ -96,70 +118,60 @@ export const PartyRelationships = () => {
         },
       }}
     >
-
-
       {/* <Grid item xs={12} md={6}> */}
-      <Typography variant="h6">
-            Relationships
-            </Typography>
-        {/* <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
+      <Typography variant="h6">Relationships</Typography>
+      {/* <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
           Relationships
         </Typography> */}
-        {/* <Demo> */}
-        {getPartyRelationshipsRequest.data?.partyRelationships.length > 0 && (
-          <List dense={false}>
-            {getPartyRelationshipsRequest.data.partyRelationships.map((item:any) => {
-              const recordId = parseInt(recordIdString);
-              let itemToDisplay:PartyRelationship = {
-                id: item.id,
-                otherPartyId: 0,
-                name: '',
-                typeName: item.typeId ? item.typeId : '', // to retrieve!
-              };
-
-              if (item.firstPartyId === recordId) { //current record entity is priviledged.
-                itemToDisplay = {
-                  ...itemToDisplay,
-                  otherPartyId: item.secondPartyId,
-                  name: item.secondPartyPersonName
-                    ? item.secondPartyPersonName
-                    : item.secondPartyOrganizationName,
-                };
-              } else if (item.secondPartyId === recordId) {
-                itemToDisplay = {
-                  ...itemToDisplay,
-                  otherPartyId: item.firstPartyId,
-                  name: item.firstPartyPersonName
-                    ? item.firstPartyPersonName
-                    : item.firstPartyOrganizationName,
-                };
-              }
-
-              return (
-                <ListItem
-                  key={itemToDisplay.id}
-                  secondaryAction={
-                    <IconButton edge="end" aria-label="delete" onClick={() => deleteRelationship(item.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                >
-                  {/* <ListItemAvatar>
-                  <Avatar>
-                    <FolderIcon />
-                  </Avatar>
-                </ListItemAvatar> */}
-                  <ListItemText
-                    primary={itemToDisplay.name}
-                    onClick={() => navigate('')}
-                    //secondary={secondary ? 'Secondary text' : null}
-                  />
-                </ListItem>
-              );
-            })}
-          </List>
-        )}
-        {/* </Demo> */}
+      {/* <Demo> */}
+      {getPartyRelationshipTypeListRequest.data && <>
+      {getPartyRelationshipsRequest.data?.partyRelationships
+        .organizationToOrganization.length > 0 && (
+        <>
+          <Typography variant="subtitle1">Organizations</Typography>
+          <MultiLevelList
+            currentRecordId={recordIdString}
+            data={
+              getPartyRelationshipsRequest.data?.partyRelationships
+                .organizationToOrganization
+            }
+            listName="organizationToOrganizationRelationships"
+            deleteItem={deleteRelationship}
+          />
+        </>
+      )}
+      {getPartyRelationshipsRequest.data?.partyRelationships
+        .personToOrganization.length > 0 && (
+        <>
+          <Typography variant="subtitle1">Organizations</Typography>
+          <MultiLevelList
+            currentRecordId={recordIdString}
+            data={
+              getPartyRelationshipsRequest.data?.partyRelationships
+                .personToOrganization
+            }
+            listName="personToOrganizationRelationships"
+            deleteItem={deleteRelationship}
+          />
+        </>
+      )}
+      {getPartyRelationshipsRequest.data?.partyRelationships.personToPerson
+        .length > 0 && (
+        <>
+          <Typography variant="subtitle1">People</Typography>
+          <MultiLevelList
+            currentRecordId={recordIdString}
+            data={
+              getPartyRelationshipsRequest.data?.partyRelationships
+                .personToPerson
+            }
+            listName="personToPersonRelationships"
+            deleteItem={deleteRelationship}
+          />
+        </>
+      )}
+      </>}
+      {/* </Demo> */}
       {/* </Grid> */}
 
       <Button

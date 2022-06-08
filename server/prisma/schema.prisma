@@ -95,15 +95,20 @@ model PartyRelationship {
   contacts Contact[] @relation("ContactBelongsToRelationship")
   firstParty Party @relation(name:"FirstPartyOfRelationship", fields:[firstPartyId], references: [id])
   secondParty Party @relation(name:"SecondPartyOfRelationship", fields:[secondPartyId], references: [id])
-  firstPartyId Int
+  firstPartyId Int 
   secondPartyId Int
+  firstPartyType PartyType @relation(name:"TypeOfFirstParty", fields: [firstPartyTypeId], references: [id])
+  firstPartyTypeId Int
+  secondPartyType PartyType @relation(name:"TypeOfSecondParty", fields: [secondPartyTypeId], references: [id])
+  secondPartyTypeId Int
   type PartyRelationshipType? @relation(fields: [typeId], references: [id])
-  typeId Int? //could be undefined
+  typeId Int? 
 }
 
 model PartyRelationshipType {
   id Int @id @default(autoincrement())
   name String @db.VarChar(30)
+  category String? @db.VarChar(16) // 'person-person', 'person-organization', 'organization-organization'
   partyRelationships PartyRelationship[]
 }
 
@@ -111,6 +116,8 @@ model PartyType {
   id Int @id @default(autoincrement())
   name String @db.VarChar(30)
   parties Party[]
+  firstPartyRelationships PartyRelationship[] @relation("TypeOfFirstParty") //firstPartyTypeId
+  secondPartyRelationships PartyRelationship[] @relation("TypeOfSecondParty") //secondPartyTypeId
 }
 
 model OrganizationType {

@@ -1,4 +1,4 @@
-import {  useMutation, useLazyQuery, makeVar  } from '@apollo/client'; /*makeVar,useLazyQuery*/
+import {  useMutation, useLazyQuery, makeVar, useApolloClient  } from '@apollo/client'; /*makeVar,useLazyQuery*/
 
 import {
     GET_PARTYRELATIONSHIPS,
@@ -23,18 +23,26 @@ import {
 export type PartyOption = {
     id: string;
     name: string;
+    typeId: string;
 }
 
 interface IPartyByName extends PartyOption {
     __typename: string;
 }
 
+type PartyRelationshipType = {
+    id: string;
+    name: string;
+    category: string;
+}
+
 // export const reportsQueueVar = makeVar<string[]>([]);
 export const filteredPartiesVar = makeVar<PartyOption[]>([]);
+export const partyRelationshipTypesVar = makeVar<PartyRelationshipType[]>([]);
 
 export function useParty() {
 
-
+    const client = useApolloClient();
     //const getAllPersons = useLazyQuery(GET_ALL_PERSONS);
 
     const getPeople = useLazyQuery(GET_PEOPLE);
@@ -46,7 +54,8 @@ export function useParty() {
             if(data.partiesByName.length > 0) {
                 preparedOptions = data.partiesByName.map((item: IPartyByName) => ({
                     id: item.id,
-                    name: item.name
+                    name: item.name,
+                    typeId: item.typeId
                 }))
             }
 
@@ -60,7 +69,35 @@ export function useParty() {
 
     const getPartyRelationships = useLazyQuery(GET_PARTYRELATIONSHIPS);
 
-    const getPartyRelationshipTypeList = useLazyQuery(GET_PARTYRELATIONSHIP_TYPE_LIST);
+    const getPartyRelationshipTypeList = useLazyQuery(GET_PARTYRELATIONSHIP_TYPE_LIST, 
+        // {
+        //     onCompleted: (data) => {
+
+        //         if(data.partyRelationshipTypeList.length > 0) {
+        //             const dataToSave = data.partyRelationshipTypeList.map((item: any) => ({
+        //                 id: item.id,
+        //                 name: item.name,
+        //                 category: item.category
+        //             }))
+                
+        //             partyRelationshipTypesVar(dataToSave);
+        //         }            
+        //     }
+        // }
+    );
+
+    const retrievePartyRelationshipTypesFromCache = (optionCategories: string[] = []) => {
+        const { partyRelationshipTypeList } = client.readQuery({
+            query: GET_PARTYRELATIONSHIP_TYPE_LIST
+        });
+
+        if (!optionCategories.length) return partyRelationshipTypeList;
+        else {
+            return partyRelationshipTypeList.filter((item:any) => {
+                if (optionCategories.includes(item.category)) return true;
+            })
+        }
+    }
 
     const createPerson = useMutation(CREATE_PERSON, {
         fetchPolicy: 'network-only',
@@ -94,6 +131,7 @@ export function useParty() {
             getStatusList,
             getPartyRelationships,
             getPartyRelationshipTypeList,
+            retrievePartyRelationshipTypesFromCache,
             createPerson,
             updatePerson,
             deletePerson,

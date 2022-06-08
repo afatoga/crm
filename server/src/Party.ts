@@ -95,24 +95,35 @@ export class PartyRelationship {
 
   @Field((type) => Number)
   firstPartyId: number
+  
+  @Field((type) => Number)
+  firstPartyTypeId: number
 
   @Field((type) => Number)
   secondPartyId: number
+
+  @Field((type) => Number)
+  secondPartyTypeId: number
 }
 
 // returned after query partyRelationships
 // Organization.name or (Person.surname + Person.name)
 @ObjectType()
 export class ExtendedPartyRelationship extends PartyRelationship {
+  @Field((type) => String) 
+  firstPartyName: string
+  @Field((type) => String) 
+  secondPartyName: string 
+}
 
-  @Field((type) => String, { nullable: true }) 
-  firstPartyPersonName: string | null 
-  @Field((type) => String, { nullable: true }) 
-  secondPartyPersonName: string | null 
-  @Field((type) => String, { nullable: true }) 
-  firstPartyOrganizationName: string | null 
-  @Field((type) => String, { nullable: true }) 
-  secondPartyOrganizationName: string | null 
+@ObjectType()
+export class SortedPartyRelationships {
+  @Field(type => [ExtendedPartyRelationship])
+  organizationToOrganization: ExtendedPartyRelationship[];
+  @Field(type => [ExtendedPartyRelationship])
+  personToOrganization: ExtendedPartyRelationship[];
+  @Field(type => [ExtendedPartyRelationship])
+  personToPerson: ExtendedPartyRelationship[];
 }
 
 @ObjectType()
@@ -122,4 +133,7 @@ export class PartyRelationshipType {
 
   @Field((type) => String)
   name: string
+
+  @Field((type) => String, { nullable: true })
+  category: string | null
 }

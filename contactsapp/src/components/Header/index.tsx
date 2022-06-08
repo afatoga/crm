@@ -38,9 +38,9 @@ export const Header = ({ toggleNavigation }: HeaderProps) => {
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex', alignItems: 'center' } }}>
             <ThemeSwitcher />
-            <Messages total={15} />
+            {/* <Messages total={15} />
             <Notifications total={20} />
-            <UserAccount onClick={handleProfileMenuOpen} />
+            <UserAccount onClick={handleProfileMenuOpen} /> */}
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <More onClick={handleMobileMenuOpen} />

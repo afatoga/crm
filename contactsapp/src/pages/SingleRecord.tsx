@@ -38,7 +38,7 @@ export const SingleRecord = () => {
 
     let recordData = {};
     if (recordType === 'person') {
-      recordData = getPersonByIdRequest.data.personById;
+      recordData = getPersonByIdRequest.data?.personById;
     }
     if (!attrName) return recordData;
 
@@ -317,7 +317,7 @@ export const SingleRecord = () => {
                   )}
                   control={control}
                   name={item.name}
-                  defaultValue={getRecordData(item.name)}
+                  defaultValue={() => getRecordData(item.name)}
                 />
               ))}
 
