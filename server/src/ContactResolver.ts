@@ -11,6 +11,7 @@ import {
 } from "type-graphql";
 import { Contact } from "./Contact";
 import { APIResponse } from "./GlobalObjects";
+import { isUserAuthorized } from "./authChecker";
 import { Context } from "./context";
 
 @InputType()
@@ -33,8 +34,8 @@ class ContactInput {
   @Field({ nullable: true })
   partyRelationshipId: number; //target
 
-  @Field({nullable: true})
-  operation: 'CREATE' | 'UPDATE' | 'DELETE'
+  @Field()
+  appUserGroupId: number;
 
 }
 
@@ -55,27 +56,64 @@ export class ContactResolver {
   
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Contact)
-  async createUpdateContact(
+  async deleteContact(
     @Arg("data") data: ContactInput,
     @Ctx() ctx: Context
   ): Promise<Contact> {
-    if (!ctx.currentUser) throw new Error("Only for logged in users");
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
 
-    if (data.operation === "CREATE") {
+      if (!data.id) throw new Error('provide contact id')
 
-      if (!data.value || !data.mainPartyId) throw new Error('provide contact value')
+      return await ctx.prisma.contact.delete({
+        where: {
+          id: data.id
+        }
+      })
 
-      return await ctx.prisma.contact.create({data: {
-        typeId: data.typeId && data.typeId,
-        value: data.value,
-        mainPartyId: data.mainPartyId,
-        partyRelationshipId: data.partyRelationshipId && data.partyRelationshipId,
-        appUserGroupId: ctx.currentUser.currentAppUserGroupId
-      }})
 
-    }
+  }
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => Contact)
+  async createContact(
+    @Arg("data") data: ContactInput,
+    @Ctx() ctx: Context
+  ): Promise<Contact> {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
 
-    else if (data.operation === "UPDATE") {
+    if (!data.value || !data.mainPartyId) throw new Error('provide contact value')
+
+    return await ctx.prisma.contact.create({data: {
+      typeId: data.typeId && data.typeId,
+      value: data.value,
+      mainPartyId: data.mainPartyId,
+      partyRelationshipId: data.partyRelationshipId && data.partyRelationshipId,
+      appUserGroupId: ctx.currentUser.currentAppUserGroupId
+    }})
+
+  }
+
+
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => Contact)
+  async updateContact(
+    @Arg("data") data: ContactInput,
+    @Ctx() ctx: Context
+  ): Promise<Contact> {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    
       if (!data.id) throw new Error('provide contact id')
 
       const currentContact = await ctx.prisma.contact.findUnique({where: {id : data.id}})
@@ -100,20 +138,6 @@ export class ContactResolver {
           partyRelationshipId: data.partyRelationshipId && data.partyRelationshipId
         }
       })
-
-    }
-
-    else if (data.operation === "DELETE") {
-      //if (!data.id) throw new Error('provide contact id')
-
-      return await ctx.prisma.contact.delete({
-        where: {
-          id: data.id
-        }
-      })
-    }
-
-    throw new Error('invalid request')
 
   }
 
