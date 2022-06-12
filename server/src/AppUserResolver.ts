@@ -47,7 +47,7 @@ class AppUserInput {
   @IsEmailAlreadyExist({ message: "email already used" })
   email: string
 
-  @Field({ nullable: true })
+  @Field({ nullable: true,  description: "password is not hashed yet"})
   password: string
 
   @Field({ nullable: true })

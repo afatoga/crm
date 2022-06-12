@@ -37,6 +37,11 @@ const app = async () => {
     authChecker, // register auth checking function
     //globalMiddlewares: [ErrorLoggerMiddleware],
     //container: Container
+    emitSchemaFile: {
+      path: __dirname + "/schema.gql",
+      commentDescriptions: true,
+      sortedSchema: false, // by default the printed schema is sorted alphabetically
+    },
   });
 
   new ApolloServer({
