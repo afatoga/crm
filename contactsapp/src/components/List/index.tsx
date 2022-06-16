@@ -14,9 +14,12 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import {useParty} from '../../hooks/useParty';
+import {ORGANIZATION_PARTY_TYPE_ID, PERSON_PARTY_TYPE_ID,
+  } from '../../utils/constants';
 
 interface IMultiLevelList {
     currentRecordId?: string,
+    currentRecordType?: string,
     data: any,
     deleteItem: (id: string) => void;
     listName?: string;
@@ -24,7 +27,7 @@ interface IMultiLevelList {
 
 
 
-export const MultiLevelList = ({currentRecordId = undefined, data, deleteItem, listName}: IMultiLevelList) => {
+export const MultiLevelList = ({currentRecordId = undefined, currentRecordType, data, deleteItem, listName}: IMultiLevelList) => {
     const navigate = useNavigate();
 
     const {operations} = useParty();
@@ -32,9 +35,17 @@ export const MultiLevelList = ({currentRecordId = undefined, data, deleteItem, l
     const navigateToItem = (item: any) => {
         if (listName === 'organizationToOrganizationRelationships' 
          || listName === 'personToOrganizationRelationships'
-         || listName === 'personToPersonRelationships' ) {
+         || listName === 'personToPersonRelationships') {
+
             const otherPartyId = parseInt(currentRecordId) === item.firstPartyId ? item.secondPartyId : item.firstPartyId;
-            return navigate('/people/'+otherPartyId);
+            
+            let otherPartyTypeId = 1;
+            if (listName === 'organizationToOrganizationRelationships') otherPartyTypeId = ORGANIZATION_PARTY_TYPE_ID;
+            else if (listName === 'personToOrganizationRelationships' && currentRecordType === 'person') otherPartyTypeId = ORGANIZATION_PARTY_TYPE_ID;
+            else if (listName === 'personToOrganizationRelationships' && currentRecordType === 'organization') otherPartyTypeId = PERSON_PARTY_TYPE_ID;
+            else if (listName === 'personToPersonRelationships') otherPartyTypeId = PERSON_PARTY_TYPE_ID;
+
+            return navigate(`/${otherPartyTypeId === PERSON_PARTY_TYPE_ID ? 'people' : 'organizations'}/${otherPartyId}`);
          }
             
         

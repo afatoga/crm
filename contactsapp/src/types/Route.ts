@@ -15,14 +15,14 @@ export type Route = {
   key: string;
 
   /**
-   * The title of the route
+   * The titleCode of the route (i18next module)
    * @type {string}
    * @memberof Route
    * @required
    * @example
-   * "My Dashboard"
+   * "pageTitles.account-settings"
    */
-  title: string;
+  titleCode: string;
 
   /**
    * The description of the route
@@ -138,3 +138,7 @@ export type Route = {
    */
   expanded?: boolean;
 };
+
+// export type PageProps = {
+//   titleCode: string;
+// }

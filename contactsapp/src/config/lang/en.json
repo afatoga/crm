@@ -1,0 +1,18 @@
+{
+    "partyType": {
+        "organization": "Organization",
+        "organizations": "Organizations",
+        "person": "Person",
+        "people": "People"
+    },
+    "singleRecord": {
+        "relationships": "Relationships"
+    },
+    "accountSettings": {
+        "language": {
+            "label": "language",
+            "en": "english",
+            "cs": "czech"
+        }
+    }
+}

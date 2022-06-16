@@ -18,6 +18,7 @@ import { isEmptyObject } from "../utils/utilityFunctions";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParty } from "../hooks/useParty";
+import { useTag } from "../hooks/useTag";
 import { PartyRelationships } from "../components/Templates/PartyRelationships";
 import {CustomFormField} from '../components/Form/CustomFormField';
 
@@ -27,9 +28,17 @@ export const SingleRecord = () => {
   const [recordLoaded, setRecordLoaded] = React.useState<boolean>(false);
  
 
+  
   const { operations } = useParty();
+  const { operations:tagOperations } = useTag();
+
+
   const [getPersonByIdHandler, getPersonByIdRequest] =
     operations.getPersonById;
+  const [getOrganizationByIdHandler, getOrganizationByIdRequest] =
+    operations.getOrganizationById;
+  const [getTagByIdHandler, getTagByIdRequest] =
+    tagOperations.getTagById;
   const [getStatusListHandler, getStatusListRequest] =
     operations.getStatusList;
 
@@ -40,15 +49,33 @@ export const SingleRecord = () => {
     if (recordType === 'person') {
       recordData = getPersonByIdRequest.data?.personById;
     }
+    else if (recordType === 'organization') {
+      recordData = getOrganizationByIdRequest.data?.organizationById;
+    }
+    else if (recordType === 'tag') {
+      recordData = getTagByIdRequest.data?.tagById;
+    }
+
     if (!attrName) return recordData;
 
-    return (recordData[attrName]) ? recordData[attrName] : "";
+    console.log(attrName, recordData);
+    return (recordData?.hasOwnProperty(attrName)) ? recordData[attrName] : "";
+
+    //return (typeof recordData[attrName] !== 'undefined') ? recordData[attrName] : "";
   } 
 
   const [updatePersonHandler, updatePersonRequest] =
     operations.updatePerson;
   const [deletePersonHandler, deletePersonRequest] =
     operations.deletePerson;
+  const [updateOrganizationHandler, updateOrganizationRequest] =
+    operations.updateOrganization;
+  const [deleteOrganizationHandler, deleteOrganizationRequest] =
+    operations.deleteOrganization;
+  const [updateTagHandler, updateTagRequest] =
+    tagOperations.updateTag;
+  const [deleteTagHandler, deleteTagRequest] =
+    tagOperations.deleteTag;
 
   const location: any = useLocation();
   const { id: recordIdString } = useParams();
@@ -113,8 +140,29 @@ export const SingleRecord = () => {
         type: "text",
         required: true,
       },
+      {
+        label: "Status",
+        name: "statusId",
+        type: "autocomplete", //"select",
+        required: true,
+        apiRequest: getStatusListRequest
+      },
     ],
-    tag: [],
+    tag: [
+      {
+        label: "Name",
+        name: "name",
+        type: "text",
+        required: true,
+      },
+      {
+        label: "Status",
+        name: "statusId",
+        type: "autocomplete", //"select",
+        required: true,
+        apiRequest: getStatusListRequest
+      },
+    ],
   };
 
   // Extend customFields with validation based on type
@@ -215,29 +263,65 @@ export const SingleRecord = () => {
 
   
   React.useEffect(() => {
-    //get person's data
+    //get data of single record
+
+    const variables = {
+      id: recordId,
+      appUserGroupId: user.currentAppUserGroupId
+    }
 
     if (recordType === 'person') { //hook for getStatusListRequest.data ?
-      getPersonByIdHandler({variables:{
-        id: recordId,
-        appUserGroupId: user.currentAppUserGroupId
-      }})
+      getPersonByIdHandler({variables:variables});
     }
+
+    
+    if (recordType === 'organization') {
+      getOrganizationByIdHandler({variables:variables})
+    }
+
+    if (recordType === 'tag') {
+      getTagByIdHandler({variables:variables})
+    }
+
+    setRecordLoaded(false);
 
   }, [recordId, recordType]);
 
   React.useEffect(() => {
 
     if (!recordLoaded && getPersonByIdRequest.data?.personById) { //exists
-
-      const personData = getPersonByIdRequest.data.personById;
+     
+      const loadedData = getPersonByIdRequest.data.personById;
       setRecordLoaded(true);
-
+      // console.log('record loaded', personData)
+ 
       reset({values:{
-        name: personData.name,
-        statusId: personData.statusid
+        name: loadedData.name,
+        surname: loadedData.surname,
+        statusId: loadedData.statusid
       }})
     }
+
+    if (!recordLoaded && getOrganizationByIdRequest.data?.organizationById) { //exists
+     
+      const loadedData = getOrganizationByIdRequest.data.organizationById;
+      setRecordLoaded(true);
+      reset({values:{
+        name: loadedData.name,
+        statusId: loadedData.statusid
+      }})
+
+    }
+    // if (!recordLoaded && getOrganizationByIdRequest.data?.organizationById) { //exists
+     
+    //   const loadedData = getOrganizationByIdRequest.data.organizationById;
+    //   setRecordLoaded(true);
+    //   reset({values:{
+    //     name: loadedData.name,
+    //     statusId: loadedData.statusid
+    //   }})
+
+    // }
 
   }, [getPersonByIdRequest])
 
@@ -346,7 +430,7 @@ export const SingleRecord = () => {
           </form>}
         </Box>
 
-          {(recordType === 'person' || recordType === 'organization') && <PartyRelationships />}
+          {(recordType === 'person' || recordType === 'organization') && <PartyRelationships recordType={recordType} />}
 
         </Box>
       </Box>

@@ -20,6 +20,16 @@ export const GET_PEOPLE = gql`
     }
   }
 `;
+export const GET_ORGANIZATIONS = gql`
+  query ($appUserGroupId: Int!, $statusId: Int) {
+    organizationsByAppUserGroup(
+      data: { appUserGroupId: $appUserGroupId, statusId: $statusId }
+    ) {
+      partyId
+      name
+    }
+  }
+`;
 export const GET_PARTIES_BY_NAME = gql`
   query ($searchedName: String!, $appUserGroupId: Int!, $statusId: Int) {
     partiesByName(
@@ -40,6 +50,16 @@ export const GET_PERSON_BY_ID = gql`
       preDegree
       postDegree
       birthday
+      statusId
+    }
+  }
+`;
+
+export const GET_ORGANIZATION_BY_ID = gql`
+  query ($appUserGroupId: Int!, $id: Int!) {
+    organizationById(data: { appUserGroupId: $appUserGroupId, id: $id }) {
+      partyId
+      name
       statusId
     }
   }

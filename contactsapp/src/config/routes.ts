@@ -19,13 +19,14 @@ import { Login } from '../pages/Login';
 import { People } from '../pages/People';
 import { NewRecord } from '../pages/NewRecord';
 import { SingleRecord } from '../pages/SingleRecord';
+import { AccountSettings } from '../pages/AccountSettings';
 
 import { Route } from '../types/Route';
 
 const routes: Array<Route> = [
   {
     key: 'router-home',
-    title: 'Home',
+    titleCode: 'Home',
     description: 'Home',
     component: Home,
     path: '/',
@@ -36,7 +37,7 @@ const routes: Array<Route> = [
   },
   {
     key: 'router-dashboard',
-    title: 'Dashboard',
+    titleCode: 'Dashboard',
     description: 'Dashboard',
     path: '/dashboard',
     isProtected: true,
@@ -45,7 +46,7 @@ const routes: Array<Route> = [
   },
   {
     key: 'router-people',
-    title: 'People',
+    titleCode: 'pageTitles.people',
     description: 'People',
     path: '/people',
     isProtected: true,
@@ -55,7 +56,7 @@ const routes: Array<Route> = [
   },
   {
     key: 'router-singlePerson',
-    title: 'Person\'s Profile',
+    titleCode: 'Person\'s Profile',
     description: 'Person\'s profile',
     path: '/people/:id',
     isProtected: true,
@@ -65,7 +66,7 @@ const routes: Array<Route> = [
   },
   {
     key: 'router-organizations',
-    title: 'Organizations',
+    titleCode: 'pageTitles.organizations',
     description: 'Organizations',
     path: '/organizations',
     isProtected: true,
@@ -73,18 +74,47 @@ const routes: Array<Route> = [
     icon: StoreIcon,
   },
   {
+    key: 'router-singleOrganization',
+    titleCode: 'Organization\'s Profile',
+    description: 'Organization\'s profile',
+    path: '/organizations/:id',
+    isProtected: true,
+    isEnabled: false,
+    //icon: PublicIcon,
+    component: SingleRecord
+  },
+  {
+    key: 'router-tags',
+    titleCode: 'pageTitles.tags',
+    description: 'Tags',
+    path: '/tags',
+    isProtected: true,
+    isEnabled: true,
+    icon: StoreIcon,
+  },
+  {
+    key: 'router-singleTag',
+    titleCode: 'pageTitles.singleTag',
+    description: 'Tag\'s detail',
+    path: '/tags/:id',
+    isProtected: true,
+    isEnabled: false,
+    //icon: PublicIcon,
+    component: SingleRecord
+  },
+  {
     key: 'router-new',
-    title: 'New',
+    titleCode: 'New',
     //description: 'People',
     path: '/new',
     isProtected: true,
     isEnabled: false,
     //icon: PeopleIcon,
-    component: NewRecord
+    component: NewRecord//() => ({titleCode: 'New'})
   },
   // {
   //   key: 'router-gh',
-  //   title: 'GitHub',
+  //   titleCode: 'GitHub',
   //   description: 'GitHub',
   //   path: '/gh',
   //   isProtected: true,
@@ -93,7 +123,7 @@ const routes: Array<Route> = [
   //   subRoutes: [
   //     {
   //       key: 'router-gh-public',
-  //       title: 'Public Repos',
+  //       titleCode: 'Public Repos',
   //       description: 'Public Repos',
   //       path: '/gh/public',
   //       isProtected: true,
@@ -102,7 +132,7 @@ const routes: Array<Route> = [
   //     },
   //     {
   //       key: 'router-gh-private',
-  //       title: 'Private Repos',
+  //       titleCode: 'Private Repos',
   //       description: 'Private Repos',
   //       path: '/gh/private',
   //       isAdmin: true,
@@ -114,7 +144,7 @@ const routes: Array<Route> = [
   // },
   // {
   //   key: 'router-code',
-  //   title: 'Code Editor',
+  //   titleCode: 'Code Editor',
   //   description: 'Code Editor',
   //   path: '/code-editor',
   //   isProtected: true,
@@ -124,7 +154,7 @@ const routes: Array<Route> = [
   // },
   {
     key: 'router-my-account',
-    title: 'My Account',
+    titleCode: 'pageTitles.myAccount',
     description: 'My Account',
     path: '/account',
     isProtected: true,
@@ -133,16 +163,18 @@ const routes: Array<Route> = [
     subRoutes: [
       {
         key: 'router-settings',
-        title: 'Settings',
+        //titleCode: 'Settings',
+        titleCode: 'pageTitles.accountSettings',
         description: 'Account Settings',
         path: '/account/settings',
         isProtected: true,
         isEnabled: true,
         icon: SettingsIcon,
+        component: AccountSettings//() => AccountSettings({titleCode: 'pageTitles.accountSettings'})
       },
       {
         key: 'router-preferences',
-        title: 'Preferences',
+        titleCode: 'Preferences',
         description: 'Account Preferences',
         path: '/account/preferences',
         isProtected: true,
@@ -151,7 +183,7 @@ const routes: Array<Route> = [
       },
       {
         key: 'router-billing',
-        title: 'Billing',
+        titleCode: 'Billing',
         description: 'Account Billing',
         path: '/account/billing',
         isProtected: true,
@@ -162,7 +194,7 @@ const routes: Array<Route> = [
   },
   {
     key: 'login',
-    title: 'Login',
+    titleCode: 'Login',
     path: '/login',
     isProtected: false,
     isEnabled: true,
@@ -171,7 +203,7 @@ const routes: Array<Route> = [
   },
   {
     key: 'register',
-    title: 'Register',
+    titleCode: 'Register',
     path: '/register',
     isProtected: false,
     isEnabled: true,

@@ -4,8 +4,10 @@ import {
     GET_PARTYRELATIONSHIPS,
     //GET_ALL_PERSONS,
     GET_PEOPLE,
+    GET_ORGANIZATIONS,
     GET_PARTIES_BY_NAME,
     GET_PERSON_BY_ID,
+    GET_ORGANIZATION_BY_ID,
     GET_PARTYRELATIONSHIP_TYPE_LIST
 } from '../api/party/queries';
 import {
@@ -15,6 +17,9 @@ import {
     CREATE_PERSON,
     UPDATE_PERSON,
     DELETE_PERSON,
+    CREATE_ORGANIZATION,
+    UPDATE_ORGANIZATION,
+    DELETE_ORGANIZATION,
     CREATE_PARTYRELATIONSHIP,
     // UPDATE_PARTYRELATIONSHIP,
     DELETE_PARTYRELATIONSHIP
@@ -43,9 +48,9 @@ export const partyRelationshipTypesVar = makeVar<PartyRelationshipType[]>([]);
 export function useParty() {
 
     const client = useApolloClient();
-    //const getAllPersons = useLazyQuery(GET_ALL_PERSONS);
 
     const getPeople = useLazyQuery(GET_PEOPLE);
+    const getOrganizations = useLazyQuery(GET_ORGANIZATIONS);
 
     const getPartiesByName = useLazyQuery(GET_PARTIES_BY_NAME, {
         onCompleted: (data) => {
@@ -64,6 +69,7 @@ export function useParty() {
     });
 
     const getPersonById = useLazyQuery(GET_PERSON_BY_ID);
+    const getOrganizationById = useLazyQuery(GET_ORGANIZATION_BY_ID);
 
     const getStatusList = useLazyQuery(GET_STATUS_LIST);
 
@@ -108,6 +114,15 @@ export function useParty() {
     const deletePerson = useMutation(DELETE_PERSON, {
         fetchPolicy: 'network-only',
     })
+    const createOrganization = useMutation(CREATE_ORGANIZATION, {
+        fetchPolicy: 'network-only',
+    })
+    const updateOrganization = useMutation(UPDATE_ORGANIZATION, {
+        fetchPolicy: 'network-only',
+    })
+    const deleteOrganization = useMutation(DELETE_ORGANIZATION, {
+        fetchPolicy: 'network-only',
+    })
     const createPartyRelationship = useMutation(CREATE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',
         // refetchQueries: [
@@ -126,8 +141,10 @@ export function useParty() {
         operations: {
             // getAllPersons,
             getPeople,
+            getOrganizations,
             getPartiesByName,
             getPersonById,
+            getOrganizationById,
             getStatusList,
             getPartyRelationships,
             getPartyRelationshipTypeList,
@@ -135,6 +152,9 @@ export function useParty() {
             createPerson,
             updatePerson,
             deletePerson,
+            createOrganization,
+            updateOrganization,
+            deleteOrganization,
             createPartyRelationship,
             deletePartyRelationship
         }

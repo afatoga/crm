@@ -42,6 +42,8 @@ const userSorter = (a, b) => {
 
 export function getGroupedPeople(data) {
 
+  if (!Array.isArray(data)) return false;
+
   const people = [...data].sort(userSorter)
   const groupedUsers = groupBy(people, (person) => person.surname[0])
   const groupCounts = Object.values(groupedUsers).map((persons: any) => persons.length)

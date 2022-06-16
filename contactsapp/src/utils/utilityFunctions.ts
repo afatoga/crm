@@ -1,3 +1,6 @@
+import { routes } from '../config';
+import { Route } from '../types';
+
 export const isEmptyObject = (obj:object) => {
     if (!obj) return false;
     return Object.keys(obj).length === 0;
@@ -29,3 +32,23 @@ export const groupBy = (arr:any[], criteria:string | Function) => {
 
 	}, {});
 };
+
+export const getPageTitleCode = (locationPathname: string) => {
+
+	let titleCode = 'pageTitles.contactsApp'; //default
+
+	routes.forEach((item: Route) => {
+		if (item.path === locationPathname) {return titleCode = item.titleCode;}
+		else if (item?.subRoutes) {
+			const found = item.subRoutes.find((subRoute: Route) => subRoute.path === locationPathname)
+			return titleCode = found.titleCode;
+		}
+	});
+
+	return titleCode;
+}
+
+// export const getPageTitleCode = (location: any) => {
+// 	let name = location.pathname.replaceAll("/", "-"); // from /account/settings --> -account-settings
+// 	return `pageTitles.${name.substring(1)}`;
+// }

@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import './i18n';
+
 import {
   ApolloClient,
   InMemoryCache,

@@ -1,0 +1,25 @@
+{
+    "partyType": {
+        "organization": "Organizace",
+        "organizations": "Organizace",
+        "person": "Osoba",
+        "people": "Lidé"
+    },
+    "singleRecord": {
+        "relationships": "Vztahy",
+        "tags": "Tagy",
+        "profile": "Profil"
+    },
+    "accountSettings": {
+        "language": {
+            "label": "jazyk",
+            "en": "angličtina",
+            "cs": "čeština"
+        }
+    },
+    "pageTitles": {
+        "contactsApp": "ContactsApp",
+        "myAccount": "Můj účet",
+        "accountSettings": "Nastavení účtu"
+    }
+}

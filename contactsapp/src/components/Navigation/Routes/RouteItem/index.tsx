@@ -2,6 +2,7 @@ import React from 'react'; //{ ComponentType }
 import { NavLink, useLocation } from 'react-router-dom';
 import { Icon, IconButton, ListItemButton, ListItemIcon, ListItemText, styled, Tooltip } from '@mui/material'; //lighten
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 import { Route } from '../../../../types';
 
@@ -19,6 +20,7 @@ export const RouteItem = ({
   handleMenuClick = () => {},
 }: RouteItemProps) => {
   //const location = useLocation();
+  const {t} = useTranslation();
 
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (!route.isEnabled || hasChildren) e.preventDefault();
@@ -37,7 +39,7 @@ export const RouteItem = ({
           {route.icon && <Icon component={route.icon} />}
         </IconButton>
       </ListItemIcon>
-      <ListItemText primary={route.title} />
+      <ListItemText primary={t(route.titleCode)} />
       {hasChildren && (route.expanded ? <ExpandLess /> : <ExpandMore />)}
     </ListItemButton>
   );

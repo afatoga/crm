@@ -35,6 +35,8 @@ import { useParty } from "../hooks/useParty";
 
 // }
 
+
+
 export const NewRecord = () => {
   // Local state
   const [recordType, setRecordType] = React.useState<string>("person");

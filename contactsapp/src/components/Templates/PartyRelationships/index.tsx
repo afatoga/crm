@@ -9,6 +9,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { MultiLevelList } from "../../List";
 import { useReactiveVar } from "@apollo/client";
 import { actionResultVar } from "../../../App";
+import { useTranslation } from "react-i18next";
 
 // type PartyRelationship = {
 //   id: string,
@@ -17,8 +18,9 @@ import { actionResultVar } from "../../../App";
 //   typeName: string
 // }
 
-export const PartyRelationships = () => {
+export const PartyRelationships: React.FC<{recordType: string}> = ({recordType}) => {
   const { id: recordIdString } = useParams();
+  const {t} = useTranslation();
   //const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedRelationshipId,setSelectedRelationshipId] = React.useState<string>('');
@@ -119,7 +121,7 @@ export const PartyRelationships = () => {
       }}
     >
       {/* <Grid item xs={12} md={6}> */}
-      <Typography variant="h6">Relationships</Typography>
+      <Typography variant="h6">{t('singleRecord.relationships')}</Typography>
       {/* <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
           Relationships
         </Typography> */}
@@ -131,6 +133,7 @@ export const PartyRelationships = () => {
           <Typography variant="subtitle1">Organizations</Typography>
           <MultiLevelList
             currentRecordId={recordIdString}
+            currentRecordType={recordType}
             data={
               getPartyRelationshipsRequest.data?.partyRelationships
                 .organizationToOrganization
@@ -143,9 +146,10 @@ export const PartyRelationships = () => {
       {getPartyRelationshipsRequest.data?.partyRelationships
         .personToOrganization.length > 0 && (
         <>
-          <Typography variant="subtitle1">Organizations</Typography>
+          <Typography variant="subtitle1">{recordType === 'person' ? t('partyType.organizations') : t('partyType.people') }</Typography>
           <MultiLevelList
             currentRecordId={recordIdString}
+            currentRecordType={recordType}
             data={
               getPartyRelationshipsRequest.data?.partyRelationships
                 .personToOrganization
@@ -158,9 +162,10 @@ export const PartyRelationships = () => {
       {getPartyRelationshipsRequest.data?.partyRelationships.personToPerson
         .length > 0 && (
         <>
-          <Typography variant="subtitle1">People</Typography>
+          <Typography variant="subtitle1">{t('partyType.people')}</Typography>
           <MultiLevelList
             currentRecordId={recordIdString}
+            currentRecordType={recordType}
             data={
               getPartyRelationshipsRequest.data?.partyRelationships
                 .personToPerson

@@ -25,6 +25,25 @@ export const CREATE_PERSON = gql`
     }
   }
 `;
+export const CREATE_ORGANIZATION = gql`
+  mutation (
+    $name: String!
+    $typeId: Int
+    $appUserGroupId: Int!
+    $statusId: Int
+  ) {
+    createOrganization(
+      data: {
+        name: $name
+        typeId: $typeId
+        appUserGroupId: $appUserGroupId
+        statusId: $statusId
+      }
+    ) {
+      partyId
+    }
+  }
+`;
 export const UPDATE_PERSON = gql`
   mutation (
     $partyId: Int!
@@ -52,12 +71,49 @@ export const UPDATE_PERSON = gql`
     }
   }
 `;
+export const UPDATE_ORGANIZATION = gql`
+  mutation (
+    $partyId: Int!
+    $name: String!
+    $typeId: Int
+    $appUserGroupId: Int!
+    $statusId: Int
+  ) {
+    updateOrganization(
+      data: {
+        partyId: $partyId
+        name: $name
+        typeId: $typeId
+        appUserGroupId: $appUserGroupId
+        statusId: $statusId
+      }
+    ) {
+      partyId
+    }
+  }
+`;
 export const DELETE_PERSON = gql`
   mutation (
     $partyId: Int!
     $appUserGroupId: Int!
   ) {
     deletePerson(
+        data: {
+          partyId: $partyId,
+          appUserGroupId: $appUserGroupId
+        }
+    ) {
+      status
+      message
+    }
+  }
+`;
+export const DELETE_ORGANIZATION = gql`
+  mutation (
+    $partyId: Int!
+    $appUserGroupId: Int!
+  ) {
+    deleteOrganization(
         data: {
           partyId: $partyId,
           appUserGroupId: $appUserGroupId
