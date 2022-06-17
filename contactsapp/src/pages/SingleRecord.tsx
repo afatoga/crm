@@ -276,29 +276,28 @@ export const SingleRecord = () => {
     getStatusListHandler();
   }, []);
 
-  React.useEffect(() => {
-    //get data of single record
+  // React.useEffect(() => {
+  //   //get data of single record
 
-    setRecordLoaded(false);
+  //   setRecordLoaded(false);
 
-    const variables = {
-      id: recordId,
-      appUserGroupId: user.currentAppUserGroupId,
-    };
+  //   const variables = {
+  //     id: recordId,
+  //     appUserGroupId: user.currentAppUserGroupId,
+  //   };
 
-    if (recordType === "person") {
-      //hook for getStatusListRequest.data ?
-      getPersonByIdHandler({ variables: variables });
-    }
+  //   if (recordType === "person") {
+  //    getPersonByIdHandler({ variables: variables });
+  //   }
 
-    if (recordType === "organization") {
-      getOrganizationByIdHandler({ variables: variables });
-    }
+  //   if (recordType === "organization") {
+  //     getOrganizationByIdHandler({ variables: variables });
+  //   }
 
-    if (recordType === "tag") {
-      getTagByIdHandler({ variables: variables });
-    }
-  }, [recordType]);
+  //   if (recordType === "tag") {
+  //     getTagByIdHandler({ variables: variables });
+  //   }
+  // }, [recordType]);
 
   React.useEffect(() => {
     if (!recordLoaded && getPersonByIdRequest.data && recordType === "person") {
@@ -360,13 +359,22 @@ export const SingleRecord = () => {
   React.useEffect(() => {
     let recordTypeToSelect = "";
     const pathname = location.pathname;
+    setRecordLoaded(false);
+
+    const variables = {
+      id: recordId,
+      appUserGroupId: user.currentAppUserGroupId,
+    };
 
     if (pathname.indexOf("/people/") === 0) {
       recordTypeToSelect = "person";
+      getPersonByIdHandler({ variables: variables })
     } else if (pathname.indexOf("/organizations/") === 0) {
       recordTypeToSelect = "organization";
+      getOrganizationByIdHandler({ variables: variables });
     } else if (pathname.indexOf("/tags/") === 0) {
       recordTypeToSelect = "tag";
+      getTagByIdHandler({ variables: variables });
     }
 
     setRecordType(recordTypeToSelect);
