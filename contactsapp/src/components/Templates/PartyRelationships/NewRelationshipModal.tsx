@@ -23,6 +23,7 @@ import {ORGANIZATION_PARTY_TYPE_ID, PERSON_PARTY_TYPE_ID,
   PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_ORGANIZATION, 
   PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON, 
   PARTY_RELATIONSHIP_CATEGORY_PERSON_PERSON} from '../../../utils/constants';
+import { useTranslation } from 'react-i18next';
 
 // const _filterOptions = createFilterOptions();
 
@@ -40,7 +41,7 @@ function debounce(func, wait) {
 
 
 export const NewRelationshipModal = () => {
-    
+    const {t} = useTranslation();
     const location = useLocation();
     let wholePath = location.pathname;
     const recordsPath = wholePath.split('/')[1]; // 'people' | 'organizations'
@@ -112,13 +113,13 @@ export const NewRelationshipModal = () => {
             // apiRequest: getPartiesByNameRequest
           },
           {
-            label: "Above party is of higher priority",
+            label: t('singleRecord.abovePartyIsOfHigherPriority'),
             name: "isMainParty",
             type: "checkbox",
             // required: true,
           },
           {
-            label: "Relation type",
+            label: t('singleRecord.relationType'),
             name: "partyRelationshipTypeId",
             type: "autocomplete",
             //optionCategories: , 
@@ -127,7 +128,7 @@ export const NewRelationshipModal = () => {
     ]
 
     const schema = yup.object().shape({
-        otherPartyId: yup.number().typeError("Select other party").required()
+        otherPartyId: yup.number().typeError("Select other party").required(t(`form.isRequired`, {fieldName: t(`singleRecord.otherParty`)}))
         //partyRelationshipTypeId: yup.number().required()
         // secondPartyId: yup.number().notOneOf([yup.ref('firstPartyId')], 'Parties could not be equal').required(),
       });
@@ -270,7 +271,7 @@ export const NewRelationshipModal = () => {
             autoFocus
             //ref={inputRef}
             {...params}
-            label="Other party"
+            label={t(`singleRecord.otherParty`)}
             InputProps={{
               ...params.InputProps,
             }}
@@ -328,11 +329,11 @@ export const NewRelationshipModal = () => {
                 sx={{ width: "120px" }}
                 //onClick={submitRelationship}
               >
-                Save
+                {t('userActions.save')}
               </Button>
               {!isSubmitting && createPartyRelationshipRequest.error && (
                 <Alert severity="error">
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>t('general.error')</AlertTitle>
                   {createPartyRelationshipRequest.error.message}
                 </Alert>
               )}

@@ -9,6 +9,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import { useTranslation } from "react-i18next";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -51,6 +52,7 @@ const BootstrapDialogTitle = (props: DialogTitleProps) => {
 
 export const Modal: FC = () => {
   let { isShown, handleModal, template } = React.useContext(ModalContext);
+  const {t} = useTranslation();
 
   const getModalTitle = (): JSX.Element => {
     if (template === "NewRelationship")
@@ -59,7 +61,7 @@ export const Modal: FC = () => {
           // id="customized-dialog-title"
           onClose={handleModal}
         >
-          Create new relationship
+          {t('singleRecord.createNewRelationship')}
         </BootstrapDialogTitle>
       );
     return null;

@@ -1,11 +1,5 @@
 import * as React from "react";
-import {
-  Box,
-  Stack,
-  Button,
-  Alert,
-  AlertTitle
-} from "@mui/material";
+import { Box, Stack, Button, Alert, AlertTitle } from "@mui/material";
 
 import { useLocation, useNavigate, useParams } from "react-router";
 import { Controller, useForm } from "react-hook-form";
@@ -20,63 +14,54 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useParty } from "../hooks/useParty";
 import { useTag } from "../hooks/useTag";
 import { PartyRelationships } from "../components/Templates/PartyRelationships";
-import {CustomFormField} from '../components/Form/CustomFormField';
+import { CustomFormField } from "../components/Form/CustomFormField";
+import { useTranslation } from "react-i18next";
 
 export const SingleRecord = () => {
+  const {t} = useTranslation();
   // Local state
   const [recordType, setRecordType] = React.useState<string>("");
   const [recordLoaded, setRecordLoaded] = React.useState<boolean>(false);
- 
 
-  
   const { operations } = useParty();
-  const { operations:tagOperations } = useTag();
+  const { operations: tagOperations } = useTag();
 
-
-  const [getPersonByIdHandler, getPersonByIdRequest] =
-    operations.getPersonById;
+  const [getPersonByIdHandler, getPersonByIdRequest] = operations.getPersonById;
   const [getOrganizationByIdHandler, getOrganizationByIdRequest] =
     operations.getOrganizationById;
-  const [getTagByIdHandler, getTagByIdRequest] =
-    tagOperations.getTagById;
-  const [getStatusListHandler, getStatusListRequest] =
-    operations.getStatusList;
+  const [getTagByIdHandler, getTagByIdRequest] = tagOperations.getTagById;
+  const [getStatusListHandler, getStatusListRequest] = operations.getStatusList;
 
   const getRecordData = (attrName: string = null) => {
     if (!recordLoaded) return "";
 
     let recordData = {};
 
-    if (recordType === 'person') {
+    if (recordType === "person") {
       recordData = getPersonByIdRequest.data?.personById;
-    }
-    else if (recordType === 'organization') {
+    } else if (recordType === "organization") {
       recordData = getOrganizationByIdRequest.data?.organizationById;
-    }
-    else if (recordType === 'tag') {
+    } else if (recordType === "tag") {
       recordData = getTagByIdRequest.data?.tagById;
     }
 
-    if (!recordData || isEmptyObject(recordData)) return ""; //recordData is undefined
+    if (!recordData || isEmptyObject(recordData)) return "";
 
-    console.log(recordLoaded, 'attr:',attrName,'recordData:', recordData);
-    return (recordData?.hasOwnProperty(attrName)) ? recordData[attrName] === null ? "" : recordData[attrName] : "";
+    return recordData?.hasOwnProperty(attrName)
+      ? recordData[attrName] === null
+        ? ""
+        : recordData[attrName]
+      : "";
+  };
 
-    //return (typeof recordData[attrName] !== 'undefined') ? recordData[attrName] : "";
-  } 
-
-  const [updatePersonHandler, updatePersonRequest] =
-    operations.updatePerson;
-  const [deletePersonHandler, deletePersonRequest] =
-    operations.deletePerson;
+  const [updatePersonHandler, updatePersonRequest] = operations.updatePerson;
+  const [deletePersonHandler, deletePersonRequest] = operations.deletePerson;
   const [updateOrganizationHandler, updateOrganizationRequest] =
     operations.updateOrganization;
   const [deleteOrganizationHandler, deleteOrganizationRequest] =
     operations.deleteOrganization;
-  const [updateTagHandler, updateTagRequest] =
-    tagOperations.updateTag;
-  const [deleteTagHandler, deleteTagRequest] =
-    tagOperations.deleteTag;
+  const [updateTagHandler, updateTagRequest] = tagOperations.updateTag;
+  const [deleteTagHandler, deleteTagRequest] = tagOperations.deleteTag;
 
   const location: any = useLocation();
   const { id: recordIdString } = useParams();
@@ -84,91 +69,95 @@ export const SingleRecord = () => {
 
   let navigate = useNavigate(); //save and view detail
   const { user } = useAuth();
-  
+
   const deleteRecord = () => {
-    if (recordType === 'person') {
-      deletePersonHandler({variables: {
-        partyId: recordId,
-        appUserGroupId: user.currentAppUserGroupId
-      }})
+    if (recordType === "person") {
+      deletePersonHandler({
+        variables: {
+          partyId: recordId,
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
     }
-  }
+  };
 
   const customFields = {
     person: [
       {
-        label: "Firstname",
+        label: t('singleRecord.firstname'),
         name: "name",
         type: "text",
         required: true,
       },
       {
-        label: "Surname",
+        label: t('singleRecord.surname'),
         name: "surname",
         type: "text",
         required: true,
       },
       {
-        label: "Pre-degree",
+        label: t('singleRecord.preDegree'),
         name: "preDegree",
         type: "text",
         required: false,
       },
       {
-        label: "Post-degree",
+        label: t('singleRecord.postDegree'),
         name: "postDegree",
         type: "text",
         required: false,
       },
       {
-        label: "Birthday",
+        label: t('singleRecord.birthday'),
         name: "birthday",
         type: "text",
         required: false,
       },
       {
-        label: "Status",
+        label: "status",
         name: "statusId",
         type: "autocomplete", //"select",
         required: true,
-        apiRequest: getStatusListRequest
+        apiRequest: getStatusListRequest,
       },
     ],
     organization: [
       {
-        label: "Name",
+        label: t('singleRecord.name'),
         name: "name",
         type: "text",
         required: true,
       },
       {
-        label: "Status",
+        label: "status",
         name: "statusId",
         type: "autocomplete", //"select",
         required: true,
-        apiRequest: getStatusListRequest
+        apiRequest: getStatusListRequest,
       },
     ],
     tag: [
       {
-        label: "Name",
+        label: t('singleRecord.name'),
         name: "name",
         type: "text",
         required: true,
       },
       {
-        label: "Status",
+        label: "status",
         name: "statusId",
         type: "autocomplete", //"select",
         required: true,
-        apiRequest: getStatusListRequest
+        apiRequest: getStatusListRequest,
       },
     ],
   };
 
   // Extend customFields with validation based on type
-  const useCustomFieldsExtendValidation = (recordType: string, customFields: any) => {
-
+  const useCustomFieldsExtendValidation = (
+    recordType: string,
+    customFields: any
+  ) => {
     if (!recordType.length) return {};
 
     return customFields[recordType].map((customField) => {
@@ -220,13 +209,15 @@ export const SingleRecord = () => {
   // Split out for readability
 
   // First extend the data with our validations
-  const dynamicFormData = useCustomFieldsExtendValidation(recordType, customFields);
+  const dynamicFormData = useCustomFieldsExtendValidation(
+    recordType,
+    customFields
+  );
 
   // Create schema based on added validations
-  const customFieldsSchema = !isEmptyObject(dynamicFormData) && dynamicFormData.reduce(
-    useCustomFieldsDynamicSchema,
-    {}
-  );
+  const customFieldsSchema =
+    !isEmptyObject(dynamicFormData) &&
+    dynamicFormData.reduce(useCustomFieldsDynamicSchema, {});
 
   // Create Yup schema
   const dynamicValidationSchema = yup.object().shape(customFieldsSchema);
@@ -241,28 +232,50 @@ export const SingleRecord = () => {
     mode: "onTouched",
   });
 
-  const onSubmit = React.useCallback((values) => {
-    console.log(values)
-    if (recordType === 'person') {
-      updatePersonHandler({
-        variables: {
-          ...values,
-          partyId: recordId,
-          birthday: values.birthday.length ? values.birthday : null,
-          statusId: values.statusId ? values.statusId : null,
-          preDegree: values.preDegree.length ? values.preDegree : null,
-          postDegree: values.postDegree.length ? values.postDegree : null,
-          appUserGroupId: user.currentAppUserGroupId,
-        },
-      });
-    }
-  }, [recordType]);
+  const onSubmit = React.useCallback(
+    (values) => {
+
+      if (recordType === "person") {
+        updatePersonHandler({
+          variables: {
+            ...values,
+            partyId: recordId,
+            birthday: values.birthday.length ? values.birthday : null,
+            statusId: values.statusId ? values.statusId : null,
+            preDegree: values.preDegree.length ? values.preDegree : null,
+            postDegree: values.postDegree.length ? values.postDegree : null,
+            appUserGroupId: user.currentAppUserGroupId,
+          },
+        });
+      }
+      if (recordType === "organization") {
+        updateOrganizationHandler({
+          variables: {
+            ...values,
+            partyId: recordId,
+            statusId: values.statusId ? values.statusId : null,
+            appUserGroupId: user.currentAppUserGroupId,
+          },
+        });
+      }
+      if (recordType === "tag") {
+        updateTagHandler({
+          variables: {
+            ...values,
+            id: recordId, 
+            statusId: values.statusId ? values.statusId : null,
+            appUserGroupId: user.currentAppUserGroupId,
+          },
+        });
+      }
+    },
+    [recordType]
+  );
 
   React.useEffect(() => {
     getStatusListHandler();
-  }, [])
+  }, []);
 
-  
   React.useEffect(() => {
     //get data of single record
 
@@ -270,85 +283,94 @@ export const SingleRecord = () => {
 
     const variables = {
       id: recordId,
-      appUserGroupId: user.currentAppUserGroupId
+      appUserGroupId: user.currentAppUserGroupId,
+    };
+
+    if (recordType === "person") {
+      //hook for getStatusListRequest.data ?
+      getPersonByIdHandler({ variables: variables });
     }
 
-    if (recordType === 'person') { //hook for getStatusListRequest.data ?
-      getPersonByIdHandler({variables:variables});
+    if (recordType === "organization") {
+      getOrganizationByIdHandler({ variables: variables });
     }
 
-    
-    if (recordType === 'organization') {
-      getOrganizationByIdHandler({variables:variables})
+    if (recordType === "tag") {
+      getTagByIdHandler({ variables: variables });
     }
-
-    if (recordType === 'tag') {
-      getTagByIdHandler({variables:variables})
-    }
-
-  }, [recordId, recordType]);
+  }, [recordType]);
 
   React.useEffect(() => {
+    if (!recordLoaded && getPersonByIdRequest.data && recordType === "person") {
+      //exists
 
-    if (!recordLoaded && getPersonByIdRequest.data?.personById && recordType === "person") { //exists
-     
       const loadedData = getPersonByIdRequest.data.personById;
-      setRecordLoaded(true);
+      // console.log(loadedData)
+      if (!loadedData) navigate("/people");
+      else {
+        setRecordLoaded(true);
 
-      reset({values:{
-        name: loadedData.name,
-        surname: loadedData.surname,
-        statusId: loadedData.statusId
-      }})
-    }
+        reset({
+          values: {
+            name: loadedData.name,
+            surname: loadedData.surname,
+            statusId: loadedData.statusId,
+          },
+        });
+      }
+    } else if (
+      !recordLoaded &&
+      getOrganizationByIdRequest.data &&
+      recordType === "organization"
+    ) {
+      //exists
 
-    if (!recordLoaded && getOrganizationByIdRequest.data?.organizationById && recordType === "organization") { //exists
- 
       const loadedData = getOrganizationByIdRequest.data.organizationById;
+      if (!loadedData) navigate("/organizations");
+      else {
+        setRecordLoaded(true);
+        reset({
+          values: {
+            name: loadedData.name,
+            statusId: loadedData.statusId,
+          },
+        });
+      }
+    } else if (
+      !recordLoaded &&
+      getTagByIdRequest.data &&
+      recordType === "tag"
+    ) {
+      //exists
 
-      setRecordLoaded(true);
-      reset({values:{
-        name: loadedData.name,
-        statusId: loadedData.statusId
-      }})
-
+      const loadedData = getTagByIdRequest.data.tagById;
+      if (!loadedData) navigate("/tags");
+      else {
+        setRecordLoaded(true);
+        reset({
+          values: {
+            name: loadedData.name,
+            statusId: loadedData.statusId,
+          },
+        });
+      }
     }
-    // if (!recordLoaded && getOrganizationByIdRequest.data?.organizationById) { //exists
-     
-    //   const loadedData = getOrganizationByIdRequest.data.organizationById;
-    //   setRecordLoaded(true);
-    //   reset({values:{
-    //     name: loadedData.name,
-    //     statusId: loadedData.statusid
-    //   }})
-
-    // }
-
-  }, [getPersonByIdRequest])
+  }, [getPersonByIdRequest, getOrganizationByIdRequest, getTagByIdRequest]);
 
   React.useEffect(() => {
+    let recordTypeToSelect = "";
+    const pathname = location.pathname;
 
-      let recordTypeToSelect = "";
-      const pathname = location.pathname;
-      
-      if (pathname.indexOf('/people/') === 0) {
-        recordTypeToSelect = "person";
-      }
-      else if (pathname.indexOf('/organizations/') === 0) {
-        recordTypeToSelect = "organization";
-      }
-      else if (pathname.indexOf('/tags/') === 0) {
-        recordTypeToSelect = "tag";
-      }
+    if (pathname.indexOf("/people/") === 0) {
+      recordTypeToSelect = "person";
+    } else if (pathname.indexOf("/organizations/") === 0) {
+      recordTypeToSelect = "organization";
+    } else if (pathname.indexOf("/tags/") === 0) {
+      recordTypeToSelect = "tag";
+    }
 
-      setRecordType(recordTypeToSelect);
-    
+    setRecordType(recordTypeToSelect);
   }, [location]);
-
-
-  
-
-
 
   return (
     <>
@@ -363,76 +385,78 @@ export const SingleRecord = () => {
           justifyContent: "center",
         }}
       >
-
-        <PageTitle
-          title={
-            recordType
-          }
-        />
+        <PageTitle title={t(`pageTitles.${recordType}`)} />
         {/* <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
           Welcome to ContactsApp.
         </Typography> */}
 
         {/* this is row for md, col for  */}
-        <Box sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          paddingTop: '1rem'
-        }}>
-
-
         <Box
           sx={{
-            width: {
-              xs: "100%", // theme.breakpoints.up('xs')
-              sm: "60%", //400, // theme.breakpoints.up('sm')
-              // md: 300, // theme.breakpoints.up('md')
-              lg: 360, // theme.breakpoints.up('lg')
-              //xl: 500, // theme.breakpoints.up('xl')
-            }
+            display: "flex",
+            flexWrap: "wrap",
+            paddingTop: "1rem",
           }}
         >
-          {recordType.length && recordLoaded && getStatusListRequest.data &&  <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack spacing={2}>
-              {customFields[recordType].map((item, index) => (
-                <Controller
-                  key={index}
-                  render={({ field }) => (
-                    <CustomFormField controllerProps={field} fieldData={item} errors={errors} />
+          <Box
+            sx={{
+              width: {
+                xs: "100%", // theme.breakpoints.up('xs')
+                sm: "60%", //400, // theme.breakpoints.up('sm')
+                // md: 300, // theme.breakpoints.up('md')
+                lg: 360, // theme.breakpoints.up('lg')
+                //xl: 500, // theme.breakpoints.up('xl')
+              },
+            }}
+          >
+            {recordType.length && recordLoaded && getStatusListRequest.data && (
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <Stack spacing={2}>
+                  {customFields[recordType].map((item, index) => (
+                    <Controller
+                      key={index}
+                      render={({ field }) => (
+                        <CustomFormField
+                          controllerProps={field}
+                          fieldData={item}
+                          errors={errors}
+                        />
+                      )}
+                      control={control}
+                      name={item.name}
+                      defaultValue={() => getRecordData(item.name)}
+                    />
+                  ))}
+
+                  <Button
+                    variant={"contained"}
+                    type="submit"
+                    sx={{ width: "120px" }}
+                  >
+                    {t('userActions.save')}
+                  </Button>
+                  <Button
+                    //variant={"contained"}
+                    type="button"
+                    sx={{ width: "120px" }}
+                    onClick={deleteRecord}
+                  >
+                     {t('userActions.delete')}
+                  </Button>
+                  {!isSubmitting && updatePersonRequest.error && (
+                    <Alert severity="error">
+                      <AlertTitle> {t('general.error')}</AlertTitle>
+                      {updatePersonRequest.error.message}
+                    </Alert>
                   )}
-                  control={control}
-                  name={item.name}
-                  defaultValue={() => getRecordData(item.name)}
-                />
-              ))}
+                </Stack>
+              </form>
+            )}
+          </Box>
 
-              <Button
-                variant={"contained"}
-                type="submit"
-                sx={{ width: "120px" }}
-              >
-                Save
-              </Button>
-              <Button
-                //variant={"contained"}
-                type="button"
-                sx={{ width: "120px" }}
-                onClick={deleteRecord}
-              >
-                Delete
-              </Button>
-              {!isSubmitting && updatePersonRequest.error && (
-                <Alert severity="error">
-                  <AlertTitle>Error</AlertTitle>
-                  {updatePersonRequest.error.message}
-                </Alert>
-              )}
-            </Stack>
-          </form>}
-        </Box>
-
-          {(recordType === 'person' || recordType === 'organization') && <PartyRelationships recordType={recordType} />}
-
+          {(recordType === "person" || recordType === "organization") && (
+            <PartyRelationships recordType={recordType} />
+          )}
         </Box>
       </Box>
     </>

@@ -63,9 +63,11 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
   React.useEffect(() => {
     if (getPartyRelationshipsRequest.called && !isShown) {
       //refetches on every modal closing
-      getPartyRelationshipsRequest.refetch();
+      getPartyRelationshipsRequest.refetch({
+        partyId: parseInt(recordIdString)
+    });
     }
-  }, [isShown]);
+  }, [isShown, recordIdString]);
 
   React.useEffect(() => {
     if (actionResult.code === "CONFIRM" && selectedRelationshipId.length) {
@@ -181,10 +183,10 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
 
       <Button
         variant={"contained"}
-        sx={{ my: 3, width: "120px" }}
+        sx={{ my: 3, width: "150px" }}
         onClick={toggleNewRelationshipModal}
       >
-        Add new
+        {t('singleRecord.createNewRelationship')}
       </Button>
     </Box>
   );

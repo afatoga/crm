@@ -6,9 +6,13 @@
             "cs": "čeština"
         }
     },
+    "form": {
+        "isRequired": "pole {{fieldName}} je povinné"
+    },
     "general": {
         "more": "více",
-        "options": "volby"
+        "options": "volby",
+        "error": "chyba"
     },
     "partyType": {
         "organization": "Organizace",
@@ -19,6 +23,9 @@
     "pageTitles": {
         "contactsApp": "ContactsApp",
         "people": "Lidé",
+        "person": "Osoba",
+        "tag": "Tag",
+        "organization": "Organizace",
         "organizations": "Organizace",
         "tags": "Tagy",
         "settings": "Nastavení",
@@ -35,7 +42,11 @@
         "postDegree": "titul za jménem",
         "birthday": "datum narození",
         "name": "název",
-        "profile": "profil"
+        "profile": "profil",
+        "createNewRelationship": "Nový vztah",
+        "otherParty": "protistrana",
+        "abovePartyIsOfHigherPriority": "protistrana je nadřazená",
+        "relationType": "typ vztahu"
     },
     "userActions": {
         "login": "Přihlásit se",

@@ -16,6 +16,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { PageTitle } from "../components/PageTitle";
 import { appRoles } from "../config";
 import { groupBy } from "../utils/utilityFunctions";
+import { useTranslation } from "react-i18next";
 //import * as yup from "yup";
 //import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -53,6 +54,7 @@ export function getGroupedPeople(data) {
 }
 
 export const People = () => {
+  const {t} = useTranslation();
   const { operations } = useParty();
   const [getPeopleHandler, getPeopleRequest] = operations.getPeople;
 
@@ -115,7 +117,7 @@ export const People = () => {
           flexDirection: "column",
         }}
       >
-        <PageTitle title={location.pathname.replaceAll("/", " ").trimStart()} />
+        <PageTitle title={t(`pageTitles.people`)} />
 
 
         <Stack
@@ -133,8 +135,8 @@ export const People = () => {
         >
 
       
-        <Button variant={"contained"} sx={{my: 3 ,width: '120px'}} onClick={() =>  navigate('/new', {state: {from: {pathname: location.pathname}}})}>
-                Add new
+        <Button variant={"contained"} sx={{my: 3 ,width: '150px'}} onClick={() =>  navigate('/new', {state: {from: {pathname: location.pathname}}})}>
+                {t('userActions.addNew')}
         </Button>
        
 
