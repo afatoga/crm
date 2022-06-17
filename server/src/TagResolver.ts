@@ -8,30 +8,62 @@ import {
   InputType,
   Field,
   Authorized,
+  Int
 } from "type-graphql";
-import { Tag } from "./Tag";
+import { Tag, ExtendedTag } from "./Tag";
 import { APIResponse } from "./GlobalObjects";
 import { Context, ICurrentUser } from "./context";
+import { isUserAuthorized } from "./authChecker";
+import { Prisma } from "@prisma/client";
 
 @InputType()
 class TagInput {
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   id: number;
 
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   statusId: number;
 
-  @Field({ nullable: true })
+  @Field((type) => String)
   name: string;
 
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   partyId: number; //target
 
-  @Field()
-  operation: 'CREATE' | 'UPDATE' | 'DELETE'
+  @Field((type) => Int, { nullable: true })
+  appUserGroupId: number;
+}
 
-  // @Field({ nullable: true })
-  // appUserGroupId: number;
+@InputType() 
+class TagByAppUserGroupInput {
+
+  @Field((type) => Int)
+  appUserGroupId: number;
+
+  @Field((type) => Int, { nullable: true })
+  id: number;
+
+  @Field((type) => Int, { nullable: true })
+  statusId: number;
+}
+
+@InputType()
+class TagByNameInput {
+  @Field((type) => String)
+  searchedName: string;
+
+  @Field((type) => Int)
+  appUserGroupId: number;
+
+  @Field((type) => Int, { nullable: true })
+  statusId: number;
+}
+@InputType() 
+class DeleteTagInput {
+  @Field((type) => Int)
+  id: number;
+  @Field((type) => Int)
+  appUserGroupId: number;
 }
 
 @InputType()
@@ -41,9 +73,9 @@ class PartyTagsInput {
 }
 
 const createTagName = (name: string) => {
-  let result = name.toLowerCase();
+  //let result = name.toLowerCase();
 
-  result = result
+  let result = name
     .replace(new RegExp("\\s", "g"), "")
     .replace(new RegExp("[àáâãäå]", "g"), "a")
     .replace(new RegExp("æ", "g"), "ae")
@@ -68,6 +100,102 @@ const createTagName = (name: string) => {
 //@Service()
 @Resolver(Tag)
 export class TagResolver {
+
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => Tag)
+  async createTag(
+    @Arg("data") data: TagInput,
+    @Ctx() ctx: Context
+  ): Promise<Tag> {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    return await ctx.prisma.tag.create({
+      data: {
+        name: createTagName(data.name),
+        statusId: data?.statusId,
+        appUserGroupId: data.appUserGroupId,
+      },
+    });
+  }
+
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => Tag)
+  async updateTag(
+    @Arg("data") data: TagInput,
+    @Ctx() ctx: Context
+  ): Promise<Tag> {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    return await ctx.prisma.tag.update({
+      where: {
+        id: data.id
+      },
+      data: {
+        name: createTagName(data.name),
+        statusId: data?.statusId,
+        appUserGroupId: data.appUserGroupId,
+      },
+    });
+  }
+
+  @Authorized()
+  @Query((returns) => Tag, { nullable: true })
+  async tagById(
+    @Arg("data") data: TagByAppUserGroupInput,
+    @Ctx() ctx: Context
+  ) {
+    //let partyTypeName = data.partyTypeId === 1 ? `"Person"` : `"Organization"`
+
+    const queryResultArray = await ctx.prisma.$queryRaw<
+      [Tag]
+    >(Prisma.sql`
+      SELECT "Tag".*
+      FROM "Tag"
+      WHERE "Tag"."appUserGroupId" = ${data.appUserGroupId}
+      AND "Tag"."id" = ${data.id}
+    `);
+
+    if (!queryResultArray.length) return null;
+    return queryResultArray[0];
+  }
+
+  @Authorized()
+  @Query((returns) => [ExtendedTag])
+  async tagsByAppUserGroup(
+    @Arg("data") data: TagByAppUserGroupInput,
+    @Ctx() ctx: Context
+  ) {
+
+    //ensure user is authorized
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    let statusCondition = data.statusId
+      ? Prisma.sql`AND "Tag"."statusId" = ${data.statusId}`
+      : Prisma.empty;
+
+    return ctx.prisma.$queryRaw<ExtendedTag[]>(Prisma.sql`
+      SELECT "Tag".*, "Status"."name" AS "statusName"
+      FROM "Tag"
+      LEFT JOIN "Status" ON "Tag"."statusId" = "Status"."id"
+      WHERE "Tag"."appUserGroupId" = ${data.appUserGroupId}
+      AND ("Tag"."statusId" != 4 OR "Tag"."statusId" IS NULL)
+      ${statusCondition}
+    `);
+  }
+  
+
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => APIResponse || Tag)
   async createUpdateTag(

@@ -148,7 +148,7 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
       {getPartyRelationshipsRequest.data?.partyRelationships
         .personToOrganization.length > 0 && (
         <>
-          <Typography variant="subtitle1">{recordType === 'person' ? t('partyType.organizations') : t('partyType.people') }</Typography>
+          <Typography variant="subtitle1">{recordType === 'person' ? t('entityType.organizations') : t('entityType.people') }</Typography>
           <MultiLevelList
             currentRecordId={recordIdString}
             currentRecordType={recordType}
@@ -164,7 +164,7 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
       {getPartyRelationshipsRequest.data?.partyRelationships.personToPerson
         .length > 0 && (
         <>
-          <Typography variant="subtitle1">{t('partyType.people')}</Typography>
+          <Typography variant="subtitle1">{t('entityType.people')}</Typography>
           <MultiLevelList
             currentRecordId={recordIdString}
             currentRecordType={recordType}

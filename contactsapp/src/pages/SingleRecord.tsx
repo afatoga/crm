@@ -79,6 +79,22 @@ export const SingleRecord = () => {
         },
       });
     }
+    else if (recordType === "organization") {
+      deleteOrganizationHandler({
+        variables: {
+          partyId: recordId,
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
+    }
+    else if (recordType === "tag") {
+      deleteTagHandler({
+        variables: {
+          id: recordId,
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
+    }
   };
 
   const customFields = {
@@ -128,6 +144,13 @@ export const SingleRecord = () => {
         type: "text",
         required: true,
       },
+      // {
+      //   label: t('singleRecord.organizationType'),
+      //   name: "typeId",
+      //   type: "autocomplete", //"select",
+      //   required: true,
+      //   apiRequest: getOrganizationTypeListRequest,
+      // },
       {
         label: "status",
         name: "statusId",
@@ -465,6 +488,13 @@ export const SingleRecord = () => {
           {(recordType === "person" || recordType === "organization") && (
             <PartyRelationships recordType={recordType} />
           )}
+           {(recordType === "person" || recordType === "organization") && (
+            <TagsOfSingleParty recordType={recordType} />
+          )}
+           {(recordType === "tag") && (
+            <TaggedParties recordType={recordType} />
+          )}
+          
         </Box>
       </Box>
     </>

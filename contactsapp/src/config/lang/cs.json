@@ -14,11 +14,15 @@
         "options": "volby",
         "error": "chyba"
     },
-    "partyType": {
+    "entityType": {
         "organization": "Organizace",
         "organizations": "Organizace",
         "person": "Osoba",
-        "people": "Lidé"
+        "people": "Lidé",
+        "contact": "Kontaktní údaj",
+        "contacts": "Kontakty",
+        "tags": "Tagy",
+        "tag": "Tag"
     },
     "pageTitles": {
         "contactsApp": "ContactsApp",
@@ -31,7 +35,10 @@
         "settings": "Nastavení",
         "myAccount": "Můj účet",
         "accountSettings": "Nastavení účtu",
-        "preferences": "Nastavení aplikace"
+        "preferences": "Nastavení aplikace",
+        "newTag": "Nový tag",
+        "newPerson": "Nová osoba",
+        "newOrganization": "Nová organizace"
     },
     "singleRecord": {
         "relationships": "Vztahy",
@@ -55,6 +62,7 @@
         "save": "Uložit",
         "delete": "Smazat",
         "addNew": "Nový záznam",
-        "search": "Vyhledat"
+        "search": "Vyhledat",
+        "switchTo": "Přepnout na"
     }
 }

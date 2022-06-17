@@ -3,48 +3,36 @@ import { gql } from "@apollo/client";
 export const CREATE_TAG = gql`
   mutation (
     $name: String!
-    $surname: String!
-    $preDegree: String
-    $postDegree: String
-    $birthday: DateTime
     $appUserGroupId: Int!
     $statusId: Int
   ) {
     createTag(
       data: {
         name: $name
-        surname: $surname
-        preDegree: $preDegree
-        postDegree: $postDegree
-        birthday: $birthday
         appUserGroupId: $appUserGroupId
         statusId: $statusId
       }
     ) {
-      partyId
+      id
     }
   }
 `;
 export const UPDATE_TAG = gql`
   mutation (
-    $partyId: Int!
+    $id: Int!
     $name: String!
     $appUserGroupId: Int!
     $statusId: Int
   ) {
     updateTag(
       data: {
-        partyId: $partyId
+        id: $id
         name: $name
-        surname: $surname
-        preDegree: $preDegree
-        postDegree: $postDegree
-        birthday: $birthday
         appUserGroupId: $appUserGroupId
         statusId: $statusId
       }
     ) {
-      partyId
+      id
     }
   }
 `;

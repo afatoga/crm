@@ -19,11 +19,12 @@ import { useAuth } from "../hooks/useAuth";
 import { PageTitle } from "../components/PageTitle";
 //import { Email } from '@mui/icons-material';
 import { appRoles } from "../config";
-import { isEmptyObject } from "../utils/utilityFunctions";
+import { capitalizeString, isEmptyObject } from "../utils/utilityFunctions";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParty } from "../hooks/useParty";
 import { useTag } from "../hooks/useTag";
+import { useTranslation } from "react-i18next";
 
 // interface ILocation {
 //   hash: string;
@@ -40,6 +41,7 @@ import { useTag } from "../hooks/useTag";
 
 export const NewRecord = () => {
   // Local state
+  const {t} = useTranslation();
   const [recordType, setRecordType] = React.useState<string>("person");
 
   const { operations } = useParty();
@@ -240,7 +242,7 @@ export const NewRecord = () => {
           appUserGroupId: user.currentAppUserGroupId,
         },
       });
-    if (recordType === "person")
+    if (recordType === "tag")
       createTagHandler({
         variables: {
           ...values,
@@ -269,7 +271,7 @@ export const NewRecord = () => {
       const newRecordId = createOrganizationRequest.data?.createOrganization.partyId;
       navigate('/organizations/' + newRecordId);
     }
-    else if (createTagRequest.data?.createPerson.partyId) {
+    else if (createTagRequest.data?.createTag.id) {
       const newRecordId = createTagRequest.data?.createTag.id;
       navigate('/tags/' + newRecordId);
     }
@@ -291,7 +293,7 @@ export const NewRecord = () => {
         }}
       >
         <Box margin={"0 0 2rem"}>
-          <Typography margin={"0 0 0.5rem"}>Switch to: </Typography>
+          <Typography margin={"0 0 0.5rem"}>{t('userActions.switchTo')}:</Typography>
           <FormControl>
             <RadioGroup
               row
@@ -303,23 +305,21 @@ export const NewRecord = () => {
               <FormControlLabel
                 value="person"
                 control={<Radio />}
-                label="Person"
+                label={t('entityType.person')}
               />
               <FormControlLabel
                 value="organization"
                 control={<Radio />}
-                label="Organization"
+                label={t('entityType.organization')}
               />
-              <FormControlLabel value="tag" control={<Radio />} label="Tag" />
+              <FormControlLabel value="tag" control={<Radio />} label={t('entityType.tag')} />
             </RadioGroup>
           </FormControl>
         </Box>
 
         <PageTitle
           title={
-            location.pathname.replaceAll("/", " ").trimStart() +
-            " " +
-            recordType
+            t(`pageTitles.new${capitalizeString(recordType)}`)
           }
         />
         {/* <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
@@ -372,7 +372,7 @@ export const NewRecord = () => {
               </Button>
               {!isSubmitting && createPersonRequest.error && (
                 <Alert severity="error">
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>{t('general.error')}</AlertTitle>
                   {createPersonRequest.error.message}
                 </Alert>
               )}

@@ -20,5 +20,10 @@ export class Tag {
 
   @Field((type) => Number, {nullable:true})
   appUserGroupId: number | null
+}
 
+@ObjectType()
+export class ExtendedTag extends Tag {
+  @Field((type) => String, { nullable: true })
+  statusName: string | null
 }

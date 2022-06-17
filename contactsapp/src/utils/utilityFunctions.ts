@@ -48,6 +48,10 @@ export const getPageTitleCode = (locationPathname: string) => {
 	return titleCode;
 }
 
+export const capitalizeString = (str: string) => {
+	return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 // export const getPageTitleCode = (location: any) => {
 // 	let name = location.pathname.replaceAll("/", "-"); // from /account/settings --> -account-settings
 // 	return `pageTitles.${name.substring(1)}`;

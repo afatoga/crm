@@ -6,9 +6,7 @@
 type Query {
   login(data: AppUserLogin!): AppUserLoginResponse!
   allAppUsers(data: AppUserGroupUniqueInput!): [AppUser!]!
-  allPersons: [Person!]!
-  allOrganizations: [Person!]!
-  personsByAppUserGroup(data: PartyByAppUserGroupInput!): [Person!]
+  personsByAppUserGroup(data: PartyByAppUserGroupInput!): [Person!]!
   organizationsByAppUserGroup(data: PartyByAppUserGroupInput!): [Organization!]
   personById(data: PartyByAppUserGroupInput!): ExtendedPerson
   organizationById(data: PartyByAppUserGroupInput!): ExtendedOrganization
@@ -16,6 +14,8 @@ type Query {
   partyRelationships(appUserGroupId: Int!, partyId: Int!): SortedPartyRelationships!
   partyRelationshipTypeList: [PartyRelationshipType!]!
   singlePartyNotes(data: TargetNotesInput!): [Note!]
+  tagById(data: TagByAppUserGroupInput!): Tag
+  tagsByAppUserGroup(data: TagByAppUserGroupInput!): [ExtendedTag!]!
   singlePartyTags(data: PartyTagsInput!): [Tag!]
   partyContacts(data: PartyContactsInput!): [Contact!]
   contactsByProps(data: ContactInput!): [Contact!]
@@ -149,6 +149,22 @@ type Tag {
 # The javascript `Date` as string. Type represents date and time as the ISO Date string.
 scalar DateTime
 
+input TagByAppUserGroupInput {
+  appUserGroupId: Int!
+  id: Int
+  statusId: Int
+}
+
+type ExtendedTag {
+  id: ID!
+  statusId: Float
+  name: String!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  appUserGroupId: Float
+  statusName: String
+}
+
 input PartyTagsInput {
   partyId: Float!
 }
@@ -177,7 +193,7 @@ input ContactInput {
   value: String
   mainPartyId: Float
   partyRelationshipId: Float
-  operation: String
+  appUserGroupId: Float!
 }
 
 type Status {
@@ -189,14 +205,20 @@ type Mutation {
   createUpdateAppUser(data: AppUserInput!): APIResponse!
   createPerson(data: PersonInput!): Person!
   updatePerson(data: PersonInput!): Person!
-  deletePerson(data: DeletePersonInput!): APIResponse!
-  createUpdateOrganization(data: OrganizationInput!): Organization!
+  deletePerson(data: DeletePartyInput!): APIResponse!
+  createOrganization(data: OrganizationInput!): Organization!
+  updateOrganization(data: OrganizationInput!): Organization!
+  deleteOrganization(data: DeletePartyInput!): APIResponse!
   createPartyRelationship(data: PartyRelationshipInput!): PartyRelationship!
   updatePartyRelationship(data: UpdatePartyRelationshipInput!): PartyRelationship!
   deletePartyRelationship(appUserGroupId: Int!, id: Int!): APIResponse!
   createUpdateNote(data: NoteInput!): APIResponse!
+  createTag(data: TagInput!): Tag!
+  updateTag(data: TagInput!): Tag!
   createUpdateTag(data: TagInput!): APIResponse!
-  createUpdateContact(data: ContactInput!): Contact!
+  deleteContact(data: ContactInput!): Contact!
+  createContact(data: ContactInput!): Contact!
+  updateContact(data: ContactInput!): Contact!
 }
 
 type APIResponse {
@@ -232,17 +254,17 @@ input PersonInput {
   appUserGroupId: Int
 }
 
-input DeletePersonInput {
+input DeletePartyInput {
   partyId: Int!
   appUserGroupId: Int!
 }
 
 input OrganizationInput {
-  partyId: Float
-  statusId: Float
+  partyId: Int
+  statusId: Int
   name: String!
-  organizationTypeId: Float
-  appUserGroupId: Float
+  typeId: Int
+  appUserGroupId: Int
 }
 
 type PartyRelationship {
@@ -276,9 +298,9 @@ input NoteInput {
 }
 
 input TagInput {
-  id: Float
-  statusId: Float
-  name: String
-  partyId: Float
-  operation: String!
+  id: Int
+  statusId: Int
+  name: String!
+  partyId: Int
+  appUserGroupId: Int
 }

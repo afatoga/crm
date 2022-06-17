@@ -23,6 +23,8 @@ import { SingleRecord } from '../pages/SingleRecord';
 import { AccountSettings } from '../pages/AccountSettings';
 
 import { Route } from '../types/Route';
+import { Organizations } from '../pages/Organizations';
+import { Tags } from '../pages/Tags';
 
 const routes: Array<Route> = [
   {
@@ -73,6 +75,7 @@ const routes: Array<Route> = [
     isProtected: true,
     isEnabled: true,
     icon: StoreIcon,
+    component: Organizations
   },
   {
     key: 'router-singleOrganization',
@@ -92,6 +95,7 @@ const routes: Array<Route> = [
     isProtected: true,
     isEnabled: true,
     icon: TagIcon,
+    component: Tags
   },
   {
     key: 'router-singleTag',

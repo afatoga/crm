@@ -61,7 +61,7 @@ class PersonInput {
 }
 
 @InputType()
-class DeletePersonInput {
+class DeletePartyInput {
   @Field((type) => Int)
   partyId: number;
 
@@ -71,19 +71,19 @@ class DeletePersonInput {
 
 @InputType()
 class OrganizationInput {
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   partyId: number;
 
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   statusId: number;
 
   @Field()
   name: string;
 
-  @Field({ nullable: true })
-  organizationTypeId: number;
+  @Field((type) => Int, { nullable: true })
+  typeId: number;
 
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   appUserGroupId: number;
 }
 
@@ -215,7 +215,7 @@ export class PartyResolver {
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => APIResponse)
   async deletePerson(
-    @Arg("data") data: DeletePersonInput,
+    @Arg("data") data: DeletePartyInput,
     @Ctx() ctx: Context
   ) {
     if (
@@ -239,53 +239,103 @@ export class PartyResolver {
     };
   }
 
-  @Query(() => [Person])
-  async allPersons(@Ctx() ctx: Context) {
-    return ctx.prisma.person.findMany();
-  }
-
+  // @Query(() => [Person])
+  // async allPersons(@Ctx() ctx: Context) {
+  //   return ctx.prisma.person.findMany();
+  // }
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Organization)
-  async createUpdateOrganization(
+  async createOrganization(
     @Arg("data") data: OrganizationInput,
     @Ctx() ctx: Context
   ): Promise<Organization> {
-    if (!ctx.currentUser) throw new Error();
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
 
-    if (data.partyId) {
-      //update
-      return ctx.prisma.organization.update({
-        where: {
-          partyId: data.partyId,
-        },
-        data: {
-          name: data.name,
-          typeId: data?.organizationTypeId,
-        },
-      });
-    }
-
-    //create
     const party = await ctx.prisma.party.create({
       data: {
         typeId: 2,
-        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        statusId: data.statusId && data.statusId,
+        appUserGroupId: data.appUserGroupId,
       },
     });
 
-    return ctx.prisma.organization.create({
+    return await ctx.prisma.organization.create({
       data: {
         partyId: party.id,
         name: data.name,
-        typeId: data?.organizationTypeId,
+        typeId: data?.typeId,
+      },
+    });
+  }
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => Organization)
+  async updateOrganization(
+    @Arg("data") data: OrganizationInput,
+    @Ctx() ctx: Context
+  ): Promise<Organization> {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    if (data.statusId)
+      await ctx.prisma.party.update({
+        where: {
+          id: data.partyId,
+        },
+        data: {
+          statusId: data.statusId,
+        },
+      });
+
+    //update
+    return await ctx.prisma.organization.update({
+      where: {
+        partyId: data.partyId
+      },
+      data: {
+        name: data.name,
+        typeId: data?.typeId,
       },
     });
   }
 
-  @Query(() => [Person])
-  async allOrganizations(@Ctx() ctx: Context) {
-    return ctx.prisma.organization.findMany();
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => APIResponse)
+  async deleteOrganization(
+    @Arg("data") data: DeletePartyInput,
+    @Ctx() ctx: Context
+  ) {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    await ctx.prisma.party.update({
+      where: {
+        id: data.partyId,
+      },
+      data: {
+        statusId: 4, //archive CONST
+      },
+    });
+
+    return {
+      status: "SUCCESS",
+      message: "organization was archived",
+    };
   }
+
+  // @Query(() => [Person])
+  // async allOrganizations(@Ctx() ctx: Context) {
+  //   return ctx.prisma.organization.findMany();
+  // }
 
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => PartyRelationship)
@@ -452,11 +502,19 @@ export class PartyResolver {
   }
 
   @Authorized()
-  @Query((returns) => [Person], { nullable: true })
+  @Query((returns) => [Person])
   async personsByAppUserGroup(
     @Arg("data") data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
+
+    //ensure user is authorized
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
     let statusCondition = data.statusId
       ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}`
       : Prisma.empty;
@@ -480,30 +538,43 @@ export class PartyResolver {
     //ensure user is authorized
     if (
       !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.id, ctx.appRoles)
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
     )
       throw new Error("Not authorized");
 
-    return ctx.prisma.appUserGroup
-      .findUnique({
-        where: {
-          id: data.appUserGroupId,
-        },
-      })
-      .parties({
-        where: {
-          typeId: data.partyTypeId,
-          statusId: data.statusId && data.statusId,
-        },
-        include: {
-          organization: true,
-        },
-      })
-      .then((res) => {
-        return res.map((item) => {
-          return item.organization;
-        });
-      });
+      let statusCondition = data.statusId
+      ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}`
+      : Prisma.empty;
+
+    return ctx.prisma.$queryRaw<Organization[]>(Prisma.sql`
+      SELECT "Organization".* 
+      FROM "Party"
+      INNER JOIN "Organization" ON "Party"."id" = "Organization"."partyId"
+      WHERE "Party"."appUserGroupId" = ${data.appUserGroupId}
+      AND ("Party"."statusId" != 4 OR "Party"."statusId" IS NULL)
+      ${statusCondition}
+    `);
+
+    // return ctx.prisma.appUserGroup
+    //   .findUnique({
+    //     where: {
+    //       id: data.appUserGroupId,
+    //     },
+    //   })
+    //   .parties({
+    //     where: {
+    //       typeId: data.partyTypeId,
+    //       statusId: data.statusId && data.statusId,
+    //     },
+    //     include: {
+    //       organization: true,
+    //     },
+    //   })
+    //   .then((res) => {
+    //     return res.map((item) => {
+    //       return item.organization;
+    //     });
+    //   });
   }
 
   @Authorized()
