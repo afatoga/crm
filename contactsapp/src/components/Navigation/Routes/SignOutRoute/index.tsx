@@ -1,10 +1,12 @@
 import { ListItemButton, ListItemIcon, ListItemText, IconButton, styled } from '@mui/material';
 import ExitToApp from '@mui/icons-material/ExitToApp';
 import { useAuth } from '../../../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export const SignOutRoute = () => {
 
   const {signout} = useAuth();
+  const {t} = useTranslation()
 
   const handleSignOutClick = () => {
     signout();
@@ -17,7 +19,7 @@ export const SignOutRoute = () => {
           <ExitToApp />
         </IconButton>
       </ListItemIcon>
-      <ListItemText primary="Sign Out" />
+      <ListItemText primary={t('userActions.signOut')} />
     </StyledListItemButton>
   );
 };

@@ -1,15 +1,4 @@
-{
-    "partyType": {
-        "organization": "Organizace",
-        "organizations": "Organizace",
-        "person": "Osoba",
-        "people": "Lidé"
-    },
-    "singleRecord": {
-        "relationships": "Vztahy",
-        "tags": "Tagy",
-        "profile": "Profil"
-    },
+{   
     "accountSettings": {
         "language": {
             "label": "jazyk",
@@ -17,9 +6,44 @@
             "cs": "čeština"
         }
     },
+    "general": {
+        "more": "více",
+        "options": "volby"
+    },
+    "partyType": {
+        "organization": "Organizace",
+        "organizations": "Organizace",
+        "person": "Osoba",
+        "people": "Lidé"
+    },
     "pageTitles": {
         "contactsApp": "ContactsApp",
+        "people": "Lidé",
+        "organizations": "Organizace",
+        "tags": "Tagy",
+        "settings": "Nastavení",
         "myAccount": "Můj účet",
-        "accountSettings": "Nastavení účtu"
+        "accountSettings": "Nastavení účtu",
+        "preferences": "Nastavení aplikace"
+    },
+    "singleRecord": {
+        "relationships": "Vztahy",
+        "tags": "Tagy",
+        "firstname": "jméno",
+        "surname": "příjmení",
+        "preDegree": "titul před jménem",
+        "postDegree": "titul za jménem",
+        "birthday": "datum narození",
+        "name": "název",
+        "profile": "profil"
+    },
+    "userActions": {
+        "login": "Přihlásit se",
+        "signOut": "Odhlásit se",
+        "toggleTheme": "Přepnout šablonu",
+        "save": "Uložit",
+        "delete": "Smazat",
+        "addNew": "Nový záznam",
+        "search": "Vyhledat"
     }
 }

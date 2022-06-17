@@ -23,6 +23,7 @@ import { isEmptyObject } from "../utils/utilityFunctions";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParty } from "../hooks/useParty";
+import { useTag } from "../hooks/useTag";
 
 // interface ILocation {
 //   hash: string;
@@ -42,8 +43,13 @@ export const NewRecord = () => {
   const [recordType, setRecordType] = React.useState<string>("person");
 
   const { operations } = useParty();
+  const { operations: tagOperations } = useTag();
   const [createPersonHandler, createPersonRequest] =
     operations.createPerson;
+  const [createOrganizationHandler, createOrganizationRequest] =
+    operations.createOrganization;
+  const [createTagHandler, createTagRequest] =
+    tagOperations.createTag;
 
   const location: any = useLocation();
 
@@ -105,12 +111,12 @@ export const NewRecord = () => {
         type: "text",
         required: false,
       },
-      {
-        label: "Status",
-        name: "statusId",
-        type: "number", //"select",
-        required: true,
-      },
+      // {
+      //   label: "Status",
+      //   name: "statusId",
+      //   type: "number", //"select",
+      //   required: false,
+      // },
     ],
     organization: [
       {
@@ -119,8 +125,27 @@ export const NewRecord = () => {
         type: "text",
         required: true,
       },
+      // {
+      //   label: "Status",
+      //   name: "statusId",
+      //   type: "number", //"select",
+      //   required: false,
+      // },
     ],
-    tag: [],
+    tag: [
+      {
+        label: "Name",
+        name: "name",
+        type: "text",
+        required: true,
+      },
+      // {
+      //   label: "Status",
+      //   name: "statusId",
+      //   type: "number", //"select",
+      //   required: true,
+      // },
+    ],
   };
 
   // Extend customFields with validation based on type
@@ -133,7 +158,7 @@ export const NewRecord = () => {
             validationType: "string",
             validations: [
               {
-                type: customField.required ? "required" : null,
+                type: customField.required ? "required" : "nullable",
                 params: ["Required"],
               },
               {
@@ -195,31 +220,36 @@ export const NewRecord = () => {
     mode: "onTouched",
   });
 
-  const onSubmit = React.useCallback((values) => {
-    console.log(recordType);
+  const onSubmit = React.useCallback((values:any) => {
 
     if (recordType === "person")
       createPersonHandler({
         variables: {
           ...values,
           birthday: values.birthday.length ? values.birthday : null,
-          statusId: values.statusId.length ? parseInt(values.statusId) : null,
+          //statusId: values.statusId.length ? parseInt(values.statusId) : null,
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
+    if (recordType === "organization")
+      createOrganizationHandler({
+        variables: {
+          ...values,
+          //birthday: values.birthday.length ? values.birthday : null,
+          //statusId: values.statusId.length ? parseInt(values.statusId) : null,
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
+    if (recordType === "person")
+      createTagHandler({
+        variables: {
+          ...values,
+          // statusId: values.statusId.length ? parseInt(values.statusId) : null,
           appUserGroupId: user.currentAppUserGroupId,
         },
       });
   }, [recordType]);
 
-  //   {
-  //     "login": {
-  //         "appUser": {
-  //             "id": "2",
-  //             "appUserGroupRelationships": [],
-  //             "__typename": "AppUser"
-  //         },
-  //         "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZmF0b2dhQGdtYWlsLmNvbSIsImlhdCI6MTY1MDY0MDI3NiwiZXhwIjoxNjUwNjQxMTc2fQ.f4tMiTcAx-LdvDC_-TiyMBQxMFEt0HKgd603LxGoVa4",
-  //         "__typename": "AppUserLoginResponse"
-  //     }
-  // }
 
   const handleChangeRecordType = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -235,7 +265,15 @@ export const NewRecord = () => {
       const newRecordId = createPersonRequest.data?.createPerson.partyId;
       navigate('/people/' + newRecordId);
     }
-  }, [createPersonRequest])
+    else if (createOrganizationRequest.data?.createOrganization.partyId) {
+      const newRecordId = createOrganizationRequest.data?.createOrganization.partyId;
+      navigate('/organizations/' + newRecordId);
+    }
+    else if (createTagRequest.data?.createPerson.partyId) {
+      const newRecordId = createTagRequest.data?.createTag.id;
+      navigate('/tags/' + newRecordId);
+    }
+  }, [createPersonRequest, createOrganizationRequest,createTagRequest])
 
 
 

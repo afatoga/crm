@@ -43,9 +43,10 @@ export const SingleRecord = () => {
     operations.getStatusList;
 
   const getRecordData = (attrName: string = null) => {
-    if (!recordLoaded) return null;
+    if (!recordLoaded) return "";
 
     let recordData = {};
+
     if (recordType === 'person') {
       recordData = getPersonByIdRequest.data?.personById;
     }
@@ -56,10 +57,10 @@ export const SingleRecord = () => {
       recordData = getTagByIdRequest.data?.tagById;
     }
 
-    if (!attrName) return recordData;
+    if (!recordData || isEmptyObject(recordData)) return ""; //recordData is undefined
 
-    console.log(attrName, recordData);
-    return (recordData?.hasOwnProperty(attrName)) ? recordData[attrName] : "";
+    console.log(recordLoaded, 'attr:',attrName,'recordData:', recordData);
+    return (recordData?.hasOwnProperty(attrName)) ? recordData[attrName] === null ? "" : recordData[attrName] : "";
 
     //return (typeof recordData[attrName] !== 'undefined') ? recordData[attrName] : "";
   } 
@@ -178,7 +179,7 @@ export const SingleRecord = () => {
             validationType: "string",
             validations: [
               {
-                type: customField.required ? "required" : null,
+                type: customField.required ? "required" : "nullable",
                 params: ["Required"],
               },
               {
@@ -265,6 +266,8 @@ export const SingleRecord = () => {
   React.useEffect(() => {
     //get data of single record
 
+    setRecordLoaded(false);
+
     const variables = {
       id: recordId,
       appUserGroupId: user.currentAppUserGroupId
@@ -283,32 +286,30 @@ export const SingleRecord = () => {
       getTagByIdHandler({variables:variables})
     }
 
-    setRecordLoaded(false);
-
   }, [recordId, recordType]);
 
   React.useEffect(() => {
 
-    if (!recordLoaded && getPersonByIdRequest.data?.personById) { //exists
+    if (!recordLoaded && getPersonByIdRequest.data?.personById && recordType === "person") { //exists
      
       const loadedData = getPersonByIdRequest.data.personById;
       setRecordLoaded(true);
-      // console.log('record loaded', personData)
- 
+
       reset({values:{
         name: loadedData.name,
         surname: loadedData.surname,
-        statusId: loadedData.statusid
+        statusId: loadedData.statusId
       }})
     }
 
-    if (!recordLoaded && getOrganizationByIdRequest.data?.organizationById) { //exists
-     
+    if (!recordLoaded && getOrganizationByIdRequest.data?.organizationById && recordType === "organization") { //exists
+ 
       const loadedData = getOrganizationByIdRequest.data.organizationById;
+
       setRecordLoaded(true);
       reset({values:{
         name: loadedData.name,
-        statusId: loadedData.statusid
+        statusId: loadedData.statusId
       }})
 
     }

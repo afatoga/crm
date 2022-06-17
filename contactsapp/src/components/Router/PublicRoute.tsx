@@ -11,7 +11,7 @@ const PublicRoute = ({ children }: Props): JSX.Element => {
   const { token } = useAuth();
 
  
-  if (token) return <Navigate to="/dashboard" />;
+  if (token) return <Navigate to="/people" />;
 
   return children;
 };
