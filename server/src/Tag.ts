@@ -27,3 +27,33 @@ export class ExtendedTag extends Tag {
   @Field((type) => String, { nullable: true })
   statusName: string | null
 }
+
+@ObjectType()
+class TagParty {
+  @Field((type) => ID)
+  tagId: number
+
+  @Field((type) => ID)
+  partyId: number
+}
+
+@ObjectType()
+export class ExtendedTagParty extends TagParty {
+  @Field((type) => ID) 
+  partyTypeId: number
+
+  @Field((type) => String, { nullable: true }) 
+  tagName: string | null
+
+  @Field((type) => String, { nullable: true }) 
+  personFullName: string | null
+
+  @Field((type) => String, { nullable: true }) 
+  organizationName: string | null
+
+  @Field((type) => ID)  //partyTypeId
+  typeId: number
+
+  @Field((type) => ID)
+  partyId: number
+}

@@ -16,6 +16,8 @@ import { useTag } from "../hooks/useTag";
 import { PartyRelationships } from "../components/Templates/PartyRelationships";
 import { CustomFormField } from "../components/Form/CustomFormField";
 import { useTranslation } from "react-i18next";
+import { TaggedParties } from "../components/Templates/TaggedParties";
+import { SinglePartyTags } from "../components/Templates/SinglePartyTags";
 
 export const SingleRecord = () => {
   const {t} = useTranslation();
@@ -489,10 +491,10 @@ export const SingleRecord = () => {
             <PartyRelationships recordType={recordType} />
           )}
            {(recordType === "person" || recordType === "organization") && (
-            <TagsOfSingleParty recordType={recordType} />
+            <SinglePartyTags />
           )}
            {(recordType === "tag") && (
-            <TaggedParties recordType={recordType} />
+            <TaggedParties />
           )}
           
         </Box>

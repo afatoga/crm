@@ -1,7 +1,8 @@
 import {  useMutation, useLazyQuery, makeVar, useApolloClient  } from '@apollo/client'; /*makeVar,useLazyQuery*/
 
 import {
-    GET_TAGPARTY,
+    GET_TAGGED_PARTIES,
+    GET_SINGLE_PARTY_TAGS,
     GET_TAGS,
     GET_TAGS_BY_NAME,
     GET_TAG_BY_ID,
@@ -56,7 +57,9 @@ export function useTag() {
 
     //const getStatusList = useLazyQuery(GET_STATUS_LIST);
 
-    const getTaggedParties = useLazyQuery(GET_TAGPARTY);
+    const getTaggedParties = useLazyQuery(GET_TAGGED_PARTIES);
+
+    const getSinglePartyTags = useLazyQuery(GET_SINGLE_PARTY_TAGS);
 
 
 
@@ -94,6 +97,9 @@ export function useTag() {
     })
     const deleteTagParty = useMutation(DELETE_TAGPARTY, {
         fetchPolicy: 'network-only',
+        refetchQueries: [
+            GET_SINGLE_PARTY_TAGS
+        ]
     })
 
 
@@ -112,6 +118,8 @@ export function useTag() {
             updateTag,
             deleteTag,
             getTaggedParties,
+            getSinglePartyTags,
+            deleteTagParty
             // createPartyRelationship,
             // deletePartyRelationship
         }

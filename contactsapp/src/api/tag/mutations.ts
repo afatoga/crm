@@ -71,12 +71,16 @@ export const CREATE_TAGPARTY = gql`
 
 export const DELETE_TAGPARTY = gql`
   mutation (
-    $id: Int!
+    $tagId: Int!
+    $partyId: Int!
     $appUserGroupId: Int!
   ) {
     deleteTagParty(
-      id: $id,
+      data: {
+      tagId: $tagId,
+      partyId: $partyId,
       appUserGroupId: $appUserGroupId
+    }
     ) {
       status
     }

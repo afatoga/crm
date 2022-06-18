@@ -42,23 +42,25 @@ export const GET_TAG_BY_ID = gql`
 `;
 
 
-export const GET_TAGPARTY = gql`
-  query ($tagId: Int, $partyId: Int, $appUserGroupId: Int!) {
-    getTaggedParties(partyId: $partyId, appUserGroupId: $appUserGroupId) {
+export const GET_SINGLE_PARTY_TAGS = gql`
+  query ($partyId: Int!, $appUserGroupId: Int!) {
+    singlePartyTags(data: {partyId: $partyId, appUserGroupId: $appUserGroupId}) {
+      
+        id
+        name
+      
+    }
+  }
+`;
+
+export const GET_TAGGED_PARTIES = gql`
+  query ($tagId: Int!, $appUserGroupId: Int!) {
+    taggedParties(tag: $tagId, appUserGroupId: $appUserGroupId) {
       
         id
         partyId
         tagId
       
-    }
-  }
-`;
-export const GET_PARTYRELATIONSHIP_TYPE_LIST = gql`
-  query {
-    partyRelationshipTypeList {
-      id
-      name
-      category
     }
   }
 `;

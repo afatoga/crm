@@ -113,7 +113,7 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
           xs: "100%", // theme.breakpoints.up('xs')
           md: "40%", // theme.breakpoints.up('sm')
           // md: 300, // theme.breakpoints.up('md')
-          lg: 360, // theme.breakpoints.up('lg')
+          lg: 600, // theme.breakpoints.up('lg')
           //xl: 500, // theme.breakpoints.up('xl')
         },
         padding: {

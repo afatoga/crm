@@ -10,7 +10,7 @@ import {
   Authorized,
   Int
 } from "type-graphql";
-import { Tag, ExtendedTag } from "./Tag";
+import { Tag, ExtendedTag, ExtendedTagParty } from "./Tag";
 import { APIResponse } from "./GlobalObjects";
 import { Context, ICurrentUser } from "./context";
 import { isUserAuthorized } from "./authChecker";
@@ -65,11 +65,30 @@ class DeleteTagInput {
   @Field((type) => Int)
   appUserGroupId: number;
 }
+@InputType() 
+class DeleteTagPartyInput {
+  @Field((type) => Int)
+  partyId: number;
+  @Field((type) => Int)
+  tagId: number;
+  @Field((type) => Int)
+  appUserGroupId: number;
+}
 
 @InputType()
-class PartyTagsInput {
-  @Field()
+class SinglePartyTagsInput {
+  @Field((type) => Int)
   partyId: number;
+  @Field((type) => Int)
+  appUserGroupId: number;
+}
+
+@InputType()
+class TaggedPartiesInput {
+  @Field((type) => Int)
+  tagId: number;
+  @Field((type) => Int)
+  appUserGroupId: number;
 }
 
 const createTagName = (name: string) => {
@@ -145,6 +164,32 @@ export class TagResolver {
       },
     });
   }
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => APIResponse)
+  async deleteTagParty(
+    @Arg("data") data: DeleteTagPartyInput,
+    @Ctx() ctx: Context
+  ): Promise<APIResponse> {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    await ctx.prisma.tagParty.delete({
+      where: {
+        partyId_tagId: {
+          partyId: data.partyId,
+          tagId: data.tagId
+        }
+      }
+    });
+
+    return {
+      status: "SUCCESS",
+      message: "party was untagged",
+    };
+  }
 
   @Authorized()
   @Query((returns) => Tag, { nullable: true })
@@ -194,166 +239,76 @@ export class TagResolver {
       ${statusCondition}
     `);
   }
-  
 
-  @Authorized(["MOD", "ADMIN"])
-  @Mutation((returns) => APIResponse || Tag)
-  async createUpdateTag(
-    @Arg("data") data: TagInput,
+
+  @Authorized()
+  @Query((returns) => [Tag])
+  async singlePartyTags(
+    @Arg("data") data: SinglePartyTagsInput,
     @Ctx() ctx: Context
-  ): Promise<APIResponse | Tag> {
-
-    if (!ctx.currentUser) throw new Error("Only for logged in users");
-
-    if (data.partyId) {
-      let target = await ctx.prisma.party.findFirst({
-        where: {
-          id: data.partyId,
-          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
-        },
-      });
-
-      //look for target object
-
-      if (!target) throw new Error("Target party does not exist");
-    }
-
-    if (data.operation === 'UPDATE') {
-      if (!data.id) throw new Error("fill tag id");
-
-      let currentTag = await ctx.prisma.tag.findFirst({
-        where: {
-          id: data.id,
-          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
-        },
-      });
-
-      if (!currentTag)
-        throw new Error(
-          "tag does not exist or you are not authorized to update"
-        );
-
-     
-
-      await ctx.prisma.tag.update({
-        where: {
-          id: data.id,
-        },
-        data: {
-          name: data.name && createTagName(data.name),
-          statusId: data.statusId ? data.statusId : undefined,
-        },
-      });
-
-
-
-      return { status: 'SUCCESS', message: "tag was updated" };
-    } else if (data.operation === 'CREATE') {
-      if (!data.name || !data.name.length) throw new Error("tag name is required");
-
-      // check if unique name
-      let currentTag = await ctx.prisma.tag.findFirst({
-        where: {
-          name: createTagName(data.name),
-          appUserGroupId: ctx.currentUser.currentAppUserGroupId,
-        },
-      });
-
-      if (!currentTag) {
-        //create
-        currentTag = await ctx.prisma.tag.create({
-          data: {
-            name: createTagName(data.name),
-            statusId: data.statusId ? data.statusId : undefined,
-            appUserGroupId: ctx.currentUser.currentAppUserGroupId,
-          },
-        });
-      }
-
-      if (data.partyId) { // assign tag to party
-        
-        const relationExist = await ctx.prisma.tagParty.findUnique({
-          where: {
-            partyId_tagId: {
-              partyId: data.partyId,
-              tagId: currentTag.id,
-            },
-          },
-        });
+  ) {
+//ensure user is authorized
+if (
+  !ctx.currentUser ||
+  !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+)
+  throw new Error("Not authorized");
+    
   
-        if (data.partyId && !relationExist)
-          await ctx.prisma.tagParty.create({
-            data: {
-              partyId: data.partyId,
-              tagId: currentTag.id,
-            },
-          });
-      
-      }
-
-      return currentTag;
-      //return { status: "SUCCESS", message: "tag was created" };
-    }
-
-    else  if (data.operation === 'DELETE') {
-
-      if (!data.id) throw new Error("fill tag id");
-
-      //delete relationships
-
-      await ctx.prisma.tagParty.deleteMany({
-        where: {
-          tagId: data.id,
-        },
-      });
-
-      await ctx.prisma.noteTag.deleteMany({
-        where: {
-          tagId: data.id,
-        },
-      });
-
-      // delete tag
-      return await ctx.prisma.tag.delete({
-        where: {
-          id: data.id,
-        },
-      });
-
-      // return {
-      //   status: "SUCCESS",
-      //   message: "tag and its relations were deleted",
-      // };
-    }
-
-    throw new Error('invalid request')
+  return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
+  SELECT "Tag".*
+  FROM "TagParty"
+  INNER JOIN "Tag" ON "TagParty"."tagId" = "Tag"."id"
+    AND "Tag"."appUserGroupId" = ${data.appUserGroupId}
+    AND ("Tag"."statusId" != 4 OR "Tag"."statusId" IS NULL)
+  WHERE "TagParty"."partyId" = ${data.partyId}
+`);
   }
 
   @Authorized()
-  @Query((returns) => [Tag], { nullable: true })
-  async singlePartyTags(
-    @Arg("data") data: PartyTagsInput,
+  @Query((returns) => [ExtendedTagParty], { nullable: true })
+  async taggedParties(
+    @Arg("data") data: TaggedPartiesInput,
     @Ctx() ctx: Context
   ) {
-    if (!ctx.currentUser) throw new Error("Only for logged in users");
+//ensure user is authorized
+if (
+  !ctx.currentUser ||
+  !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+)
+  throw new Error("Not authorized");
 
-    return ctx.prisma.tagParty
-      .findMany({
-        where: {
-          partyId: data.partyId,
-        },
-        include: {
-          tag: true,
-        },
-      })
-      .then((foundItems) => {
-        return foundItems.flatMap((item: any) => {
-          return item.tag.appUserGroupId ===
-            ctx.currentUser?.currentAppUserGroupId
-            ? item.tag
-            : [];
-        });
-      });
+  return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
+  SELECT CONCAT ("Person"."surname", ' ', "Person"."name") AS "personFullName", 
+    "Organization"."name" AS "organizationName",
+    "Party"."typeId"
+    "TagParty"."partyId" 
+  FROM "TagParty"
+  INNER JOIN "Party" ON "TagParty"."partyId" = "Party"."id"
+    AND "Party"."appUserGroupId" = ${data.appUserGroupId}
+    AND ("Party"."statusId" != 4 OR "Party"."statusId" IS NULL)
+  LEFT JOIN "Person" ON "TagParty"."partyId" = "Person"."partyId"
+  LEFT JOIN "Organization" ON "TagParty"."partyId" = "Organization"."partyId"
+  WHERE "TagParty"."tagId" = ${data.tagId}
+`);
+
+    // return ctx.prisma.tagParty
+    //   .findMany({
+    //     where: {
+    //       partyId: data.partyId,
+    //     },
+    //     include: {
+    //       tag: true,
+    //     },
+    //   })
+    //   .then((foundItems) => {
+    //     return foundItems.flatMap((item: any) => {
+    //       return item.tag.appUserGroupId ===
+    //         ctx.currentUser?.currentAppUserGroupId
+    //         ? item.tag
+    //         : [];
+    //     });
+    //   });
   }
 
   // appUserGroupId:

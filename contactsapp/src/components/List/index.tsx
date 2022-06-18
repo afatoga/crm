@@ -27,7 +27,7 @@ interface IMultiLevelList {
 
 
 
-export const MultiLevelList = ({currentRecordId = undefined, currentRecordType, data, deleteItem, listName}: IMultiLevelList) => {
+export const MultiLevelList = ({currentRecordId, currentRecordType, data, deleteItem, listName}: IMultiLevelList) => {
     const navigate = useNavigate();
 
     const {operations} = useParty();
