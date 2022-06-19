@@ -434,7 +434,7 @@ export const SingleRecord = () => {
         >
           <Box
             sx={{
-              marginBottom: '1.5rem',
+              margin: '0 1rem 1.5rem',
               width: {
                 xs: "100%", // theme.breakpoints.up('xs')
                 sm: "60%", //400, // theme.breakpoints.up('sm')
@@ -471,8 +471,9 @@ export const SingleRecord = () => {
                     {t('userActions.save')}
                   </Button>
                   <Button
-                    //variant={"contained"}
+                    variant={"outlined"}
                     type="button"
+                    color="warning"
                     sx={{ width: "120px" }}
                     onClick={deleteRecord}
                   >

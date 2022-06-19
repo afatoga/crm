@@ -20,7 +20,7 @@ type Query {
   taggedParties(data: TaggedPartiesInput!): [ExtendedTagParty!]
   tagsByName(data: TagsByNameInput!): [ExtendedTag!]!
   partyPrivateContacts(data: PartyContactsInput!): [ExtendedContact!]!
-  partyRelationshipContacts(data: PartyContactsInput!): [Contact!]
+  partyRelationshipContacts(data: PartyRelationshipContactsInput!): [ExtendedContact!]!
   contactsByProps(data: ContactInput!): [Contact!]
   statusList: [Status!]!
 }
@@ -219,7 +219,13 @@ type Status {
 
 input PartyContactsInput {
   partyId: Int!
-  partyRelationshipId: Int
+  statusId: Int
+  appUserGroupId: Int!
+}
+
+input PartyRelationshipContactsInput {
+  partyId: Int!
+  partyRelationshipIdList: [Int!]!
   statusId: Int
   appUserGroupId: Int!
 }

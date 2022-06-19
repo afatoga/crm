@@ -54,8 +54,23 @@ class PartyContactsInput {
   @Field((type) => Int!)
   partyId: number;
 
-  @Field((type) => Int, { nullable: true })
-  partyRelationshipId: number;
+  // @Field((type) => Int, { nullable: true })
+  // partyRelationshipId: number;
+
+  @Field((type) => Int,{ nullable: true })
+  statusId: number;
+
+  @Field((type) => Int)
+  appUserGroupId: number;
+}
+
+@InputType()
+class PartyRelationshipContactsInput {
+  @Field((type) => Int!)
+  partyId: number;
+
+  @Field((type) => [Int!])
+  partyRelationshipIdList: [number];
 
   @Field((type) => Int,{ nullable: true })
   statusId: number;
@@ -210,9 +225,9 @@ export class ContactResolver {
   }
 
   @Authorized()
-  @Query((returns) => [Contact], { nullable: true })
+  @Query((returns) => [ExtendedContact])
   async partyRelationshipContacts(
-    @Arg("data") data: PartyContactsInput,
+    @Arg("data") data: PartyRelationshipContactsInput,
     @Ctx() ctx: Context
   ) {
     if (
@@ -221,14 +236,40 @@ export class ContactResolver {
     )
       throw new Error("Not authorized");
 
-    if (!data.partyRelationshipId)  throw new Error("Party relationship invalid");
+    //if (!data.partyRelationshipId)  throw new Error("Party relationship invalid");
+
+    let whereConditions:any = {
+      mainPartyId: data.partyId,
+      partyRelationshipId: {in: data.partyRelationshipIdList}
+    }
+
+    if (data.statusId) {
+      whereConditions = {...whereConditions, statusId: data.statusId};
+    }
+    else if (!data.statusId) {
+      whereConditions = {...whereConditions,
+        OR: [
+          {statusId: {not: 4}},
+          {statusId: null}
+        ]
+      };
+    }
 
     return ctx.prisma.contact
       .findMany({
-        where: {
-          mainPartyId: data.partyId,
-          partyRelationshipId: data.partyRelationshipId
-        }
+        where: whereConditions,
+        include: {
+          contactType: {
+            select: {
+              name: true
+            }
+          },
+          status: {
+            select: {
+              name: true,
+            },
+          }
+        } 
       })
   }
 

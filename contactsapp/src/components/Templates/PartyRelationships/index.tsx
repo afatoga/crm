@@ -108,25 +108,17 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
   }, [deletePartyRelationshipRequest]);
 
   return (
-    <StyledPaper>
-    <Box
-      sx={{
-        width: {
-          xs: "100%", // theme.breakpoints.up('xs')
-          sm: "60%", //400, // theme.breakpoints.up('sm')
-          // md: 300, // theme.breakpoints.up('md')
-          lg: "360px", // theme.breakpoints.up('lg')
-          //xl: 500, // theme.breakpoints.up('xl')
-        },
-        padding: {
-          // xs: "1rem 0",
-          //md: "1rem 2rem",
-        },
-        margin: {
-          lg: "0 1rem"
-        }
-      }}
-    >
+    <StyledPaper sx={{
+      width: {
+        xs: "100%", // theme.breakpoints.up('xs')
+        sm: "60%", //400, // theme.breakpoints.up('sm')
+        // md: 300, // theme.breakpoints.up('md')
+        lg: "360px", // theme.breakpoints.up('lg')
+        //xl: 500, // theme.breakpoints.up('xl')
+      }
+     
+    }}>
+  
       {/* <Grid item xs={12} md={6}> */}
       <Typography variant="h6">{t('singleRecord.relationships')}</Typography>
       {/* <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
@@ -193,7 +185,7 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
       >
         {t('singleRecord.createNewRelationship')}
       </Button>
-    </Box>
+ 
     </StyledPaper>
   );
 };

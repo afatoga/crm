@@ -1,8 +1,7 @@
-import {  useMutation, useLazyQuery, makeVar, useApolloClient  } from '@apollo/client'; /*makeVar,useLazyQuery*/
+import {  useMutation, useLazyQuery, makeVar, useApolloClient  } from '@apollo/client';
 
 import {
     GET_PARTYRELATIONSHIPS,
-    //GET_ALL_PERSONS,
     GET_PEOPLE,
     GET_ORGANIZATIONS,
     GET_PARTIES_BY_NAME,
@@ -24,11 +23,27 @@ import {
     // UPDATE_PARTYRELATIONSHIP,
     DELETE_PARTYRELATIONSHIP
 } from '../api/party/mutations';
+import { isEmptyObject } from '../utils/utilityFunctions';
 
 export type PartyOption = {
     id: string;
     name: string;
     typeId: string;
+}
+
+type PartyRelationship = {
+    id: string;
+    typeId: string;
+    firstPartyId: number;
+    secondPartyId: number;
+    //firstPartyTypeId: number;
+    //secondPartyTypeId: number;
+    firstPartyName: string; 
+    secondPartyName: string; 
+}
+
+export interface IPartyRelationship extends PartyRelationship {
+    __typename: string;
 }
 
 interface IPartyByName extends PartyOption {
@@ -44,6 +59,7 @@ type PartyRelationshipType = {
 // export const reportsQueueVar = makeVar<string[]>([]);
 export const filteredPartiesVar = makeVar<PartyOption[]>([]);
 export const partyRelationshipTypesVar = makeVar<PartyRelationshipType[]>([]);
+export const partyRelationshipListVar = makeVar<IPartyRelationship[]>([]);
 
 export function useParty() {
 
@@ -73,12 +89,29 @@ export function useParty() {
 
     const getStatusList = useLazyQuery(GET_STATUS_LIST);
 
-    const getPartyRelationships = useLazyQuery(GET_PARTYRELATIONSHIPS);
+    const getPartyRelationships = useLazyQuery(GET_PARTYRELATIONSHIPS, {
+        onCompleted: (data) => {
+           
+            if (data?.partyRelationships && !isEmptyObject(data.partyRelationships)) {
+
+                let partyRelationshipList = [];
+                Object.keys(data.partyRelationships).forEach((key: string) => {
+                  
+                    if (typeof data.partyRelationships[key] !== 'string' &&  data.partyRelationships[key].length) {
+
+                        data.partyRelationships[key].forEach((relationship: IPartyRelationship) => {
+                            partyRelationshipList.push(relationship);
+                        })
+                    }
+                })
+                if (partyRelationshipList.length) partyRelationshipListVar(partyRelationshipList);
+            }
+        }
+    });
 
     const getPartyRelationshipTypeList = useLazyQuery(GET_PARTYRELATIONSHIP_TYPE_LIST, 
         // {
         //     onCompleted: (data) => {
-
         //         if(data.partyRelationshipTypeList.length > 0) {
         //             const dataToSave = data.partyRelationshipTypeList.map((item: any) => ({
         //                 id: item.id,
@@ -125,11 +158,12 @@ export function useParty() {
     })
     const createPartyRelationship = useMutation(CREATE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',
-        // refetchQueries: [
-        //     {
-        //         query: GET_PARTYRELATIONSHIPS,
-        //     }
-        // ]
+        refetchQueries: [
+            GET_PARTYRELATIONSHIPS
+            // {
+            //     query: GET_PARTYRELATIONSHIPS,
+            // }
+        ]
     })
     const deletePartyRelationship = useMutation(DELETE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',

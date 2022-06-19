@@ -37,21 +37,17 @@ import { useTranslation } from "react-i18next";
 
 // }
 
-
-
 export const NewRecord = () => {
   // Local state
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [recordType, setRecordType] = React.useState<string>("person");
 
   const { operations } = useParty();
   const { operations: tagOperations } = useTag();
-  const [createPersonHandler, createPersonRequest] =
-    operations.createPerson;
+  const [createPersonHandler, createPersonRequest] = operations.createPerson;
   const [createOrganizationHandler, createOrganizationRequest] =
     operations.createOrganization;
-  const [createTagHandler, createTagRequest] =
-    tagOperations.createTag;
+  const [createTagHandler, createTagRequest] = tagOperations.createTag;
 
   const location: any = useLocation();
 
@@ -222,62 +218,60 @@ export const NewRecord = () => {
     mode: "onTouched",
   });
 
-  const onSubmit = React.useCallback((values:any) => {
-
-    if (recordType === "person")
-      createPersonHandler({
-        variables: {
-          ...values,
-          birthday: values.birthday.length ? values.birthday : null,
-          //statusId: values.statusId.length ? parseInt(values.statusId) : null,
-          appUserGroupId: user.currentAppUserGroupId,
-        },
-      });
-    if (recordType === "organization")
-      createOrganizationHandler({
-        variables: {
-          ...values,
-          //birthday: values.birthday.length ? values.birthday : null,
-          //statusId: values.statusId.length ? parseInt(values.statusId) : null,
-          appUserGroupId: user.currentAppUserGroupId,
-        },
-      });
-    if (recordType === "tag")
-      createTagHandler({
-        variables: {
-          ...values,
-          // statusId: values.statusId.length ? parseInt(values.statusId) : null,
-          appUserGroupId: user.currentAppUserGroupId,
-        },
-      });
-  }, [recordType]);
-
+  const onSubmit = React.useCallback(
+    (values: any) => {
+      if (recordType === "person")
+        createPersonHandler({
+          variables: {
+            ...values,
+            birthday: values.birthday.length ? values.birthday : null,
+            //statusId: values.statusId.length ? parseInt(values.statusId) : null,
+            appUserGroupId: user.currentAppUserGroupId,
+          },
+        });
+      if (recordType === "organization")
+        createOrganizationHandler({
+          variables: {
+            ...values,
+            //birthday: values.birthday.length ? values.birthday : null,
+            //statusId: values.statusId.length ? parseInt(values.statusId) : null,
+            appUserGroupId: user.currentAppUserGroupId,
+          },
+        });
+      if (recordType === "tag")
+        createTagHandler({
+          variables: {
+            ...values,
+            // statusId: values.statusId.length ? parseInt(values.statusId) : null,
+            appUserGroupId: user.currentAppUserGroupId,
+          },
+        });
+    },
+    [recordType]
+  );
 
   const handleChangeRecordType = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setRecordType((event.target as HTMLInputElement).value);
   };
-  
+
   React.useEffect(() => {
     reset();
-  }, [recordType])
+  }, [recordType]);
   React.useEffect(() => {
     if (createPersonRequest.data?.createPerson.partyId) {
       const newRecordId = createPersonRequest.data?.createPerson.partyId;
-      navigate('/people/' + newRecordId);
-    }
-    else if (createOrganizationRequest.data?.createOrganization.partyId) {
-      const newRecordId = createOrganizationRequest.data?.createOrganization.partyId;
-      navigate('/organizations/' + newRecordId);
-    }
-    else if (createTagRequest.data?.createTag.id) {
+      navigate("/people/" + newRecordId);
+    } else if (createOrganizationRequest.data?.createOrganization.partyId) {
+      const newRecordId =
+        createOrganizationRequest.data?.createOrganization.partyId;
+      navigate("/organizations/" + newRecordId);
+    } else if (createTagRequest.data?.createTag.id) {
       const newRecordId = createTagRequest.data?.createTag.id;
-      navigate('/tags/' + newRecordId);
+      navigate("/tags/" + newRecordId);
     }
-  }, [createPersonRequest, createOrganizationRequest,createTagRequest])
-
-
+  }, [createPersonRequest, createOrganizationRequest, createTagRequest]);
 
   return (
     <>
@@ -293,7 +287,9 @@ export const NewRecord = () => {
         }}
       >
         <Box margin={"0 0 2rem"}>
-          <Typography margin={"0 0 0.5rem"}>{t('userActions.switchTo')}:</Typography>
+          <Typography margin={"0 0 0.5rem"}>
+            {t("userActions.switchTo")}:
+          </Typography>
           <FormControl>
             <RadioGroup
               row
@@ -305,23 +301,23 @@ export const NewRecord = () => {
               <FormControlLabel
                 value="person"
                 control={<Radio />}
-                label={t('entityType.person')}
+                label={t("entityType.person")}
               />
               <FormControlLabel
                 value="organization"
                 control={<Radio />}
-                label={t('entityType.organization')}
+                label={t("entityType.organization")}
               />
-              <FormControlLabel value="tag" control={<Radio />} label={t('entityType.tag')} />
+              <FormControlLabel
+                value="tag"
+                control={<Radio />}
+                label={t("entityType.tag")}
+              />
             </RadioGroup>
           </FormControl>
         </Box>
 
-        <PageTitle
-          title={
-            t(`pageTitles.new${capitalizeString(recordType)}`)
-          }
-        />
+        <PageTitle title={t(`pageTitles.new${capitalizeString(recordType)}`)} />
         {/* <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
           Welcome to ContactsApp.
         </Typography> */}
@@ -372,7 +368,7 @@ export const NewRecord = () => {
               </Button>
               {!isSubmitting && createPersonRequest.error && (
                 <Alert severity="error">
-                  <AlertTitle>{t('general.error')}</AlertTitle>
+                  <AlertTitle>{t("general.error")}</AlertTitle>
                   {createPersonRequest.error.message}
                 </Alert>
               )}

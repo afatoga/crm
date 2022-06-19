@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import {useParty} from '../../hooks/useParty';
 import {ORGANIZATION_PARTY_TYPE_ID, PERSON_PARTY_TYPE_ID,
   } from '../../utils/constants';
+import { useTranslation } from "react-i18next";
 
 interface IMultiLevelList {
     currentRecordId?: string,
@@ -32,6 +33,7 @@ interface IMultiLevelList {
 
 export const MultiLevelList = ({currentRecordId, currentRecordType, data, deleteItem, listName}: IMultiLevelList) => {
     const navigate = useNavigate();
+    const {t} = useTranslation();
 
     const {operations} = useParty();
 
@@ -76,7 +78,7 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
         if (listName === 'taggedParties') {
           return (!item.personFullName || !item.personFullName.trim().length) ? item.organizationName: item.personFullName;
         }
-        if (listName === 'privateContacts') {
+        if (listName === 'privateContacts' || listName === 'partyRelationshipContacts') {
           return item.value;
         }
 
@@ -89,12 +91,15 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
          || listName === 'personToPersonRelationships' ) {
              const relationshipTypeList = operations.retrievePartyRelationshipTypesFromCache();
              const found = relationshipTypeList.find((relationshipType:any) => parseInt(relationshipType.id) === item.typeId);
-             return found?.name;
+             return (found) ? t(`partyRelationshipType.${found.category}.${found.name}`) : '';
 
         }
 
         if (listName === 'privateContacts') {
           return item.contactType?.name;
+        }
+        if (listName === 'partyRelationshipContacts') {
+          return `${item.contactType?.name}, ${item.otherPartyName}`;
         }
 
         return undefined;
@@ -111,7 +116,7 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
               key={listName === 'taggedParties' ? item.partyId:item.id}
               secondaryAction={
                 <>
-                {listName === 'privateContacts' && 
+                {(listName === 'privateContacts' || listName === 'partyRelationshipContacts') && 
                 <IconButton edge="end" aria-label="edit" onClick={() => console.log(item.id)}>
                 <EditIcon />
               </IconButton>}

@@ -25,20 +25,22 @@ export const GET_PARTY_PRIVATE_CONTACTS = gql`
 export const GET_PARTYRELATIONSHIP_CONTACTS = gql`
   query (
     $partyId: Int!
-    $partyRelationshipId: Int!
+    $partyRelationshipIdList: [Int!]!
     $statusId: Int
     $appUserGroupId: Int!
   ) {
     partyRelationshipContacts(
       data: {
         partyId: $partyId
-        partyRelationshipId: $partyRelationshipId
+        partyRelationshipIdList: $partyRelationshipIdList
         statusId: $statusId
         appUserGroupId: $appUserGroupId
       }
     ) {
       id
-      type {
+      mainPartyId
+      partyRelationshipId
+      contactType {
         name
       }
       value

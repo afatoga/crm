@@ -1,9 +1,13 @@
-import {  useMutation, useLazyQuery  } from '@apollo/client'; /*makeVar,useLazyQuery*/
+import {  useMutation, useLazyQuery, useApolloClient, makeVar  } from '@apollo/client'; /*makeVar,useLazyQuery*/
 
 import {
     GET_PARTY_PRIVATE_CONTACTS,
     GET_PARTYRELATIONSHIP_CONTACTS,
 } from '../api/contact/queries';
+
+import { partyRelationshipListVar, IPartyRelationship} from './useParty';
+
+//import { GET_PARTYRELATIONSHIPS } from '../api/party/queries';
 
 import {
     CREATE_CONTACT,
@@ -21,30 +25,67 @@ import {
 // }
 
 // export const reportsQueueVar = makeVar<string[]>([]);
-//export const filteredTagsVar = makeVar<TagOption[]>([]);
+export const extendedPartyRelationshipContactsVar = makeVar<ExtendedPartyRelationshipContact[]>([]);
+
+//"otherPartyName": string;
+type PartyRelationshipContact = {
+    "id": string;
+    "mainPartyId": number;
+    "partyRelationshipId": number;
+    "contactType": {
+      "name": string;
+      "__typename": "ContactType";
+    },
+    "value": string;
+    "status": {
+      "name": string;
+      "__typename": "Status";
+    },
+    "__typename": string;
+}
+
+interface ExtendedPartyRelationshipContact extends PartyRelationshipContact {
+    otherPartyName: string;
+}
 
 export function useContact() {
 
-    // const client = useApolloClient();
+    const client = useApolloClient();
     //const getAllTAGs = useLazyQuery(GET_ALL_TAGS);
 
     const getPartyPrivateContacts = useLazyQuery(GET_PARTY_PRIVATE_CONTACTS);
 
-    const getPartyrelationshipContacts = useLazyQuery(GET_PARTYRELATIONSHIP_CONTACTS);
+    const getPartyRelationshipContacts = useLazyQuery(GET_PARTYRELATIONSHIP_CONTACTS, {
+        onCompleted: (data) => {
+            if (data?.partyRelationshipContacts.length) {
+                const partyRelationships = partyRelationshipListVar();
+
+                let extendedData = data.partyRelationshipContacts.map((contact: PartyRelationshipContact) => {
+                    
+                    const found = partyRelationships.find((partyRelationship: IPartyRelationship) => {
+                        if (parseInt(partyRelationship.id) === contact.partyRelationshipId) return partyRelationship;
+                    })
+                    return {
+                        ...contact,
+                        otherPartyName: (found) ? (contact.mainPartyId === found.firstPartyId) ? found.secondPartyName : found.firstPartyName : ''
+                    }
+                });
+
+                extendedPartyRelationshipContactsVar(extendedData);
+            }
+        }
+    });
 
 
 
-    // const retrievePartyRelationshipTypesFromCache = (optionCategories: string[] = []) => {
-    //     const { partyRelationshipTypeList } = client.readQuery({
-    //         query: GET_PARTYRELATIONSHIP_TYPE_LIST
+    // const retrievePartyRelationshipsFromCache = () => {
+    //     const { partyRelationships } = client.readQuery({
+    //         query: GET_PARTYRELATIONSHIPS
     //     });
 
-    //     if (!optionCategories.length) return partyRelationshipTypeList;
-    //     else {
-    //         return partyRelationshipTypeList.filter((item:any) => {
-    //             if (optionCategories.includes(item.category)) return true;
-    //         })
-    //     }
+    //     if (!partyRelationships || !partyRelationships.length) return [];
+
+    //     return partyRelationships;
     // }
 
     const createContact = useMutation(CREATE_CONTACT, {
@@ -66,7 +107,7 @@ export function useContact() {
     return {
         operations: {
             getPartyPrivateContacts,
-            getPartyrelationshipContacts,
+            getPartyRelationshipContacts,
             createContact,
             updateContact,
             deleteContact,

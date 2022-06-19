@@ -44,6 +44,19 @@
         "newPerson": "Nová osoba",
         "newOrganization": "Nová organizace"
     },
+    "partyRelationshipType":{
+        "o-o": {
+            "department": "oddělení",
+            "faculty": "fakulta"
+        },
+        "o-p": {
+            "employee": "zaměstnanec",
+            "family": "rodina"
+        },
+        "p-p": {
+            "collegue": "kolega"
+        }
+    },
     "singleRecord": {
         "relationships": "Vztahy",
         "tags": "Tagy",
@@ -55,6 +68,9 @@
         "name": "název",
         "profile": "profil",
         "createNewRelationship": "Nový vztah",
+        "createNewContact": "Nový kontakt",
+        "privateContacts": "Osobní kontakty",
+        "partyRelationshipContacts": "Firemní /org. kontakty",
         "createNewTagParty": "Přidat tag",
         "otherParty": "protistrana",
         "abovePartyIsOfHigherPriority": "protistrana je nadřazená",
