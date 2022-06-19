@@ -42,7 +42,7 @@ export const SinglePartyTags = () => {
         appUserGroupId: user.currentAppUserGroupId,
       },
     });
-  }, []);
+  }, [recordId]);
 
   return (
     <>

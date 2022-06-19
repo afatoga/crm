@@ -49,7 +49,7 @@ export const PartyContacts = () => {
         //statusId: 1
       },
     });
-  }, []);
+  }, [recordId]);
 
   React.useEffect(() => {
     if (partyRelationshipList.length) {
