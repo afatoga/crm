@@ -128,13 +128,15 @@ export const CREATE_PARTYRELATIONSHIP = gql`
   mutation (
     $firstPartyId: Int!
     $secondPartyId: Int!
-    $typeId: Int
+    $typeId: Int,
+    $appUserGroupId: Int
   ) {
     createPartyRelationship(
       data: {
         firstPartyId: $firstPartyId,
         secondPartyId: $secondPartyId,
-        typeId: $typeId
+        typeId: $typeId,
+        appUserGroupId: $appUserGroupId
       }
     ) {
       id

@@ -97,6 +97,12 @@ class PartyRelationshipInput {
 
   @Field((type) => Int, { nullable: true })
   typeId: number;
+  
+  
+  @Field((type) => Int, { nullable: true })
+  appUserGroupId: number;
+  
+
 }
 
 @InputType()
@@ -343,7 +349,12 @@ export class PartyResolver {
     @Arg("data") data: PartyRelationshipInput,
     @Ctx() ctx: Context
   ): Promise<PartyRelationship> {
-    if (!ctx.currentUser) throw new Error("Only for logged in users");
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
     if (data.firstPartyId === data.secondPartyId)
       throw new Error("use two different parties");
 
@@ -358,7 +369,7 @@ export class PartyResolver {
       },
     });
 
-    if (relationshipExist) throw new Error("relationship exist");
+    if (relationshipExist) throw new Error("relationship exists");
 
     const firstParty = await ctx.prisma.party.findFirst({
       where: {
@@ -636,7 +647,7 @@ export class PartyResolver {
 
     if (!data.searchedName.length) return [];
 
-    const searchText = `%${data.searchedName}%`;
+    const searchText = `%${data.searchedName.toLocaleLowerCase()}%`;
 
     const queryResultArray = await ctx.prisma.$queryRaw<
       [PartyWithName]

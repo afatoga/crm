@@ -41,7 +41,7 @@ export const Tags = () => {
     },
     {
       field: "edit",
-      headerName: "Edit",
+      headerName: t('general.actions'),
       sortable: false,
       width: 130,
       // disableClickEventBubbling: true,
@@ -49,7 +49,7 @@ export const Tags = () => {
        
         return (
           <Button variant="contained" color="primary" startIcon={<EditIcon />} onClick={() => navigate(`/tags/${id}`)} >
-            Edit
+            {t('userActions.edit')}
           </Button>
         );
       }

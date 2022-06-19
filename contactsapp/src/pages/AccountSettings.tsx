@@ -64,6 +64,12 @@ export const AccountSettings = () => {
             //margin: "1.5rem auto 0",
           }}
         >
+          <Box sx={{display:'block'}}>
+          {t('accountSettings.currentAppUserGroup')}: {user.currentAppUserGroupId}
+          </Box>
+          <Box sx={{display:'block'}}>
+          {t('accountSettings.currentPermissions')}: {user.currentRole}
+          </Box>
 
         <Box sx={{display:'block'}}>
         <FormControl sx={{ mt: 4, minWidth: 120 }} size="small">

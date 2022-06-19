@@ -56,3 +56,15 @@ export const capitalizeString = (str: string) => {
 // 	let name = location.pathname.replaceAll("/", "-"); // from /account/settings --> -account-settings
 // 	return `pageTitles.${name.substring(1)}`;
 // }
+
+export function debounce(func, wait) {
+	let timeout;
+	return function(...args) {
+	  const context = this;
+	  if (timeout) clearTimeout(timeout);
+	  timeout = setTimeout(() => {
+		timeout = null;
+		func.apply(context, args);
+	  }, wait);
+	};
+  }

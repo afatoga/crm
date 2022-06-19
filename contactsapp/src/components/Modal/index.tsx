@@ -2,8 +2,9 @@ import React, { FC, useEffect } from "react";
 // import FocusLock from "react-focus-lock";
 import ReactDOM from "react-dom";
 import { ModalContext } from "../../contexts/ModalContext";
-import {ConfirmDialog} from './ConfirmDialog';
+import { ConfirmDialog } from "./ConfirmDialog";
 import { NewRelationshipModal } from "../Templates/PartyRelationships/NewRelationshipModal";
+import { NewTagPartyModal } from "../Templates/SinglePartyTags/NewTagPartyModal";
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -30,7 +31,23 @@ const BootstrapDialogTitle = (props: DialogTitleProps) => {
   const { children, onClose, ...other } = props;
 
   return (
-    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+    <DialogTitle
+      sx={{
+        m: 0,
+        p: 2,
+        width: {
+          xs: "100%", // theme.breakpoints.up('xs')
+          md: "460px", // theme.breakpoints.up('sm')
+          // md: 300, // theme.breakpoints.up('md')
+          //lg: 380, // theme.breakpoints.up('lg')
+          //xl: 500, // theme.breakpoints.up('xl')
+        },
+        minWidth: {
+          xs: '310px'
+        }
+      }}
+      {...other}
+    >
       {children}
       {onClose ? (
         <IconButton
@@ -52,7 +69,7 @@ const BootstrapDialogTitle = (props: DialogTitleProps) => {
 
 export const Modal: FC = () => {
   let { isShown, handleModal, template } = React.useContext(ModalContext);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const getModalTitle = (): JSX.Element => {
     if (template === "NewRelationship")
@@ -61,15 +78,26 @@ export const Modal: FC = () => {
           // id="customized-dialog-title"
           onClose={handleModal}
         >
-          {t('singleRecord.createNewRelationship')}
+          {t("singleRecord.createNewRelationship")}
+        </BootstrapDialogTitle>
+      );
+    else if (template === "NewTagParty")
+      return (
+        <BootstrapDialogTitle
+          // id="customized-dialog-title"
+          onClose={handleModal}
+        >
+          {t("singleRecord.createNewTagParty")}
         </BootstrapDialogTitle>
       );
     return null;
   };
 
   const getModalContent = (): JSX.Element => {
-    if (template === "NewRelationship") return <NewRelationshipModal />;
     if (template === "ConfirmDialog") return <ConfirmDialog />;
+    else if (template === "NewRelationship") return <NewRelationshipModal />;
+    else if (template === "NewTagParty") return <NewTagPartyModal />;
+
     return null;
   };
 
@@ -93,7 +121,7 @@ export const Modal: FC = () => {
     <React.Fragment>
       <BootstrapDialog
         onClose={handleModal}
-        aria-labelledby="customized-dialog-title"
+        // aria-labelledby="customized-dialog-title"
         open={isShown}
       >
         {getModalTitle()}

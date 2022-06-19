@@ -4,15 +4,19 @@
             "label": "jazyk",
             "en": "angličtina",
             "cs": "čeština"
-        }
+        },
+        "currentPermissions": "Současné oprávnění",
+        "currentAppUserGroup": "Zvolená skupina"
     },
     "form": {
         "isRequired": "pole {{fieldName}} je povinné"
     },
     "general": {
+        "actions": "akce",
         "more": "více",
         "options": "volby",
-        "error": "chyba"
+        "error": "chyba",
+        "noRecords": "Nenalezeno"
     },
     "entityType": {
         "organization": "Organizace",
@@ -51,9 +55,11 @@
         "name": "název",
         "profile": "profil",
         "createNewRelationship": "Nový vztah",
+        "createNewTagParty": "Přidat tag",
         "otherParty": "protistrana",
         "abovePartyIsOfHigherPriority": "protistrana je nadřazená",
-        "relationType": "typ vztahu"
+        "relationType": "typ vztahu",
+        "connections": "Napojení"
     },
     "userActions": {
         "login": "Přihlásit se",
@@ -63,6 +69,9 @@
         "delete": "Smazat",
         "addNew": "Nový záznam",
         "search": "Vyhledat",
-        "switchTo": "Přepnout na"
+        "switchTo": "Přepnout na",
+        "lookForParty": "Najít osobu / organizaci",
+        "lookForTag": "Najít tag",
+        "edit": "Upravit"
     }
 }

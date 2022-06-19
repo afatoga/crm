@@ -16,7 +16,6 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {CustomFormField} from '../../Form/CustomFormField';
 
-import {useParty, filteredPartiesVar, PartyOption} from '../../../hooks/useParty';
 import { useAuth } from '../../../hooks/useAuth';
 import { useReactiveVar } from '@apollo/client';
 import {ORGANIZATION_PARTY_TYPE_ID, PERSON_PARTY_TYPE_ID,
@@ -24,111 +23,55 @@ import {ORGANIZATION_PARTY_TYPE_ID, PERSON_PARTY_TYPE_ID,
   PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON, 
   PARTY_RELATIONSHIP_CATEGORY_PERSON_PERSON} from '../../../utils/constants';
 import { useTranslation } from 'react-i18next';
-
+import { debounce } from '../../../utils/utilityFunctions';
+import { useTag, filteredTagsVar, TagOption} from '../../../hooks/useTag';
 // const _filterOptions = createFilterOptions();
 
-function debounce(func, wait) {
-  let timeout;
-  return function(...args) {
-    const context = this;
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      timeout = null;
-      func.apply(context, args);
-    }, wait);
-  };
-}
 
 
-export const NewRelationshipModal = () => {
+
+export const NewTagPartyModal = () => {
     const {t} = useTranslation();
     const location = useLocation();
     let wholePath = location.pathname;
     const recordsPath = wholePath.split('/')[1]; // 'people' | 'organizations'
-    const recordIdString = wholePath.replace(/^(?:[^\/]*\/){2}\s*/, '');
+    const recordId = wholePath.replace(/^(?:[^\/]*\/){2}\s*/, '');
     //const { id: recordIdString } = useParams();
 
     const {user} = useAuth();
     let { handleModal } = React.useContext(ModalContext);  
-    const {operations} = useParty();
-    const [createPartyRelationshipHandler, createPartyRelationshipRequest] = operations.createPartyRelationship;
-    const [getPartiesByNameHandler, getPartiesByNameRequest] = operations.getPartiesByName;
+    const {operations} = useTag();
+    const [createTagPartyHandler, createTagPartyRequest] = operations.createTagParty;
+    const [getTagsByNameHandler, getTagsByNameRequest] = operations.getTagsByName;
 
     const [open, setOpen] = React.useState<boolean>(false);
     const [searchedName, setSearchedName] = React.useState<string>('');
-    //const [filteredParties, setfilteredParties] = React.useState<PartyOption[]>([]);
+    //const [filteredParties, setfilteredParties] = React.useState<TagOption[]>([]);
     //const inputRef = React.useRef(null);
 
-    const filteredParties = useReactiveVar(filteredPartiesVar);
+    const filteredTags = useReactiveVar(filteredTagsVar);
 
-    const getPartyRelationshipTypesByCategory = () => {
-      
-      let config = [];
 
-      if (recordsPath === 'people' && getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID) {
-        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON] 
-      }
-      else if (recordsPath === 'people' && getValues('otherPartyTypeId') === PERSON_PARTY_TYPE_ID) {
-        config =[PARTY_RELATIONSHIP_CATEGORY_PERSON_PERSON] 
-      }
-
-      else if (recordsPath === 'organizations' && getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID) {
-        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_ORGANIZATION] 
-      }
-      else if (recordsPath === 'organizations' && getValues('otherPartyTypeId') === PERSON_PARTY_TYPE_ID) {
-        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON] 
-      }
-
-      else if (recordsPath === 'people') {
-        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON, PARTY_RELATIONSHIP_CATEGORY_PERSON_PERSON] 
-      }
-      else if (recordsPath === 'organizations' ) {
-        config = [PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_ORGANIZATION, PARTY_RELATIONSHIP_CATEGORY_ORGANIZATION_PERSON]
-      }
-
-      return operations.retrievePartyRelationshipTypesFromCache(config);
-    }
 
     const fields = [
           {
-            label: "Other party",
-            name: "otherParty",
+            label: t('userActions.lookForTag'),
+            name: "tag",
             type: "autocomplete",
             // required: true,
           },
           {
             //label: "Other party",
-            name: "otherPartyId",
+            name: "tagId",
             type: "hidden",
             required: true,
             // apiHandler: getPartiesByNameHandler,
             // apiRequest: getPartiesByNameRequest
-          },
-          {
-            //label: "Other party",
-            name: "otherPartyTypeId",
-            type: "hidden",
-            required: true,
-            // apiHandler: getPartiesByNameHandler,
-            // apiRequest: getPartiesByNameRequest
-          },
-          {
-            label: t('singleRecord.abovePartyIsOfHigherPriority'),
-            name: "isMainParty",
-            type: "checkbox",
-            // required: true,
-          },
-          {
-            label: t('singleRecord.relationType'),
-            name: "partyRelationshipTypeId",
-            type: "autocomplete",
-            //optionCategories: , 
-            apiRequest: () => getPartyRelationshipTypesByCategory()
-          }
+          } 
     ]
 
     const schema = yup.object().shape({
-        otherPartyId: yup.number().typeError("Select other party").required(t(`form.isRequired`, {fieldName: t(`singleRecord.otherParty`)}))
+        tagId: yup.number().typeError(t(`form.isRequired`, {fieldName: t(`entityType.tag`)})).required(t(`form.isRequired`, {fieldName: t(`entityType.tag`)}))
         //partyRelationshipTypeId: yup.number().required()
         // secondPartyId: yup.number().notOneOf([yup.ref('firstPartyId')], 'Parties could not be equal').required(),
       });
@@ -146,43 +89,33 @@ export const NewRelationshipModal = () => {
     
     const onSubmit = React.useCallback((values) => {
 
-      const isMainParty = (recordsPath === 'people' && values.otherPartyTypeId === ORGANIZATION_PARTY_TYPE_ID) ? true : values?.isMainParty;
-
-      let dataToSubmit = {
-        firstPartyId: parseInt(recordIdString),
-        secondPartyId: values.otherPartyId,
-        otherPartyTypeId: values.otherPartyTypeId,
-        typeId: values.partyRelationshipTypeId,
-        appUserGroupId: user.currentAppUserGroupId
-      }
-
-      if (isMainParty) {
-        dataToSubmit.firstPartyId = values.otherPartyId;
-        dataToSubmit.secondPartyId = parseInt(recordIdString);
-      }
-          createPartyRelationshipHandler({
-            variables: dataToSubmit,
+          createTagPartyHandler({
+            variables: {
+              partyId: parseInt(recordId),
+              tagId: values.tagId,
+              appUserGroupId: user.currentAppUserGroupId
+            },
         });
       
     }, []);
 
     React.useEffect(() => {
-      filteredPartiesVar([]) //reset
+      filteredTagsVar([]) //reset
     }, [])
 
     React.useEffect(() => {
       if(searchedName.length > 0) {
-        getPartiesByNameHandler({variables: {searchedName: searchedName, appUserGroupId: user.currentAppUserGroupId}});
+        getTagsByNameHandler({variables: {searchedName: searchedName, appUserGroupId: user.currentAppUserGroupId}});
       }
       //inputRef.current.querySelector('input').focus();
     }, [searchedName])
 
 
     React.useEffect(() => {
-      if (filteredParties.length > 0) {
+      if (filteredTags.length > 0) {
         setOpen(true);
       }
-    }, [filteredParties])
+    }, [filteredTags])
 
     // const filterOptions = React.useCallback((options, state) => {
     //   const results = _filterOptions(options, state);  
@@ -201,7 +134,7 @@ export const NewRelationshipModal = () => {
 
         if (typeof option === "number") {
 
-          const found = filteredParties.find((item:any) => (option === parseInt(item.id)))
+          const found = filteredTags.find((item:any) => (option === parseInt(item.id)))
           if (found) return found.name;
         }
 
@@ -217,7 +150,7 @@ export const NewRelationshipModal = () => {
         id={fieldData.name}
         //sx={{ width: 300 }}
         open={open}
-        onOpen={() => {if(filteredParties.length > 0) setOpen(true)}}
+        onOpen={() => {if(filteredTags.length > 0) setOpen(true)}}
         onClose={() => {
           setOpen(false);
         }}
@@ -225,17 +158,17 @@ export const NewRelationshipModal = () => {
           controllerProps.onChange(newValue);
           
           if(newValue && newValue !== "string") {
-            setValue('otherPartyId', parseInt(newValue.id));
-            setValue('otherPartyTypeId', parseInt(newValue.typeId));
+            setValue('tagId', parseInt(newValue.id));
+            //setValue('otherPartyTypeId', parseInt(newValue.typeId));
           }
           else if(!newValue) { //reset
-            setValue('otherPartyId', null);
-            setValue('otherPartyTypeId', null);
+            setValue('tagId', null);
+            //setValue('otherPartyTypeId', null);
           }
         }}
         onInputChange={(_event, newInputValue) => {
           
-          if (filteredParties.find((item: PartyOption) => item.name === newInputValue)) {
+          if (filteredTags.find((item: TagOption) => item.name === newInputValue)) {
             controllerProps.onChange(newInputValue);
           }
           else {
@@ -254,14 +187,14 @@ export const NewRelationshipModal = () => {
           // return value === undefined || value === '' || option.id === value.id
         }}
         getOptionLabel={getOptionLabel}
-        options={filteredParties}
-        loading={getPartiesByNameRequest.loading}
+        options={filteredTags}
+        loading={getTagsByNameRequest.loading}
         
         // filterOptions={(options, state) => {
 
         //   if (!state.inputValue.length) return options;
 
-        //   return options.filter((item: PartyOption) => {
+        //   return options.filter((item: TagOption) => {
         //     const loweCasedOptionLabel = item.name.toLowerCase();
         //     return loweCasedOptionLabel.indexOf(state.inputValue.toLowerCase()) >= 0;
         //   })
@@ -272,7 +205,7 @@ export const NewRelationshipModal = () => {
             autoFocus
             //ref={inputRef}
             {...params}
-            label={t(`singleRecord.otherParty`)}
+            label={t(`entityType.tag`)}
             InputProps={{
               ...params.InputProps,
             }}
@@ -288,13 +221,13 @@ export const NewRelationshipModal = () => {
 
 
     React.useEffect(( ) => {
-        if (createPartyRelationshipRequest.data) {
-          if (createPartyRelationshipRequest.data.createPartyRelationship.id) {
+        if (createTagPartyRequest.data) {
+          if (createTagPartyRequest.data.createTagParty.status === 'SUCCESS') {
             //status = SUCCESS
             handleModal() // && refetch relationshipList
           }
         }
-    }, [createPartyRelationshipRequest])
+    }, [createTagPartyRequest])
 
   return (
    <>
@@ -304,14 +237,14 @@ export const NewRelationshipModal = () => {
             <Stack spacing={2}>
               {fields.map((item, index) => {
 
-                if (item.name === 'isMainParty' && getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID && recordsPath === 'people') return null;
+                // if (item.name === 'isMainParty' && getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID && recordsPath === 'people') return null;
 
                 return (
                 <Controller
                   key={index}
                   render={({ field }) => {
 
-                    return field.name === 'otherParty' ?
+                    return field.name === 'tag' ?
 
                     <AutocompleteLoadOnInputField controllerProps={field} fieldData={item} /> :
 
@@ -332,10 +265,10 @@ export const NewRelationshipModal = () => {
               >
                 {t('userActions.save')}
               </Button>
-              {!isSubmitting && createPartyRelationshipRequest.error && (
+              {!isSubmitting && createTagPartyRequest.error && (
                 <Alert severity="error">
                   <AlertTitle>{t('general.error')}</AlertTitle>
-                  {createPartyRelationshipRequest.error.message}
+                  {createTagPartyRequest.error.message}
                 </Alert>
               )}
             </Stack>

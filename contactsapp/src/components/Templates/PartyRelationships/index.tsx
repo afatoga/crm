@@ -10,6 +10,7 @@ import { MultiLevelList } from "../../List";
 import { useReactiveVar } from "@apollo/client";
 import { actionResultVar } from "../../../App";
 import { useTranslation } from "react-i18next";
+import { StyledPaper } from "../../Container";
 
 // type PartyRelationship = {
 //   id: string,
@@ -107,19 +108,23 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
   }, [deletePartyRelationshipRequest]);
 
   return (
+    <StyledPaper>
     <Box
       sx={{
         width: {
           xs: "100%", // theme.breakpoints.up('xs')
-          md: "40%", // theme.breakpoints.up('sm')
+          sm: "60%", //400, // theme.breakpoints.up('sm')
           // md: 300, // theme.breakpoints.up('md')
-          lg: 600, // theme.breakpoints.up('lg')
+          lg: "360px", // theme.breakpoints.up('lg')
           //xl: 500, // theme.breakpoints.up('xl')
         },
         padding: {
-          xs: "1rem 0",
-          md: "1rem 2rem",
+          // xs: "1rem 0",
+          //md: "1rem 2rem",
         },
+        margin: {
+          lg: "0 1rem"
+        }
       }}
     >
       {/* <Grid item xs={12} md={6}> */}
@@ -189,5 +194,6 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
         {t('singleRecord.createNewRelationship')}
       </Button>
     </Box>
+    </StyledPaper>
   );
 };

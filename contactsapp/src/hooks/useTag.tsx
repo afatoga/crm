@@ -89,6 +89,9 @@ export function useTag() {
     // this will tag a party
     const createTagParty = useMutation(CREATE_TAGPARTY, {
         fetchPolicy: 'network-only',
+        refetchQueries: [
+            GET_SINGLE_PARTY_TAGS
+        ]
         // refetchQueries: [
         //     {
         //         query: GET_PARTYRELATIONSHIPS,
@@ -98,7 +101,8 @@ export function useTag() {
     const deleteTagParty = useMutation(DELETE_TAGPARTY, {
         fetchPolicy: 'network-only',
         refetchQueries: [
-            GET_SINGLE_PARTY_TAGS
+            GET_SINGLE_PARTY_TAGS,
+            GET_TAGGED_PARTIES
         ]
     })
 

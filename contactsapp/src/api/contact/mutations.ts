@@ -1,61 +1,68 @@
 import { gql } from "@apollo/client";
 
-export const CREATE_UPDATE_PERSON = gql`
+export const CREATE_CONTACT = gql`
   mutation (
-    $partyId: Int
+    $partyId: Int!
+    $partyRelationshipId: Int
     $name: String!
-    $surname: String!
-    $preDegree: String
-    $postDegree: String
-    $birthday: DateTime
     $appUserGroupId: Int!
+    $typeId: Int
     $statusId: Int
+    $appUserGroupId: Int!
   ) {
-    createUpdatePerson(
+    createContact(
       data: {
-        partyId: $partyId
-        name: $name
-        surname: $surname
-        preDegree: $preDegree
-        postDegree: $postDegree
-        birthday: $birthday
+        mainPartyId: $partyId,
+        partyRelationshipId: $partyRelationshipId,
+        typeId: $typeId,
+        value: $value,
+        statusId: $statusId,
         appUserGroupId: $appUserGroupId
+      }
+    ) {
+      id
+    }
+  }
+`;
+export const UPDATE_CONTACT = gql`
+  mutation (
+    $id: Int!
+    $partyId: Int!
+    $partyRelationshipId: Int
+    $value: String!
+    $typeId: Int
+    $statusId: Int
+    $appUserGroupId: Int!
+  ) {
+    updateContact(
+      data: {
+        id: $id,
+        mainPartyId: $partyId,
+        partyRelationshipId: $partyRelationshipId,
+        typeId: $typeId,
+        statusId: $statusId,
+        value: $name,
+        appUserGroupId: $appUserGroupId,
         statusId: $statusId
       }
     ) {
-      partyId
-    }
-  }
-`;
-export const CREATE_PARTYRELATIONSHIP = gql`
-  mutation (
-    $firstPartyId: Int!
-    $secondPartyId: Int!
-    $typeId: Int!
-  ) {
-    createPartyRelationship(
-      data: {
-        firstPartyId: $firstPartyId,
-        secondPartyId: $secondPartyId,
-        typeId: $typeId
-    ) {
       id
-      typeId
-      firstPartyId
-      secondPartyId
     }
   }
 `;
-
-export const DELETE_PARTYRELATIONSHIP = gql`
+export const DELETE_CONTACT = gql`
   mutation (
     $id: Int!
+    $appUserGroupId: Int!
   ) {
-    deletePartyRelationship(
-      data: {
-        id: $id
+    deleteContact(
+        data: {
+          id: $id,
+          appUserGroupId: $appUserGroupId
+        }
     ) {
       status
+      message
     }
   }
 `;

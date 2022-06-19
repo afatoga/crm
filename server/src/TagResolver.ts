@@ -48,7 +48,7 @@ class TagByAppUserGroupInput {
 }
 
 @InputType()
-class TagByNameInput {
+class TagsByNameInput {
   @Field((type) => String)
   searchedName: string;
 
@@ -87,6 +87,15 @@ class SinglePartyTagsInput {
 class TaggedPartiesInput {
   @Field((type) => Int)
   tagId: number;
+  @Field((type) => Int)
+  appUserGroupId: number;
+}
+@InputType()
+class CreateTagPartyInput {
+  @Field((type) => Int)
+  tagId: number;
+  @Field((type) => Int)
+  partyId: number;
   @Field((type) => Int)
   appUserGroupId: number;
 }
@@ -281,7 +290,7 @@ if (
   return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
   SELECT CONCAT ("Person"."surname", ' ', "Person"."name") AS "personFullName", 
     "Organization"."name" AS "organizationName",
-    "Party"."typeId"
+    "Party"."typeId",
     "TagParty"."partyId" 
   FROM "TagParty"
   INNER JOIN "Party" ON "TagParty"."partyId" = "Party"."id"
@@ -311,9 +320,98 @@ if (
     //   });
   }
 
-  // appUserGroupId:
-  //    data.appUserGroupId &&
-  //    isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-  //    ? data.appUserGroupId
-  //    : undefined,
+  
+  @Authorized()
+  @Query((returns) => [ExtendedTag])
+  async tagsByName(
+    @Arg("data") data: TagsByNameInput,
+    @Ctx() ctx: Context
+  ) {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    if (!data.searchedName.length) return [];
+
+    const searchText = `%${data.searchedName.toLocaleLowerCase()}%`;
+
+    const queryResultArray = await ctx.prisma.$queryRaw<
+      [ExtendedTag]
+    >(Prisma.sql`
+      SELECT "Tag"."id", "Tag"."name"
+      FROM "Tag"
+      WHERE "Tag"."appUserGroupId" = ${data.appUserGroupId} 
+      AND ("Tag"."statusId" != 4 OR "Tag"."statusId" IS NULL)
+      AND LOWER("Tag"."name") LIKE ${searchText}
+    `);
+
+    return queryResultArray;
+  }
+
+  @Authorized(["MOD", "ADMIN"])
+  @Mutation((returns) => APIResponse)
+  async createTagParty(
+    @Arg("data") data: CreateTagPartyInput,
+    @Ctx() ctx: Context
+  ): Promise<APIResponse> {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+    
+
+    const tagPartyExists = await ctx.prisma.tagParty.findFirst({
+      where: {
+        tagId: data.tagId,
+        partyId: data.partyId
+      },
+    });
+
+    if (tagPartyExists) throw new Error("relationship exists");
+
+    const party = await ctx.prisma.party.findFirst({
+      where: {
+        OR: [
+          {statusId: {not: 4}},
+          {statusId: null}
+        ],
+        id: data.partyId,
+        appUserGroupId: data.appUserGroupId //ctx.currentUser.currentAppUserGroupId,
+      },
+    });
+    const tag = await ctx.prisma.tag.findFirst({
+      where: {
+        OR: [
+          {statusId: {not: 4}},
+          {statusId: null}
+        ],
+        //statusId: {not: 4},
+        id: data.tagId,
+        appUserGroupId: data.appUserGroupId
+      },
+    });
+
+
+    if (
+     !party || !tag
+    )
+      throw new Error("party or tag are invalid");
+
+    await ctx.prisma.tagParty.create({
+      data: {
+        
+        partyId: party.id,
+        tagId: tag.id,
+       
+      },
+    });
+
+    return {
+      status: "SUCCESS",
+      message: "party was tagged",
+    }
+  }
 }

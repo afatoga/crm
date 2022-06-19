@@ -6,46 +6,62 @@ import {
   Arg,
   Ctx,
   InputType,
+  Int,
   Field,
   Authorized,
 } from "type-graphql";
-import { Contact } from "./Contact";
+import { Contact, ExtendedContact } from "./Contact";
 import { APIResponse } from "./GlobalObjects";
 import { isUserAuthorized } from "./authChecker";
 import { Context } from "./context";
 
 @InputType()
 class ContactInput {
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   id: number;
 
-  @Field({ nullable: true })
+  @Field((type) => Int,{ nullable: true })
   typeId: number;
 
-  @Field({ nullable: true })
+  @Field((type) => Int,{ nullable: true })
   statusId: number;
 
   @Field({ nullable: true })
   value: string;
 
-  @Field({ nullable: true })
+  @Field((type) => Int)
   mainPartyId: number; //target
 
-  @Field({ nullable: true })
+  @Field((type) => Int,{ nullable: true })
   partyRelationshipId: number; //target
 
-  @Field()
+  @Field((type) => Int)
   appUserGroupId: number;
 
 }
 
 @InputType()
+class DeleteContactInput {
+  @Field((type) => Int)
+  id: number;
+
+  @Field((type) => Int)
+  appUserGroupId: number;
+}
+
+@InputType()
 class PartyContactsInput {
-  @Field()
+  @Field((type) => Int!)
   partyId: number;
 
-  @Field({ nullable: true})
+  @Field((type) => Int, { nullable: true })
   partyRelationshipId: number;
+
+  @Field((type) => Int,{ nullable: true })
+  statusId: number;
+
+  @Field((type) => Int)
+  appUserGroupId: number;
 }
 
 
@@ -55,11 +71,11 @@ class PartyContactsInput {
 export class ContactResolver {
   
   @Authorized(["MOD", "ADMIN"])
-  @Mutation((returns) => Contact)
+  @Mutation((returns) => APIResponse)
   async deleteContact(
-    @Arg("data") data: ContactInput,
+    @Arg("data") data: DeleteContactInput,
     @Ctx() ctx: Context
-  ): Promise<Contact> {
+  ): Promise<APIResponse> {
     if (
       !ctx.currentUser ||
       !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
@@ -68,11 +84,16 @@ export class ContactResolver {
 
       if (!data.id) throw new Error('provide contact id')
 
-      return await ctx.prisma.contact.delete({
+      await ctx.prisma.contact.delete({
         where: {
           id: data.id
         }
       })
+
+      return {
+        status: "SUCCESS",
+        message: "contact was deleted"
+      }
 
 
   }
@@ -95,7 +116,7 @@ export class ContactResolver {
       value: data.value,
       mainPartyId: data.mainPartyId,
       partyRelationshipId: data.partyRelationshipId && data.partyRelationshipId,
-      appUserGroupId: ctx.currentUser.currentAppUserGroupId
+      appUserGroupId: data.appUserGroupId //ctx.currentUser.currentAppUserGroupId
     }})
 
   }
@@ -142,18 +163,71 @@ export class ContactResolver {
   }
 
   @Authorized()
-  @Query((returns) => [Contact], { nullable: true })
-  async partyContacts(
+  @Query((returns) => [ExtendedContact])
+  async partyPrivateContacts(
     @Arg("data") data: PartyContactsInput,
     @Ctx() ctx: Context
   ) {
-    if (!ctx.currentUser) throw new Error("please log in");
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    let whereConditions:any = {
+      mainPartyId: data.partyId,
+      partyRelationshipId: null, //has to be null
+    }
+
+    if (data.statusId) {
+      whereConditions = {...whereConditions, statusId: data.statusId};
+    }
+    else if (!data.statusId) {
+      whereConditions = {...whereConditions,
+        OR: [
+          {statusId: {not: 4}},
+          {statusId: null}
+        ]
+      };
+    }
+
+    return await ctx.prisma.contact
+      .findMany({
+        where: whereConditions,
+        include: {
+          contactType: {
+            select: {
+              name: true
+            }
+          },
+          status: {
+            select: {
+              name: true,
+            },
+          }
+        },
+      })
+  }
+
+  @Authorized()
+  @Query((returns) => [Contact], { nullable: true })
+  async partyRelationshipContacts(
+    @Arg("data") data: PartyContactsInput,
+    @Ctx() ctx: Context
+  ) {
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    if (!data.partyRelationshipId)  throw new Error("Party relationship invalid");
 
     return ctx.prisma.contact
       .findMany({
         where: {
           mainPartyId: data.partyId,
-          partyRelationshipId: (data.partyRelationshipId) ? data.partyRelationshipId : null
+          partyRelationshipId: data.partyRelationshipId
         }
       })
   }

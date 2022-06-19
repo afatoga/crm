@@ -3,6 +3,8 @@ import { verify } from "jsonwebtoken";
 import { AppUser } from "./AppUser";
 
 const prisma = new PrismaClient();
+
+// this object has to be in => PrismaClient()
 // {
 //   log: [
 //     {

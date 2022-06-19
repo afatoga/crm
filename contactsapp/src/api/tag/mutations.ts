@@ -56,11 +56,13 @@ export const CREATE_TAGPARTY = gql`
   mutation (
     $partyId: Int!
     $tagId: Int!
+    $appUserGroupId: Int!
   ) {
     createTagParty(
       data: {
         partyId: $partyId,
         tagId: $tagId,
+        appUserGroupId: $appUserGroupId
       }
     ) {
       message

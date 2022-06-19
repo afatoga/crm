@@ -3,41 +3,42 @@ import { useTag } from '../../../hooks/useTag';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { MultiLevelList } from "../../List";
-import { Typography, Box, Button } from "@mui/material";
+import { Typography, Box, Button} from "@mui/material";
 import { useTranslation } from 'react-i18next';
 import { ModalContext } from "../../../contexts/ModalContext";
+import { useContact } from '../../../hooks/useContact';
 import { StyledPaper } from '../../Container';
 
-export const SinglePartyTags = () => {
+export const PartyContacts = () => {
     const { id: recordId } = useParams(); //always string
     const { user } = useAuth();
     const {t} = useTranslation();
     const {handleModal} = React.useContext(ModalContext);
 
-    const toggleNewTagPartyModal = () => {
-        handleModal("NewTagParty");
+    const toggleCreateUpdateContactModal = () => {
+        handleModal("CreateUpdateContact");
       };
     
 
-    const {operations} = useTag();
+    const {operations} = useContact();
 
-    const [getSinglePartyTagsHandler, getSinglePartyTagsRequest] = operations.getSinglePartyTags;
-    const [deleteTagPartyHandler, deleteTagPartyRequest] = operations.deleteTagParty;
+    const [getPartyPrivateContactsHandler, getPartyPrivateContactsRequest] = operations.getPartyPrivateContacts;
+    const [deleteContactHandler, deleteContactRequest] = operations.deleteContact;
 
-    const untag = (tagId: string)=> {
-        deleteTagPartyHandler({
+    const removeContact = (contactId: string)=> {
+      deleteContactHandler({
             variables: {
-                tagId: parseInt(tagId),
-                partyId: parseInt(recordId),
+                id: parseInt(contactId),
                 appUserGroupId: user.currentAppUserGroupId
             }
         })
     }
 
     React.useEffect(() => {
-        getSinglePartyTagsHandler({variables: {
+      getPartyPrivateContactsHandler({variables: {
             partyId: parseInt(recordId),
-            appUserGroupId: user.currentAppUserGroupId
+            appUserGroupId: user.currentAppUserGroupId,
+            //statusId: 1
         }})
     }, [])
     
@@ -46,8 +47,7 @@ export const SinglePartyTags = () => {
         
         
         <>
-         {getSinglePartyTagsRequest.data?.singlePartyTags &&
-         <StyledPaper>
+        <StyledPaper>
            <Box
       sx={{
         width: {
@@ -66,18 +66,23 @@ export const SinglePartyTags = () => {
         }
       }}
     >
-        <Typography variant="h6">{t('singleRecord.tags')}</Typography>
+        <Typography variant="h6">{t('entityType.contacts')}</Typography>
 
-        <MultiLevelList listName="tagList"  data={getSinglePartyTagsRequest.data.singlePartyTags} deleteItem={untag}/>
+        {getPartyPrivateContactsRequest.data?.partyPrivateContacts?.length && <> 
+          <Typography>{t('singleRecord.privateContacts')}</Typography>
+        <MultiLevelList listName="privateContacts"  data={getPartyPrivateContactsRequest.data.partyPrivateContacts} deleteItem={removeContact}/>
+        </>
+      }
         <Button
         variant={"contained"}
         sx={{ my: 3, width: "150px" }}
-        onClick={toggleNewTagPartyModal}
+        onClick={toggleCreateUpdateContactModal}
       >
-        {t('singleRecord.createNewTagParty')}
+        {t('singleRecord.createNewContact')}
       </Button>
         </Box>
-        </StyledPaper> }
+        </StyledPaper>
         </>
     )
 }
+

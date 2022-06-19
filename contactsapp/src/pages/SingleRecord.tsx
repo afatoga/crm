@@ -18,6 +18,7 @@ import { CustomFormField } from "../components/Form/CustomFormField";
 import { useTranslation } from "react-i18next";
 import { TaggedParties } from "../components/Templates/TaggedParties";
 import { SinglePartyTags } from "../components/Templates/SinglePartyTags";
+import { PartyContacts } from "../components/Templates/PartyContacts";
 
 export const SingleRecord = () => {
   const {t} = useTranslation();
@@ -433,11 +434,12 @@ export const SingleRecord = () => {
         >
           <Box
             sx={{
+              marginBottom: '1.5rem',
               width: {
                 xs: "100%", // theme.breakpoints.up('xs')
                 sm: "60%", //400, // theme.breakpoints.up('sm')
                 // md: 300, // theme.breakpoints.up('md')
-                lg: 360, // theme.breakpoints.up('lg')
+                lg: "360px", // theme.breakpoints.up('lg')
                 //xl: 500, // theme.breakpoints.up('xl')
               },
             }}
@@ -492,6 +494,9 @@ export const SingleRecord = () => {
           )}
            {(recordType === "person" || recordType === "organization") && (
             <SinglePartyTags />
+          )}
+           {(recordType === "person" || recordType === "organization") && (
+            <PartyContacts />
           )}
            {(recordType === "tag") && (
             <TaggedParties />

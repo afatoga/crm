@@ -39,8 +39,8 @@ class TagParty {
 
 @ObjectType()
 export class ExtendedTagParty extends TagParty {
-  @Field((type) => ID) 
-  partyTypeId: number
+  // @Field((type) => ID) 
+  // partyTypeId: number
 
   @Field((type) => String, { nullable: true }) 
   tagName: string | null

@@ -24,7 +24,11 @@ export const GET_TAGS = gql`
 export const GET_TAGS_BY_NAME = gql`
   query ($searchedName: String!, $appUserGroupId: Int!, $statusId: Int) {
     tagsByName(
-      data: { appUserGroupId: $appUserGroupId, statusId: $statusId, searchedName: $searchedName }
+      data: {
+        appUserGroupId: $appUserGroupId
+        statusId: $statusId
+        searchedName: $searchedName
+      }
     ) {
       id
       name
@@ -41,26 +45,24 @@ export const GET_TAG_BY_ID = gql`
   }
 `;
 
-
 export const GET_SINGLE_PARTY_TAGS = gql`
   query ($partyId: Int!, $appUserGroupId: Int!) {
-    singlePartyTags(data: {partyId: $partyId, appUserGroupId: $appUserGroupId}) {
-      
-        id
-        name
-      
+    singlePartyTags(
+      data: { partyId: $partyId, appUserGroupId: $appUserGroupId }
+    ) {
+      id
+      name
     }
   }
 `;
 
 export const GET_TAGGED_PARTIES = gql`
   query ($tagId: Int!, $appUserGroupId: Int!) {
-    taggedParties(tag: $tagId, appUserGroupId: $appUserGroupId) {
-      
-        id
-        partyId
-        tagId
-      
+    taggedParties(data: { tagId: $tagId, appUserGroupId: $appUserGroupId }) {
+      personFullName
+      organizationName
+      typeId
+      partyId
     }
   }
 `;

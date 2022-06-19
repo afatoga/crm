@@ -1,17 +1,20 @@
-import * as React from "react";
+//import * as React from "react";
 
 import {
-  Typography,
-  Box,
-  Button,
-  Grid,
+  // Typography,
+  // Box,
+  // Button,
+  // Grid,
   List,
   ListItem,
   ListItemText,
   IconButton,
+  styled
 } from "@mui/material";
 
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Edit as EditIcon, Delete as DeleteIcon} from "@mui/icons-material";
+
+//import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import {useParty} from '../../hooks/useParty';
 import {ORGANIZATION_PARTY_TYPE_ID, PERSON_PARTY_TYPE_ID,
@@ -47,13 +50,22 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
 
             return navigate(`/${otherPartyTypeId === PERSON_PARTY_TYPE_ID ? 'people' : 'organizations'}/${otherPartyId}`);
          }
+
+         else if (listName === 'tagList') {
+            return navigate(`/tags/${item.id}`);
+         }
+         else if (listName === 'taggedParties') {
+            if (!item.personFullName || !item.personFullName.trim().length) {
+              return navigate(`/organizations/${item.partyId}`);
+            } else return navigate(`/people/${item.partyId}`);
+            
+         }
             
         
         return false;
     }
 
     const getLabel = (item: any) => {
-        // console.log(item, currentRecordId)
 
         if (listName === 'organizationToOrganizationRelationships' 
          || listName === 'personToOrganizationRelationships'
@@ -61,10 +73,16 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
              return parseInt(currentRecordId) === item.firstPartyId ? item.secondPartyName : item.firstPartyName;
          }
 
+        if (listName === 'taggedParties') {
+          return (!item.personFullName || !item.personFullName.trim().length) ? item.organizationName: item.personFullName;
+        }
+        if (listName === 'privateContacts') {
+          return item.value;
+        }
+
         return item.name;
     }
     const getSubtitle = (item: any) => {
-        // console.log(item, currentRecordId)
 
         if (listName === 'organizationToOrganizationRelationships' 
          || listName === 'personToOrganizationRelationships'
@@ -75,6 +93,10 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
 
         }
 
+        if (listName === 'privateContacts') {
+          return item.contactType?.name;
+        }
+
         return undefined;
     }
 
@@ -82,39 +104,21 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
 
         <List dense={false}>
         {data.map((item:any) => {
-        //   const recordId = parseInt(recordIdString);
-        //   let itemToDisplay:PartyRelationship = {
-        //     id: item.id,
-        //     otherPartyId: 0,
-        //     name: '',
-        //     typeName: item.typeId ? item.typeId : '', // to retrieve!
-        //   };
 
-        //   if (item.firstPartyId === recordId) { //current record entity is priviledged.
-        //     itemToDisplay = {
-        //       ...itemToDisplay,
-        //       otherPartyId: item.secondPartyId,
-        //       name: item.secondPartyPersonName
-        //         ? item.secondPartyPersonName
-        //         : item.secondPartyOrganizationName,
-        //     };
-        //   } else if (item.secondPartyId === recordId) {
-        //     itemToDisplay = {
-        //       ...itemToDisplay,
-        //       otherPartyId: item.firstPartyId,
-        //       name: item.firstPartyPersonName
-        //         ? item.firstPartyPersonName
-        //         : item.firstPartyOrganizationName,
-        //     };
-        //   }
 
           return (
             <ListItem
-              key={item.id}
+              key={listName === 'taggedParties' ? item.partyId:item.id}
               secondaryAction={
-                <IconButton edge="end" aria-label="delete" onClick={() => deleteItem(item.id)}>
+                <>
+                {listName === 'privateContacts' && 
+                <IconButton edge="end" aria-label="edit" onClick={() => console.log(item.id)}>
+                <EditIcon />
+              </IconButton>}
+                <IconButton edge="end" aria-label="delete" onClick={() => deleteItem(listName === 'taggedParties' ? item.partyId:item.id)}>
                   <DeleteIcon />
                 </IconButton>
+                </>
               }
             >
               {/* <ListItemAvatar>
@@ -122,7 +126,7 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
                 <FolderIcon />
               </Avatar>
             </ListItemAvatar> */}
-              <ListItemText
+              <StyledListItemText
                 primary={getLabel(item)}
                 secondary={getSubtitle(item)}
                 onClick={() => navigateToItem(item)}
@@ -135,3 +139,7 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
 
     )
 }
+
+const StyledListItemText = styled(ListItemText)`
+span.MuiTypography-root:hover {     cursor: pointer;   }
+`;

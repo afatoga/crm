@@ -1,46 +1,50 @@
 import { gql } from "@apollo/client";
 
-export const GET_ALL_PERSONS = gql`
-  query {
-    allPersons {
-      partyId
-      name
-      surname
-    }
-  }
-`;
-export const GET_PERSONS_BY_APPUSERGROUP = gql`
-  query ($appUserGroupId: Int!, $statusId: Int) {
-    personsByAppUserGroup(
-      data: { appUserGroupId: $appUserGroupId, statusId: $statusId }
+export const GET_PARTY_PRIVATE_CONTACTS = gql`
+  query ($appUserGroupId: Int!, $partyId: Int!, $statusId: Int) {
+    partyPrivateContacts(
+      data: {
+        appUserGroupId: $appUserGroupId,
+        partyId: $partyId,
+        statusId: $statusId
+      }
     ) {
-      partyId
-      name
-      surname
-    }
-  }
-`;
-export const GET_PERSON_BY_ID = gql`
-  query ($appUserGroupId: Int!, $id: Int!) {
-    personById(data: { appUserGroupId: $appUserGroupId, id: $id }) {
-      partyId
-      name
-      surname
-      preDegree
-      postDegree
-      birthday
-      statusId
+      id
+      typeId
+      contactType {
+        name
+      }
+      value
+      status {
+        name
+      }
     }
   }
 `;
 
-export const GET_PARTYRELATIONSHIPS_BY_PARTYID = gql`
-  query ($id: Int!) {
-    partyRelationshipsByPartyId(data: { id: $id }) {
+export const GET_PARTYRELATIONSHIP_CONTACTS = gql`
+  query (
+    $partyId: Int!
+    $partyRelationshipId: Int!
+    $statusId: Int
+    $appUserGroupId: Int!
+  ) {
+    partyRelationshipContacts(
+      data: {
+        partyId: $partyId
+        partyRelationshipId: $partyRelationshipId
+        statusId: $statusId
+        appUserGroupId: $appUserGroupId
+      }
+    ) {
       id
-      firstPartyId
-      secondPartyId
-      typeId
+      type {
+        name
+      }
+      value
+      status {
+        name
+      }
     }
   }
 `;
