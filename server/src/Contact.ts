@@ -33,7 +33,7 @@ export class Contact {
 }
 
 @ObjectType()
-class ContactType {
+export class ContactType {
   @Field((type) => ID)
   id: number
 

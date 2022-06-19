@@ -4,9 +4,8 @@ export const CREATE_CONTACT = gql`
   mutation (
     $partyId: Int!
     $partyRelationshipId: Int
-    $name: String!
-    $appUserGroupId: Int!
     $typeId: Int
+    $contactValue: String!
     $statusId: Int
     $appUserGroupId: Int!
   ) {
@@ -15,7 +14,7 @@ export const CREATE_CONTACT = gql`
         mainPartyId: $partyId,
         partyRelationshipId: $partyRelationshipId,
         typeId: $typeId,
-        value: $value,
+        value: $contactValue,
         statusId: $statusId,
         appUserGroupId: $appUserGroupId
       }
@@ -29,7 +28,7 @@ export const UPDATE_CONTACT = gql`
     $id: Int!
     $partyId: Int!
     $partyRelationshipId: Int
-    $value: String!
+    $contactValue: String!
     $typeId: Int
     $statusId: Int
     $appUserGroupId: Int!
@@ -41,7 +40,7 @@ export const UPDATE_CONTACT = gql`
         partyRelationshipId: $partyRelationshipId,
         typeId: $typeId,
         statusId: $statusId,
-        value: $name,
+        value: $contactValue,
         appUserGroupId: $appUserGroupId,
         statusId: $statusId
       }

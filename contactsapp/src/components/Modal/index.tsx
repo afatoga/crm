@@ -11,6 +11,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
+import { CreateUpdateContactModal } from "../Templates/PartyContacts/CreateUpdateContactModal";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -84,10 +85,17 @@ export const Modal: FC = () => {
     else if (template === "NewTagParty")
       return (
         <BootstrapDialogTitle
-          // id="customized-dialog-title"
           onClose={handleModal}
         >
           {t("singleRecord.createNewTagParty")}
+        </BootstrapDialogTitle>
+      );
+    else if (template === "CreateUpdateContact")
+      return (
+        <BootstrapDialogTitle
+          onClose={handleModal}
+        >
+          {t("singleRecord.createUpdateContact")}
         </BootstrapDialogTitle>
       );
     return null;
@@ -97,6 +105,7 @@ export const Modal: FC = () => {
     if (template === "ConfirmDialog") return <ConfirmDialog />;
     else if (template === "NewRelationship") return <NewRelationshipModal />;
     else if (template === "NewTagParty") return <NewTagPartyModal />;
+    else if (template === "CreateUpdateContact") return <CreateUpdateContactModal />;
 
     return null;
   };

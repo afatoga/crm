@@ -1,5 +1,14 @@
 import { gql } from "@apollo/client";
 
+export const GET_CONTACTTYPE_LIST = gql`
+  query {
+    contactTypeList {
+      id
+      name
+    }
+  }
+`;
+
 export const GET_PARTY_PRIVATE_CONTACTS = gql`
   query ($appUserGroupId: Int!, $partyId: Int!, $statusId: Int) {
     partyPrivateContacts(

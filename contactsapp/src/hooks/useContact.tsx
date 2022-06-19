@@ -3,11 +3,12 @@ import {  useMutation, useLazyQuery, useApolloClient, makeVar  } from '@apollo/c
 import {
     GET_PARTY_PRIVATE_CONTACTS,
     GET_PARTYRELATIONSHIP_CONTACTS,
+    GET_CONTACTTYPE_LIST
 } from '../api/contact/queries';
 
 import { partyRelationshipListVar, IPartyRelationship} from './useParty';
 
-//import { GET_PARTYRELATIONSHIPS } from '../api/party/queries';
+import { GET_STATUS_LIST } from '../api/status/queries';
 
 import {
     CREATE_CONTACT,
@@ -53,6 +54,7 @@ export function useContact() {
     const client = useApolloClient();
     //const getAllTAGs = useLazyQuery(GET_ALL_TAGS);
 
+    const getContactTypeList = useLazyQuery(GET_CONTACTTYPE_LIST);
     const getPartyPrivateContacts = useLazyQuery(GET_PARTY_PRIVATE_CONTACTS);
 
     const getPartyRelationshipContacts = useLazyQuery(GET_PARTYRELATIONSHIP_CONTACTS, {
@@ -76,17 +78,15 @@ export function useContact() {
         }
     });
 
+    const retrieveStatusListFromCache = () => {
+        const { statusList } = client.readQuery({
+            query: GET_STATUS_LIST
+        });
 
+        if (!statusList || !statusList.length) return {data: null};
 
-    // const retrievePartyRelationshipsFromCache = () => {
-    //     const { partyRelationships } = client.readQuery({
-    //         query: GET_PARTYRELATIONSHIPS
-    //     });
-
-    //     if (!partyRelationships || !partyRelationships.length) return [];
-
-    //     return partyRelationships;
-    // }
+        return {data: statusList};
+    }
 
     const createContact = useMutation(CREATE_CONTACT, {
         fetchPolicy: 'network-only',
@@ -106,12 +106,13 @@ export function useContact() {
 
     return {
         operations: {
+            getContactTypeList,
             getPartyPrivateContacts,
             getPartyRelationshipContacts,
             createContact,
             updateContact,
             deleteContact,
-            
+            retrieveStatusListFromCache
         }
     }
 }

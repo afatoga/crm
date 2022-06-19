@@ -27,6 +27,15 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         }));
       }
     }
+    if (fieldData.name === "contactTypeId") {
+      if (fieldData.apiRequest.data?.contactTypeList?.length) {
+        const list = fieldData.apiRequest.data.contactTypeList;
+        return list.map((item: any) => ({
+          name: item.name,
+          id: item.id,
+        }));
+      }
+    }
 
     // if (fieldData.name === 'otherPartyId') {
     //   if (fieldData.apiRequest.called) {
@@ -71,6 +80,14 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         if (partyRelationshipTypeList.length > 0) {
           
           const found = partyRelationshipTypeList.find(
+            (item: any) => option === parseInt(item.id)
+          );
+          if (found) return found.name;
+        }
+      } else if (fieldData.name === "contactTypeId") {
+        if (fieldData.apiRequest.data?.contactTypeList?.length) {
+          const list = fieldData.apiRequest.data.contactTypeList;
+          const found = list.find(
             (item: any) => option === parseInt(item.id)
           );
           if (found) return found.name;

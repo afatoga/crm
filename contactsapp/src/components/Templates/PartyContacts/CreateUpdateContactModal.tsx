@@ -24,13 +24,14 @@ import {ORGANIZATION_PARTY_TYPE_ID, PERSON_PARTY_TYPE_ID,
   PARTY_RELATIONSHIP_CATEGORY_PERSON_PERSON} from '../../../utils/constants';
 import { useTranslation } from 'react-i18next';
 import { debounce } from '../../../utils/utilityFunctions';
-import { useTag, filteredTagsVar, TagOption} from '../../../hooks/useTag';
+// import { useTag, filteredTagsVar, TagOption} from '../../../hooks/useTag';
+import { useContact } from '../../../hooks/useContact';
 // const _filterOptions = createFilterOptions();
 
 
 
 
-export const NewTagPartyModal = () => {
+export const CreateUpdateContactModal = () => {
     const {t} = useTranslation();
     const location = useLocation();
     let wholePath = location.pathname;
@@ -39,35 +40,50 @@ export const NewTagPartyModal = () => {
     //const { id: recordIdString } = useParams();
 
     const {user} = useAuth();
-    let { handleModal } = React.useContext(ModalContext);  
-    const {operations} = useTag();
-    const [createTagPartyHandler, createTagPartyRequest] = operations.createTagParty;
-    const [getTagsByNameHandler, getTagsByNameRequest] = operations.getTagsByName;
+    let { isShown,handleModal } = React.useContext(ModalContext);  
+    const {operations} = useContact();
+    const [createContactHandler, createContactRequest] = operations.createContact;
+    const [updateContactHandler, updateContactRequest] = operations.updateContact;
+    const [getContactTypeListHandler, getContactTypeListRequest] = operations.getContactTypeList;
+    //const [getTagsByNameHandler, getTagsByNameRequest] = operations.getTagsByName;
 
     const [open, setOpen] = React.useState<boolean>(false);
-    const [searchedName, setSearchedName] = React.useState<string>('');
+    //const [searchedName, setSearchedName] = React.useState<string>('');
     //const [filteredParties, setfilteredParties] = React.useState<TagOption[]>([]);
     //const inputRef = React.useRef(null);
 
-    const filteredTags = useReactiveVar(filteredTagsVar);
+    //const filteredTags = useReactiveVar(filteredTagsVar);
 
 
 
     const fields = [
+          // {
+          //   label: t('contact.value'),
+          //   name: "contactValue",
+          //   type: "text",
+          //   required: true,
+          // },
+            {
+              label: t('contact.type'),
+              name: "contactTypeId",
+              type: "autocomplete", //"select",
+              required: true,
+              apiRequest: getContactTypeListRequest,
+            },
+        
           {
-            label: t('userActions.lookForTag'),
-            name: "tag",
-            type: "autocomplete",
-            // required: true,
+            label: t('contact.value'),
+            name: "contactValue",
+            type: "text",
+            required: true,
           },
           {
-            //label: "Other party",
-            name: "tagId",
-            type: "hidden",
+            label: "status",
+            name: "statusId",
+            type: "autocomplete", //"select",
             required: true,
-            // apiHandler: getPartiesByNameHandler,
-            // apiRequest: getPartiesByNameRequest
-          } 
+            apiRequest: operations.retrieveStatusListFromCache(),
+          },
     ]
 
     const schema = yup.object().shape({
@@ -89,33 +105,22 @@ export const NewTagPartyModal = () => {
     
     const onSubmit = React.useCallback((values) => {
 
-          createTagPartyHandler({
+      createContactHandler({
             variables: {
               partyId: parseInt(recordId),
-              tagId: values.tagId,
+              value: values.contactValue,
+              partyRelationshipId: values.partyRelationshipId,
               appUserGroupId: user.currentAppUserGroupId
             },
         });
       
     }, []);
 
+
+
     React.useEffect(() => {
-      filteredTagsVar([]) //reset
+      getContactTypeListHandler();
     }, [])
-
-    React.useEffect(() => {
-      if(searchedName.length > 0) {
-        getTagsByNameHandler({variables: {searchedName: searchedName, appUserGroupId: user.currentAppUserGroupId}});
-      }
-      //inputRef.current.querySelector('input').focus();
-    }, [searchedName])
-
-
-    React.useEffect(() => {
-      if (filteredTags.length > 0) {
-        setOpen(true);
-      }
-    }, [filteredTags])
 
     // const filterOptions = React.useCallback((options, state) => {
     //   const results = _filterOptions(options, state);  
@@ -123,117 +128,35 @@ export const NewTagPartyModal = () => {
     // }, []);
 
 
-    const debounceOnChange = React.useCallback(
-      debounce(value => {
-        setSearchedName(value);
-      }, 400),
-      []
-    );
+    // const debounceOnChange = React.useCallback(
+    //   debounce(value => {
+    //     setSearchedName(value);
+    //   }, 400),
+    //   []
+    // );
 
-    const getOptionLabel = (option) => {
-
-        if (typeof option === "number") {
-
-          const found = filteredTags.find((item:any) => (option === parseInt(item.id)))
-          if (found) return found.name;
-        }
-
-        else return (typeof option === "string") ? option : option.name
-     
-    }
-
-
-    const AutocompleteLoadOnInputField = ({controllerProps, fieldData}) => {
-      return (
-        <FormGroup>
-        <Autocomplete
-        id={fieldData.name}
-        //sx={{ width: 300 }}
-        open={open}
-        onOpen={() => {if(filteredTags.length > 0) setOpen(true)}}
-        onClose={() => {
-          setOpen(false);
-        }}
-        onChange={(_event, newValue) => {
-          controllerProps.onChange(newValue);
-          
-          if(newValue && newValue !== "string") {
-            setValue('tagId', parseInt(newValue.id));
-            //setValue('otherPartyTypeId', parseInt(newValue.typeId));
-          }
-          else if(!newValue) { //reset
-            setValue('tagId', null);
-            //setValue('otherPartyTypeId', null);
-          }
-        }}
-        onInputChange={(_event, newInputValue) => {
-          
-          if (filteredTags.find((item: TagOption) => item.name === newInputValue)) {
-            controllerProps.onChange(newInputValue);
-          }
-          else {
-            debounceOnChange(newInputValue);
-            controllerProps.onChange(newInputValue);
-          }
-        }}
-        value={controllerProps.value ? controllerProps.value : ""}
-        isOptionEqualToValue={(option, value) => {
-          if (option && typeof value === "string") {
-          
-            const loweCasedOptionLabel = option.name.toLowerCase();
-            return loweCasedOptionLabel.indexOf(value.toLowerCase()) >= 0;
-          }
-          return value === option
-          // return value === undefined || value === '' || option.id === value.id
-        }}
-        getOptionLabel={getOptionLabel}
-        options={filteredTags}
-        loading={getTagsByNameRequest.loading}
-        
-        // filterOptions={(options, state) => {
-
-        //   if (!state.inputValue.length) return options;
-
-        //   return options.filter((item: TagOption) => {
-        //     const loweCasedOptionLabel = item.name.toLowerCase();
-        //     return loweCasedOptionLabel.indexOf(state.inputValue.toLowerCase()) >= 0;
-        //   })
-        // }}
-        //filterOptions={filterOptions}
-        renderInput={(params) => (
-          <TextField
-            autoFocus
-            //ref={inputRef}
-            {...params}
-            label={t(`entityType.tag`)}
-            InputProps={{
-              ...params.InputProps,
-            }}
-            helperText={
-              errors["otherPartyId"] ? errors["otherPartyId"].message : ""
-            }
-          />
-        )}
-      />
-      </FormGroup>
-      )
-    }
+    
 
 
     React.useEffect(( ) => {
-        if (createTagPartyRequest.data) {
-          if (createTagPartyRequest.data.createTagParty.status === 'SUCCESS') {
-            //status = SUCCESS
-            handleModal() // && refetch relationshipList
+        if (createContactRequest.data) {
+          if (createContactRequest.data.createContact.id) {
+            isShown && handleModal() 
           }
         }
-    }, [createTagPartyRequest])
+
+        else if (updateContactRequest.data) {
+          if (updateContactRequest.data.updateContact.id) {
+            isShown && handleModal()
+          }
+        }
+    }, [createContactRequest, updateContactRequest])
 
   return (
    <>
         <DialogContent dividers>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        {getContactTypeListRequest.data && <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={2}>
               {fields.map((item, index) => {
 
@@ -242,15 +165,9 @@ export const NewTagPartyModal = () => {
                 return (
                 <Controller
                   key={index}
-                  render={({ field }) => {
-
-                    return field.name === 'tag' ?
-
-                    <AutocompleteLoadOnInputField controllerProps={field} fieldData={item} /> :
-
+                  render={({ field }) => (
                     <CustomFormField controllerProps={field} fieldData={item} errors={errors} />
-                    }
-                  }
+                  )}
                   control={control}
                   name={item.name}
                   //defaultValue={getRecordData(item.name)}
@@ -265,26 +182,24 @@ export const NewTagPartyModal = () => {
               >
                 {t('userActions.save')}
               </Button>
-              {!isSubmitting && createTagPartyRequest.error && (
+              {!isSubmitting && createContactRequest.error && (
                 <Alert severity="error">
                   <AlertTitle>{t('general.error')}</AlertTitle>
-                  {createTagPartyRequest.error.message}
+                  {createContactRequest.error.message}
+                </Alert>
+              )}
+              {!isSubmitting && updateContactRequest.error && (
+                <Alert severity="error">
+                  <AlertTitle>{t('general.error')}</AlertTitle>
+                  {updateContactRequest.error.message}
                 </Alert>
               )}
             </Stack>
-          </form>
+          </form>}
         
-          {/* <Typography gutterBottom>
-            Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus
-            magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec
-            ullamcorper nulla non metus auctor fringilla.
-          </Typography> */}
+        
         </DialogContent>
-        {/* <DialogActions>
-          <Button autoFocus onClick={handleModal}>
-            Save changes
-          </Button>
-        </DialogActions> */}
+
         </>
    
   );

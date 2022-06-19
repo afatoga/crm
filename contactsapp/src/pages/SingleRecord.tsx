@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { TaggedParties } from "../components/Templates/TaggedParties";
 import { SinglePartyTags } from "../components/Templates/SinglePartyTags";
 import { PartyContacts } from "../components/Templates/PartyContacts";
+//import { useApolloClient } from "@apollo/client";
 
 export const SingleRecord = () => {
   const {t} = useTranslation();
@@ -29,6 +30,7 @@ export const SingleRecord = () => {
   const { operations } = useParty();
   const { operations: tagOperations } = useTag();
 
+  // const apolloClient = useApolloClient();
   const [getPersonByIdHandler, getPersonByIdRequest] = operations.getPersonById;
   const [getOrganizationByIdHandler, getOrganizationByIdRequest] =
     operations.getOrganizationById;

@@ -10,7 +10,7 @@ import {
   Field,
   Authorized,
 } from "type-graphql";
-import { Contact, ExtendedContact } from "./Contact";
+import { Contact, ContactType, ExtendedContact } from "./Contact";
 import { APIResponse } from "./GlobalObjects";
 import { isUserAuthorized } from "./authChecker";
 import { Context } from "./context";
@@ -84,6 +84,17 @@ class PartyRelationshipContactsInput {
 //@Service()
 @Resolver(Contact)
 export class ContactResolver {
+
+  @Authorized()
+  @Query((returns) => [ContactType])
+  async contactTypeList(
+    @Ctx() ctx: Context,
+  ): Promise<ContactType[]> {
+
+    if(!ctx.currentUser) throw new Error('Not authorized')
+
+    return await ctx.prisma.contactType.findMany();
+  }
   
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => APIResponse)
