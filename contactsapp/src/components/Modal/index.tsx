@@ -12,6 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
 import { CreateUpdateContactModal } from "../Templates/PartyContacts/CreateUpdateContactModal";
+import { contactToEditVar } from "../../hooks/useContact";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -72,6 +73,8 @@ export const Modal: FC = () => {
   let { isShown, handleModal, template } = React.useContext(ModalContext);
   const { t } = useTranslation();
 
+  
+
   const getModalTitle = (): JSX.Element => {
     if (template === "NewRelationship")
       return (
@@ -95,7 +98,7 @@ export const Modal: FC = () => {
         <BootstrapDialogTitle
           onClose={handleModal}
         >
-          {t("singleRecord.createUpdateContact")}
+          {contactToEditVar().length ? t("singleRecord.editContact") : t("singleRecord.createNewContact")}
         </BootstrapDialogTitle>
       );
     return null;

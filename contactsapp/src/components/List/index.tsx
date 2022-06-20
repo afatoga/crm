@@ -26,12 +26,13 @@ interface IMultiLevelList {
     currentRecordType?: string,
     data: any,
     deleteItem: (id: string) => void;
+    editItem?: (id: string) => void;
     listName?: string;
 }
 
 
 
-export const MultiLevelList = ({currentRecordId, currentRecordType, data, deleteItem, listName}: IMultiLevelList) => {
+export const MultiLevelList = ({currentRecordId, currentRecordType, data, deleteItem, editItem, listName}: IMultiLevelList) => {
     const navigate = useNavigate();
     const {t} = useTranslation();
 
@@ -117,7 +118,7 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
               secondaryAction={
                 <>
                 {(listName === 'privateContacts' || listName === 'partyRelationshipContacts') && 
-                <IconButton edge="end" aria-label="edit" onClick={() => console.log(item.id)}>
+                <IconButton edge="end" aria-label="edit" onClick={() => editItem(item.id)}>
                 <EditIcon />
               </IconButton>}
                 <IconButton edge="end" aria-label="delete" onClick={() => deleteItem(listName === 'taggedParties' ? item.partyId:item.id)}>

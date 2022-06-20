@@ -8,6 +8,7 @@ import {
   FormGroup,
 } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
+import { IPartyRelationship } from "../../hooks/useParty";
 
 export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
 
   const getSelectOptions = () => {
     if (fieldData.name === "statusId") {
+     
       if (fieldData.apiRequest.data?.statusList?.length) {
         const statusList = fieldData.apiRequest.data.statusList;
         return statusList.map((item: any) => ({
@@ -27,7 +29,21 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         }));
       }
     }
+    if (fieldData.name === "partyRelationshipId") {
+
+      if (fieldData.apiRequest) {
+        const list = fieldData.apiRequest;
+        
+        return list.map((item: IPartyRelationship) => ({
+          name: parseInt(fieldData.currentPartyId) === item.firstPartyId ? item.secondPartyName : item.firstPartyName,
+          id: item.id,
+        }));
+
+        //return [{ id: 0, name: " - " }, ...options]
+      }
+    }
     if (fieldData.name === "contactTypeId") {
+
       if (fieldData.apiRequest.data?.contactTypeList?.length) {
         const list = fieldData.apiRequest.data.contactTypeList;
         return list.map((item: any) => ({
@@ -36,17 +52,6 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         }));
       }
     }
-
-    // if (fieldData.name === 'otherPartyId') {
-    //   if (fieldData.apiRequest.called) {
-    //     if (fieldData.apiRequest.data?.partiesByName?.length) {
-    //       const partyList = fieldData.apiRequest.data.partiesByName;
-    //       return partyList.map((item:any) => ({name:item.name, id:item.id}))
-    //     }
-    //   }
-
-    //   else return [];
-    // }
 
     if (fieldData.name === "partyRelationshipTypeId") {
       if (partyRelationshipTypeList.length > 0) {
@@ -63,7 +68,9 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
   };
 
   const getOptionLabel = (option: number | { id: string; name: string }) => {
-    if (!option || (!fieldData.apiRequest.data && fieldData.name !== "partyRelationshipTypeId")) return "";
+    
+    if (!option || (!fieldData.apiRequest.data && fieldData.name !== "partyRelationshipTypeId" && fieldData.name !== "partyRelationshipId")) return "";
+  
 
     // console.log(option);
     if (typeof option === "number") {
@@ -83,6 +90,17 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
             (item: any) => option === parseInt(item.id)
           );
           if (found) return found.name;
+        }
+      } else if (fieldData.name === "partyRelationshipId") {
+    
+        if (fieldData.apiRequest.length) {
+          const list = fieldData.apiRequest;
+          
+          const found = list.find(
+            (item: IPartyRelationship) => option === parseInt(item.id)
+          );
+          // option's type is number, therefore we need to look up the name in data from "fieldData.apiRequest"
+          if (found) return parseInt(fieldData.currentPartyId) === found.firstPartyId ? found.secondPartyName : found.firstPartyName;
         }
       } else if (fieldData.name === "contactTypeId") {
         if (fieldData.apiRequest.data?.contactTypeList?.length) {
@@ -119,7 +137,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
       <TextField
         name={fieldData.name}
         type={fieldData.type}
-        value={controllerProps.value}
+        defaultValue={controllerProps.value ? controllerProps.value : ""}
         onChange={controllerProps.onChange}
         onBlur={controllerProps.onBlur}
         label={fieldData.label}
@@ -127,7 +145,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         helperText={
           errors[fieldData.name] ? errors[fieldData.name].message : ""
         }
-        disabled={user.currentRole !== "ADMIN" && user.currentRole !== "MOD"}
+        disabled={!["ADMIN", "MOD"].includes(user.currentRole)}
         //size={(item.name === 'name' || item.name === 'surname' ) ? 'medium' : 'small'}
       />
     );
@@ -166,11 +184,13 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         }}
         value={controllerProps.value ? controllerProps.value : ""}
         onChange={(event: any, newValue: { id: string; name: string }) => {
-      
+         
           if (newValue) {
             newValue?.id
               ? controllerProps.onChange(parseInt(newValue.id))
-              : controllerProps.onChange(undefined);
+              : controllerProps.onChange(undefined); //undefined
+          } else {
+            controllerProps.onChange(null)
           }
         }}
         onInputChange={(_event, newInputValue) => {
@@ -181,6 +201,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         }}
         isOptionEqualToValue={(option: any, value) => {
           if (!value.length) return true;
+          console.log(parseInt(option.id), value)
           return parseInt(option.id) === value;
         }}
         getOptionLabel={getOptionLabel}

@@ -248,7 +248,7 @@ input ContactInput {
   typeId: Int
   statusId: Int
   value: String
-  mainPartyId: Int!
+  mainPartyId: Int
   partyRelationshipId: Int
   appUserGroupId: Int!
 }

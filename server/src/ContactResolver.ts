@@ -20,24 +20,23 @@ class ContactInput {
   @Field((type) => Int, { nullable: true })
   id: number;
 
-  @Field((type) => Int,{ nullable: true })
+  @Field((type) => Int, { nullable: true })
   typeId: number;
 
-  @Field((type) => Int,{ nullable: true })
+  @Field((type) => Int, { nullable: true })
   statusId: number;
 
   @Field({ nullable: true })
   value: string;
 
-  @Field((type) => Int)
+  @Field((type) => Int, { nullable: true })
   mainPartyId: number; //target
 
-  @Field((type) => Int,{ nullable: true })
+  @Field((type) => Int, { nullable: true })
   partyRelationshipId: number; //target
 
   @Field((type) => Int)
   appUserGroupId: number;
-
 }
 
 @InputType()
@@ -57,7 +56,7 @@ class PartyContactsInput {
   // @Field((type) => Int, { nullable: true })
   // partyRelationshipId: number;
 
-  @Field((type) => Int,{ nullable: true })
+  @Field((type) => Int, { nullable: true })
   statusId: number;
 
   @Field((type) => Int)
@@ -72,30 +71,24 @@ class PartyRelationshipContactsInput {
   @Field((type) => [Int!])
   partyRelationshipIdList: [number];
 
-  @Field((type) => Int,{ nullable: true })
+  @Field((type) => Int, { nullable: true })
   statusId: number;
 
   @Field((type) => Int)
   appUserGroupId: number;
 }
 
-
-
 //@Service()
 @Resolver(Contact)
 export class ContactResolver {
-
   @Authorized()
   @Query((returns) => [ContactType])
-  async contactTypeList(
-    @Ctx() ctx: Context,
-  ): Promise<ContactType[]> {
-
-    if(!ctx.currentUser) throw new Error('Not authorized')
+  async contactTypeList(@Ctx() ctx: Context): Promise<ContactType[]> {
+    if (!ctx.currentUser) throw new Error("Not authorized");
 
     return await ctx.prisma.contactType.findMany();
   }
-  
+
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => APIResponse)
   async deleteContact(
@@ -108,20 +101,18 @@ export class ContactResolver {
     )
       throw new Error("Not authorized");
 
-      if (!data.id) throw new Error('provide contact id')
+    if (!data.id) throw new Error("provide contact id");
 
-      await ctx.prisma.contact.delete({
-        where: {
-          id: data.id
-        }
-      })
+    await ctx.prisma.contact.delete({
+      where: {
+        id: data.id,
+      },
+    });
 
-      return {
-        status: "SUCCESS",
-        message: "contact was deleted"
-      }
-
-
+    return {
+      status: "SUCCESS",
+      message: "contact was deleted",
+    };
   }
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Contact)
@@ -135,18 +126,30 @@ export class ContactResolver {
     )
       throw new Error("Not authorized");
 
-    if (!data.value || !data.mainPartyId) throw new Error('provide contact value')
+    if (!data.value || !data.mainPartyId)
+      throw new Error("provide contact value");
 
-    return await ctx.prisma.contact.create({data: {
-      typeId: data.typeId && data.typeId,
-      value: data.value,
-      mainPartyId: data.mainPartyId,
-      partyRelationshipId: data.partyRelationshipId && data.partyRelationshipId,
-      appUserGroupId: data.appUserGroupId //ctx.currentUser.currentAppUserGroupId
-    }})
+    const mainParty = await ctx.prisma.party.findFirst({
+      where: {
+        id: data.mainPartyId,
+        appUserGroupId: data.appUserGroupId,
+      },
+    });
 
+    if (!mainParty) throw new Error("Not authorized");
+
+    return await ctx.prisma.contact.create({
+      data: {
+        typeId: data.typeId && data.typeId,
+        value: data.value,
+        mainPartyId: mainParty.id,
+        partyRelationshipId:
+          data.partyRelationshipId && data.partyRelationshipId,
+        statusId: data?.statusId,
+        appUserGroupId: data.appUserGroupId, //ctx.currentUser.currentAppUserGroupId
+      },
+    });
   }
-
 
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Contact)
@@ -160,32 +163,37 @@ export class ContactResolver {
     )
       throw new Error("Not authorized");
 
-    
-      if (!data.id) throw new Error('provide contact id')
+    if (!data.id || data.mainPartyId) throw new Error("contact not found");
 
-      const currentContact = await ctx.prisma.contact.findUnique({where: {id : data.id}})
-      if (!currentContact) throw new Error('contact does not exist')
+    const currentContact = await ctx.prisma.contact.findUnique({
+      where: { id: data.id },
+    });
+    if (!currentContact) throw new Error("contact not found");
 
-      // zamceni zaznamu for update
-      // druhy uzivatel ceka, nedostane nactana data
+    // zamceni zaznamu for update
+    // druhy uzivatel ceka, nedostane nactana data
 
-      if (data.partyRelationshipId) {
-        const partyRelationship = await ctx.prisma.partyRelationship.findUnique({where: {id : data.partyRelationshipId}})
-        if (!partyRelationship) throw new Error('partyRelationship does not exist')
-      }
+    if (data.partyRelationshipId) {
+      const partyRelationship = await ctx.prisma.partyRelationship.findUnique({
+        where: { id: data.partyRelationshipId },
+      });
+      if (!partyRelationship)
+        throw new Error("partyRelationship does not exist");
+    }
 
-      return await ctx.prisma.contact.update({
-        where: {
-          id: data.id
-        },
-        data: {
-          typeId: data.typeId && data.typeId,
-          value: data.value,
-          mainPartyId: data.mainPartyId,
-          partyRelationshipId: data.partyRelationshipId && data.partyRelationshipId
-        }
-      })
-
+    return await ctx.prisma.contact.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        typeId: data.typeId && data.typeId,
+        value: data.value,
+        //mainPartyId: data.mainPartyId,
+        partyRelationshipId:
+          data.partyRelationshipId && data.partyRelationshipId,
+        statusId: data?.statusId
+      },
+    });
   }
 
   @Authorized()
@@ -200,39 +208,36 @@ export class ContactResolver {
     )
       throw new Error("Not authorized");
 
-    let whereConditions:any = {
+    let whereConditions: any = {
       mainPartyId: data.partyId,
       partyRelationshipId: null, //has to be null
-    }
+    };
 
     if (data.statusId) {
-      whereConditions = {...whereConditions, statusId: data.statusId};
-    }
-    else if (!data.statusId) {
-      whereConditions = {...whereConditions,
-        OR: [
-          {statusId: {not: 4}},
-          {statusId: null}
-        ]
+      whereConditions = { ...whereConditions, statusId: data.statusId };
+    } else if (!data.statusId) {
+      whereConditions = {
+        ...whereConditions,
+        OR: [{ statusId: { not: 4 } }, { statusId: null }],
       };
     }
 
-    return await ctx.prisma.contact
-      .findMany({
-        where: whereConditions,
-        include: {
-          contactType: {
-            select: {
-              name: true
-            }
-          },
-          status: {
-            select: {
-              name: true,
-            },
-          }
-        },
-      })
+    return await ctx.prisma.contact.findMany({
+      where: whereConditions,
+      include: {
+        contactType: true,
+        // {
+        //   select: 
+        //   {  name: true,},
+        // },
+        status: true
+        // {
+        //   select: {
+        //     name: true,
+        //   },
+        // },
+      },
+    });
   }
 
   @Authorized()
@@ -249,59 +254,44 @@ export class ContactResolver {
 
     //if (!data.partyRelationshipId)  throw new Error("Party relationship invalid");
 
-    let whereConditions:any = {
+    let whereConditions: any = {
       mainPartyId: data.partyId,
-      partyRelationshipId: {in: data.partyRelationshipIdList}
-    }
+      partyRelationshipId: { in: data.partyRelationshipIdList },
+    };
 
     if (data.statusId) {
-      whereConditions = {...whereConditions, statusId: data.statusId};
-    }
-    else if (!data.statusId) {
-      whereConditions = {...whereConditions,
-        OR: [
-          {statusId: {not: 4}},
-          {statusId: null}
-        ]
+      whereConditions = { ...whereConditions, statusId: data.statusId };
+    } else if (!data.statusId) {
+      whereConditions = {
+        ...whereConditions,
+        OR: [{ statusId: { not: 4 } }, { statusId: null }],
       };
     }
 
-    return ctx.prisma.contact
-      .findMany({
-        where: whereConditions,
-        include: {
-          contactType: {
-            select: {
-              name: true
-            }
-          },
-          status: {
-            select: {
-              name: true,
-            },
-          }
-        } 
-      })
+    return ctx.prisma.contact.findMany({
+      where: whereConditions,
+      include: {
+        contactType: true,
+        status: true,
+      },
+    });
   }
 
   @Authorized()
   @Query((returns) => [Contact], { nullable: true })
-  async contactsByProps(
-    @Arg("data") data: ContactInput,
-    @Ctx() ctx: Context
-  ) {
+  async contactsByProps(@Arg("data") data: ContactInput, @Ctx() ctx: Context) {
     if (!ctx.currentUser) throw new Error("please log in");
 
-    return ctx.prisma.contact
-      .findMany({
-        where: {
-          typeId: data.typeId && data.typeId,
-          value: data.value && {contains: data.value},
-          mainPartyId: data.mainPartyId,
-          partyRelationshipId: data.partyRelationshipId && data.partyRelationshipId,
-          appUserGroupId: ctx.currentUser.currentAppUserGroupId
-        }
-      })
+    return ctx.prisma.contact.findMany({
+      where: {
+        typeId: data.typeId && data.typeId,
+        value: data.value && { contains: data.value },
+        mainPartyId: data.mainPartyId,
+        partyRelationshipId:
+          data.partyRelationshipId && data.partyRelationshipId,
+        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+      },
+    });
   }
 
   // appUserGroupId:
@@ -309,5 +299,4 @@ export class ContactResolver {
   //    isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
   //    ? data.appUserGroupId
   //    : undefined,
-
 }

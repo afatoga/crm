@@ -8,7 +8,7 @@ import {
   InputType,
   Field,
   Authorized,
-  Int
+  Int,
 } from "type-graphql";
 import { Tag, ExtendedTag, ExtendedTagParty } from "./Tag";
 import { APIResponse } from "./GlobalObjects";
@@ -34,9 +34,8 @@ class TagInput {
   appUserGroupId: number;
 }
 
-@InputType() 
+@InputType()
 class TagByAppUserGroupInput {
-
   @Field((type) => Int)
   appUserGroupId: number;
 
@@ -58,14 +57,14 @@ class TagsByNameInput {
   @Field((type) => Int, { nullable: true })
   statusId: number;
 }
-@InputType() 
+@InputType()
 class DeleteTagInput {
   @Field((type) => Int)
   id: number;
   @Field((type) => Int)
   appUserGroupId: number;
 }
-@InputType() 
+@InputType()
 class DeleteTagPartyInput {
   @Field((type) => Int)
   partyId: number;
@@ -128,7 +127,6 @@ const createTagName = (name: string) => {
 //@Service()
 @Resolver(Tag)
 export class TagResolver {
-
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Tag)
   async createTag(
@@ -164,7 +162,7 @@ export class TagResolver {
 
     return await ctx.prisma.tag.update({
       where: {
-        id: data.id
+        id: data.id,
       },
       data: {
         name: createTagName(data.name),
@@ -189,9 +187,9 @@ export class TagResolver {
       where: {
         partyId_tagId: {
           partyId: data.partyId,
-          tagId: data.tagId
-        }
-      }
+          tagId: data.tagId,
+        },
+      },
     });
 
     return {
@@ -208,9 +206,7 @@ export class TagResolver {
   ) {
     //let partyTypeName = data.partyTypeId === 1 ? `"Person"` : `"Organization"`
 
-    const queryResultArray = await ctx.prisma.$queryRaw<
-      [Tag]
-    >(Prisma.sql`
+    const queryResultArray = await ctx.prisma.$queryRaw<[Tag]>(Prisma.sql`
       SELECT "Tag".*
       FROM "Tag"
       WHERE "Tag"."appUserGroupId" = ${data.appUserGroupId}
@@ -227,7 +223,6 @@ export class TagResolver {
     @Arg("data") data: TagByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
-
     //ensure user is authorized
     if (
       !ctx.currentUser ||
@@ -249,22 +244,20 @@ export class TagResolver {
     `);
   }
 
-
   @Authorized()
   @Query((returns) => [Tag])
   async singlePartyTags(
     @Arg("data") data: SinglePartyTagsInput,
     @Ctx() ctx: Context
   ) {
-//ensure user is authorized
-if (
-  !ctx.currentUser ||
-  !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-)
-  throw new Error("Not authorized");
-    
-  
-  return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
+    //ensure user is authorized
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
+    return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
   SELECT "Tag".*
   FROM "TagParty"
   INNER JOIN "Tag" ON "TagParty"."tagId" = "Tag"."id"
@@ -280,14 +273,14 @@ if (
     @Arg("data") data: TaggedPartiesInput,
     @Ctx() ctx: Context
   ) {
-//ensure user is authorized
-if (
-  !ctx.currentUser ||
-  !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-)
-  throw new Error("Not authorized");
+    //ensure user is authorized
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
 
-  return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
+    return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
   SELECT CONCAT ("Person"."surname", ' ', "Person"."name") AS "personFullName", 
     "Organization"."name" AS "organizationName",
     "Party"."typeId",
@@ -320,13 +313,9 @@ if (
     //   });
   }
 
-  
   @Authorized()
   @Query((returns) => [ExtendedTag])
-  async tagsByName(
-    @Arg("data") data: TagsByNameInput,
-    @Ctx() ctx: Context
-  ) {
+  async tagsByName(@Arg("data") data: TagsByNameInput, @Ctx() ctx: Context) {
     if (
       !ctx.currentUser ||
       !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
@@ -361,12 +350,11 @@ if (
       !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
     )
       throw new Error("Not authorized");
-    
 
     const tagPartyExists = await ctx.prisma.tagParty.findFirst({
       where: {
         tagId: data.tagId,
-        partyId: data.partyId
+        partyId: data.partyId,
       },
     });
 
@@ -374,44 +362,32 @@ if (
 
     const party = await ctx.prisma.party.findFirst({
       where: {
-        OR: [
-          {statusId: {not: 4}},
-          {statusId: null}
-        ],
+        OR: [{ statusId: { not: 4 } }, { statusId: null }],
         id: data.partyId,
-        appUserGroupId: data.appUserGroupId //ctx.currentUser.currentAppUserGroupId,
+        appUserGroupId: data.appUserGroupId, //ctx.currentUser.currentAppUserGroupId,
       },
     });
     const tag = await ctx.prisma.tag.findFirst({
       where: {
-        OR: [
-          {statusId: {not: 4}},
-          {statusId: null}
-        ],
+        OR: [{ statusId: { not: 4 } }, { statusId: null }],
         //statusId: {not: 4},
         id: data.tagId,
-        appUserGroupId: data.appUserGroupId
+        appUserGroupId: data.appUserGroupId,
       },
     });
 
-
-    if (
-     !party || !tag
-    )
-      throw new Error("party or tag are invalid");
+    if (!party || !tag) throw new Error("party or tag are invalid");
 
     await ctx.prisma.tagParty.create({
       data: {
-        
         partyId: party.id,
         tagId: tag.id,
-       
       },
     });
 
     return {
       status: "SUCCESS",
       message: "party was tagged",
-    }
+    };
   }
 }

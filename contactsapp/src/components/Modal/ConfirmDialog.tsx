@@ -5,10 +5,12 @@ import { actionResultVar } from '../../App';
 import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import Typography from '@mui/material/Typography';
+// import Typography from '@mui/material/Typography';
+import { useTranslation } from 'react-i18next';
 
 export const ConfirmDialog: React.FC = () => {
     let { isShown, handleModal, template } = React.useContext(ModalContext);
+    const {t} = useTranslation();
     
     const confirmAction = () => {
         actionResultVar({code:"CONFIRM"});
@@ -21,14 +23,14 @@ export const ConfirmDialog: React.FC = () => {
 
     return (
         <><DialogContent>
-            Do you really want to remove this item?
+           {t('form.confirmYourAction')}
         </DialogContent>
           <DialogActions>
           <Button autoFocus onClick={confirmAction} color={"success"}>
-            Confirm
+          {t('userActions.confirm')}
           </Button>
           <Button onClick={cancelAction} color={"error"}>
-            Cancel
+          {t('userActions.cancel')}
           </Button>
         </DialogActions>
         </>

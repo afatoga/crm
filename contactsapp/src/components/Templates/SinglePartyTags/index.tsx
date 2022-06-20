@@ -7,6 +7,8 @@ import { Typography, Box, Button } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ModalContext } from "../../../contexts/ModalContext";
 import { StyledPaper } from "../../Container";
+import { actionResultVar } from "../../../App";
+import { useReactiveVar } from "@apollo/client";
 
 export const SinglePartyTags = () => {
   const { id: recordId } = useParams(); //always string
@@ -25,15 +27,31 @@ export const SinglePartyTags = () => {
   const [deleteTagPartyHandler, deleteTagPartyRequest] =
     operations.deleteTagParty;
 
+const [selectedTagId, setSelectedTagId] = React.useState<string>(''); 
+const actionResult = useReactiveVar(actionResultVar);
+
   const untag = (tagId: string) => {
-    deleteTagPartyHandler({
-      variables: {
-        tagId: parseInt(tagId),
-        partyId: parseInt(recordId),
-        appUserGroupId: user.currentAppUserGroupId,
-      },
-    });
+    handleModal("ConfirmDialog");
+    setSelectedTagId(tagId);
+
+   
   };
+
+  React.useEffect(() => {
+    if (actionResult.code === "CONFIRM" && selectedTagId.length) {
+
+        deleteTagPartyHandler({
+            variables: {
+              tagId: parseInt(selectedTagId),
+              partyId: parseInt(recordId),
+              appUserGroupId: user.currentAppUserGroupId,
+            },
+          });
+
+      actionResultVar({});
+  
+    }
+  }, [actionResult])
 
   React.useEffect(() => {
     getSinglePartyTagsHandler({

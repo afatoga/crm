@@ -21,10 +21,12 @@ export const GET_PARTY_PRIVATE_CONTACTS = gql`
       id
       typeId
       contactType {
+        id
         name
       }
       value
       status {
+        id
         name
       }
     }
@@ -50,10 +52,12 @@ export const GET_PARTYRELATIONSHIP_CONTACTS = gql`
       mainPartyId
       partyRelationshipId
       contactType {
+        id
         name
       }
       value
       status {
+        id
         name
       }
     }

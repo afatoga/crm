@@ -47,25 +47,18 @@ export const TaggedParties = () => {
         
         <>
          {getTaggedPartiesRequest.data?.taggedParties &&
-         <StyledPaper>
+         <StyledPaper sx={{
+            width: {
+                xs: "100%", // theme.breakpoints.up('xs')
+                sm: "60%", //400, // theme.breakpoints.up('sm')
+                // md: 300, // theme.breakpoints.up('md')
+                lg: "360px", // theme.breakpoints.up('lg')
+                //xl: 500, // theme.breakpoints.up('xl')
+              }
+          }}>
          
            <Box
-      sx={{
-        width: {
-            xs: "100%", // theme.breakpoints.up('xs')
-            sm: "60%", //400, // theme.breakpoints.up('sm')
-            // md: 300, // theme.breakpoints.up('md')
-            lg: "360px", // theme.breakpoints.up('lg')
-            //xl: 500, // theme.breakpoints.up('xl')
-          },
-        padding: {
-          //xs: "1rem 0",
-          //md: "1rem 2rem",
-        },
-        margin: {
-          lg: "0 1rem"
-        }
-      }}
+      
     >
         <Typography variant="h6">{t('singleRecord.connections')}</Typography>
 

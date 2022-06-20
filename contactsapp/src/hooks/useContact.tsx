@@ -25,7 +25,7 @@ import {
 //     __typename: string;
 // }
 
-// export const reportsQueueVar = makeVar<string[]>([]);
+export const contactToEditVar = makeVar<string>(''); //contactId to load data in modal component
 export const extendedPartyRelationshipContactsVar = makeVar<ExtendedPartyRelationshipContact[]>([]);
 
 //"otherPartyName": string;
@@ -54,11 +54,15 @@ export function useContact() {
     const client = useApolloClient();
     //const getAllTAGs = useLazyQuery(GET_ALL_TAGS);
 
-    const getContactTypeList = useLazyQuery(GET_CONTACTTYPE_LIST);
+    const getContactTypeList = useLazyQuery(GET_CONTACTTYPE_LIST,
+    {
+        fetchPolicy: 'cache-first'
+    });
     const getPartyPrivateContacts = useLazyQuery(GET_PARTY_PRIVATE_CONTACTS);
 
     const getPartyRelationshipContacts = useLazyQuery(GET_PARTYRELATIONSHIP_CONTACTS, {
         onCompleted: (data) => {
+            
             if (data?.partyRelationshipContacts.length) {
                 const partyRelationships = partyRelationshipListVar();
 
@@ -74,18 +78,37 @@ export function useContact() {
                 });
 
                 extendedPartyRelationshipContactsVar(extendedData);
+            } else {
+                extendedPartyRelationshipContactsVar([]); //reset
             }
+
+            
         }
     });
 
+    const prepareExtendedPartyRelationshipContacts = (data) => {
+
+    }
+
     const retrieveStatusListFromCache = () => {
-        const { statusList } = client.readQuery({
+        const data = client.readQuery({
             query: GET_STATUS_LIST
         });
 
-        if (!statusList || !statusList.length) return {data: null};
+        if (!data?.statusList || !data.statusList.length) return {data: null};
 
-        return {data: statusList};
+        return {data};
+    }
+
+    const retrievePartyPrivateContactsCache = (variables: {appUserGroupId: number; partyId: number; statusId?: string}) => {
+        const data = client.readQuery({
+            query: GET_PARTY_PRIVATE_CONTACTS,
+            variables: variables
+        });
+
+        if (!data?.partyPrivateContacts || !data.partyPrivateContacts.length) return [];
+
+        return data.partyPrivateContacts;
     }
 
     const createContact = useMutation(CREATE_CONTACT, {
@@ -97,9 +120,17 @@ export function useContact() {
     })
     const updateContact = useMutation(UPDATE_CONTACT, {
         fetchPolicy: 'network-only',
+        refetchQueries: [ 
+            GET_PARTY_PRIVATE_CONTACTS,
+            GET_PARTYRELATIONSHIP_CONTACTS
+        ]
     })
     const deleteContact = useMutation(DELETE_CONTACT, {
         fetchPolicy: 'network-only',
+        refetchQueries: [ //could be removed from cache as well
+            GET_PARTY_PRIVATE_CONTACTS,
+            GET_PARTYRELATIONSHIP_CONTACTS
+        ]
     })
 
 
@@ -112,6 +143,7 @@ export function useContact() {
             createContact,
             updateContact,
             deleteContact,
+            retrievePartyPrivateContactsCache,
             retrieveStatusListFromCache
         }
     }

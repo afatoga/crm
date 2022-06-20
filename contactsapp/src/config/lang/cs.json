@@ -9,7 +9,8 @@
         "currentAppUserGroup": "Zvolená skupina"
     },
     "form": {
-        "isRequired": "pole {{fieldName}} je povinné"
+        "isRequired": "pole {{fieldName}} je povinné",
+        "confirmYourAction": "Skutečně chcete provést tuto akci?"
     },
     "general": {
         "actions": "akce",
@@ -69,6 +70,7 @@
         "profile": "profil",
         "createNewRelationship": "Nový vztah",
         "createNewContact": "Nový kontakt",
+        "editContact": "Upravit kontakt",
         "privateContacts": "Osobní kontakty",
         "partyRelationshipContacts": "Firemní /org. kontakty",
         "createNewTagParty": "Přidat tag",
@@ -76,6 +78,11 @@
         "abovePartyIsOfHigherPriority": "protistrana je nadřazená",
         "relationType": "typ vztahu",
         "connections": "Napojení"
+    },
+    "contact": {
+        "type": "Typ kontaktu",
+        "partyRelationship": "Vazba na vztah",
+        "value": "hodnota"
     },
     "userActions": {
         "login": "Přihlásit se",
@@ -88,6 +95,8 @@
         "switchTo": "Přepnout na",
         "lookForParty": "Najít osobu / organizaci",
         "lookForTag": "Najít tag",
-        "edit": "Upravit"
+        "edit": "Upravit",
+        "confirm": "Potvrdit",
+        "cancel": "Storno"
     }
 }

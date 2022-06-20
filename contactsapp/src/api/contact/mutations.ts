@@ -26,7 +26,7 @@ export const CREATE_CONTACT = gql`
 export const UPDATE_CONTACT = gql`
   mutation (
     $id: Int!
-    $partyId: Int!
+    #$partyId: Int!
     $partyRelationshipId: Int
     $contactValue: String!
     $typeId: Int
@@ -36,13 +36,12 @@ export const UPDATE_CONTACT = gql`
     updateContact(
       data: {
         id: $id,
-        mainPartyId: $partyId,
+        #mainPartyId: $partyId,
         partyRelationshipId: $partyRelationshipId,
         typeId: $typeId,
         statusId: $statusId,
         value: $contactValue,
-        appUserGroupId: $appUserGroupId,
-        statusId: $statusId
+        appUserGroupId: $appUserGroupId
       }
     ) {
       id

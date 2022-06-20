@@ -5,10 +5,11 @@ import { MultiLevelList } from "../../List";
 import { Typography, Button } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ModalContext } from "../../../contexts/ModalContext";
-import { useContact, extendedPartyRelationshipContactsVar } from "../../../hooks/useContact";
+import { useContact, extendedPartyRelationshipContactsVar, contactToEditVar } from "../../../hooks/useContact";
 import { StyledPaper } from "../../Container";
 import { useReactiveVar } from "@apollo/client";
 import { IPartyRelationship, partyRelationshipListVar } from "../../../hooks/useParty";
+import { actionResultVar } from "../../../App";
 
 export const PartyContacts = () => {
   const { id: recordId } = useParams(); //always string
@@ -16,7 +17,9 @@ export const PartyContacts = () => {
   const { t } = useTranslation();
   const { handleModal } = React.useContext(ModalContext);
 
-  const toggleCreateUpdateContactModal = () => {
+  const createNewContact = () => {
+    const contactToEdit = contactToEditVar();
+    if (contactToEdit.length) contactToEditVar('') //reset
     handleModal("CreateUpdateContact");
   };
 
@@ -28,18 +31,41 @@ export const PartyContacts = () => {
     operations.getPartyRelationshipContacts;
   const [deleteContactHandler, deleteContactRequest] = operations.deleteContact;
 
+  const [selectedContactId, setSelectedContactId] = React.useState<string>('');
+
   const removeContact = (contactId: string) => {
-    deleteContactHandler({
-      variables: {
-        id: parseInt(contactId),
-        appUserGroupId: user.currentAppUserGroupId,
-      },
-    });
+
+    handleModal("ConfirmDialog");
+    setSelectedContactId(contactId);
+    
+  };
+  const editContact = (contactId: string) => {
+    if (contactId.length) {
+    contactToEditVar(contactId);
+    handleModal("CreateUpdateContact");
+  }
+    
   };
 
 
   const partyRelationshipList = useReactiveVar(partyRelationshipListVar); 
   const extendedPartyRelationshipContacts = useReactiveVar(extendedPartyRelationshipContactsVar); 
+  const actionResult = useReactiveVar(actionResultVar);
+
+  React.useEffect(() => {
+    if (actionResult.code === "CONFIRM" && selectedContactId.length) {
+
+      deleteContactHandler({
+        variables: {
+          id: parseInt(selectedContactId),
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
+
+      actionResultVar({});
+  
+    }
+  }, [actionResult])
 
   React.useEffect(() => {
     getPartyPrivateContactsHandler({
@@ -92,6 +118,7 @@ export const PartyContacts = () => {
                 listName="privateContacts"
                 data={getPartyPrivateContactsRequest.data.partyPrivateContacts}
                 deleteItem={removeContact}
+                editItem={editContact}
               />
             </>
           )}
@@ -103,6 +130,7 @@ export const PartyContacts = () => {
                listName="partyRelationshipContacts"
                data={extendedPartyRelationshipContacts}
                deleteItem={removeContact}
+               editItem={editContact}
              />
            </>
           }              
@@ -110,7 +138,7 @@ export const PartyContacts = () => {
           <Button
             variant={"contained"}
             sx={{ my: 3, width: "160px" }}
-            onClick={toggleCreateUpdateContactModal}
+            onClick={createNewContact}
           >
             {t("singleRecord.createNewContact")}
           </Button>

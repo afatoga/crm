@@ -9,6 +9,11 @@ import {
     GET_ORGANIZATION_BY_ID,
     GET_PARTYRELATIONSHIP_TYPE_LIST
 } from '../api/party/queries';
+
+import {
+    GET_PARTYRELATIONSHIP_CONTACTS
+} from '../api/contact/queries';
+
 import {
     GET_STATUS_LIST
 } from '../api/status/queries';
@@ -90,6 +95,7 @@ export function useParty() {
     const getStatusList = useLazyQuery(GET_STATUS_LIST);
 
     const getPartyRelationships = useLazyQuery(GET_PARTYRELATIONSHIPS, {
+        fetchPolicy: 'network-only',
         onCompleted: (data) => {
            
             if (data?.partyRelationships && !isEmptyObject(data.partyRelationships)) {
@@ -167,6 +173,9 @@ export function useParty() {
     })
     const deletePartyRelationship = useMutation(DELETE_PARTYRELATIONSHIP, {
         fetchPolicy: 'network-only',
+        refetchQueries: [
+            GET_PARTYRELATIONSHIP_CONTACTS
+        ]
     })
 
 
