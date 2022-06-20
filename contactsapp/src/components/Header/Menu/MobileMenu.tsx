@@ -1,9 +1,10 @@
 import React, { useContext } from 'react';
 import { Box, Menu, MenuItem } from '@mui/material';
 
-import { Messages, Notifications, SignOut, Settings } from '../../Actions';
+// import { Messages, Notifications, SignOut, Settings } from '../../Actions';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 import { ThemeModeContext } from '../../../contexts';
+import { useTranslation } from 'react-i18next';
 
 interface MobileMenuProps {
   isMenuOpen: boolean;
@@ -14,6 +15,7 @@ interface MobileMenuProps {
 
 export const MobileMenu = ({ isMenuOpen, handleMenuOpen, handleMenuClose, anchorEl }: MobileMenuProps) => {
   const { toggleThemeMode } = useContext(ThemeModeContext);
+  const {t} = useTranslation();
 
   return (
     <Menu
@@ -34,24 +36,24 @@ export const MobileMenu = ({ isMenuOpen, handleMenuOpen, handleMenuClose, anchor
       <Box sx={{ textAlign: 'center' }}>
         <MenuItem onClick={toggleThemeMode}>
           <ThemeSwitcher disableTooltip />
-          Toggle Theme
+          {t('userActions.toggleTheme')}
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        {/* <MenuItem onClick={handleMenuClose}>
           <Messages total={15} disableTooltip />
           Messages
         </MenuItem>
         <MenuItem onClick={handleMenuClose}>
           <Notifications total={20} disableTooltip />
           Notifications
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        </MenuItem> */}
+        {/* <MenuItem onClick={handleMenuClose}>
           <Settings disableTooltip />
           Settings
         </MenuItem>
         <MenuItem onClick={handleMenuClose}>
           <SignOut disableTooltip onClick={() => alert('Signing out...')} />
           Sign Out
-        </MenuItem>
+        </MenuItem> */}
       </Box>
     </Menu>
   );

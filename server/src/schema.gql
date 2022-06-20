@@ -13,7 +13,6 @@ type Query {
   partiesByName(data: PartyByNameInput!): [PartyWithName!]!
   partyRelationships(appUserGroupId: Int!, partyId: Int!): SortedPartyRelationships!
   partyRelationshipTypeList: [PartyRelationshipType!]!
-  singlePartyNotes(data: TargetNotesInput!): [Note!]
   tagById(data: TagByAppUserGroupInput!): Tag
   tagsByAppUserGroup(data: TagByAppUserGroupInput!): [ExtendedTag!]!
   singlePartyTags(data: SinglePartyTagsInput!): [Tag!]!
@@ -22,7 +21,6 @@ type Query {
   contactTypeList: [ContactType!]!
   partyPrivateContacts(data: PartyContactsInput!): [ExtendedContact!]!
   partyRelationshipContacts(data: PartyRelationshipContactsInput!): [ExtendedContact!]!
-  contactsByProps(data: ContactInput!): [Contact!]
   statusList: [Status!]!
 }
 
@@ -129,18 +127,6 @@ type PartyRelationshipType {
   category: String
 }
 
-type Note {
-  id: ID!
-  content: String!
-  appUserId: Float!
-  appUserGroupId: Float
-}
-
-input TargetNotesInput {
-  noteTarget: String!
-  noteTargetId: Float!
-}
-
 type Tag {
   id: ID!
   statusId: Float
@@ -231,28 +217,6 @@ input PartyRelationshipContactsInput {
   appUserGroupId: Int!
 }
 
-type Contact {
-  id: ID!
-  typeId: ID
-  statusId: ID
-  value: String!
-  createdAt: DateTime!
-  updatedAt: DateTime
-  mainPartyId: ID!
-  partyRelationshipId: Float
-  appUserGroupId: ID!
-}
-
-input ContactInput {
-  id: Int
-  typeId: Int
-  statusId: Int
-  value: String
-  mainPartyId: Int
-  partyRelationshipId: Int
-  appUserGroupId: Int!
-}
-
 type Mutation {
   createUpdateAppUser(data: AppUserInput!): APIResponse!
   createPerson(data: PersonInput!): Person!
@@ -264,7 +228,6 @@ type Mutation {
   createPartyRelationship(data: PartyRelationshipInput!): PartyRelationship!
   updatePartyRelationship(data: UpdatePartyRelationshipInput!): PartyRelationship!
   deletePartyRelationship(appUserGroupId: Int!, id: Int!): APIResponse!
-  createUpdateNote(data: NoteInput!): APIResponse!
   createTag(data: TagInput!): Tag!
   updateTag(data: TagInput!): Tag!
   deleteTagParty(data: DeleteTagPartyInput!): APIResponse!
@@ -333,22 +296,15 @@ input PartyRelationshipInput {
   firstPartyId: Int
   secondPartyId: Int
   typeId: Int
-  appUserGroupId: Int
+  appUserGroupId: Int!
 }
 
 input UpdatePartyRelationshipInput {
-  id: Float
-  firstPartyId: Float
-  secondPartyId: Float
-  typeId: Float
-}
-
-input NoteInput {
-  id: Float
-  content: String!
-  noteTarget: String!
-  noteTargetId: Float!
-  isPrivate: Boolean
+  id: Int!
+  firstPartyId: Int
+  secondPartyId: Int
+  typeId: Int
+  appUserGroupId: Int!
 }
 
 input TagInput {
@@ -373,5 +329,27 @@ input CreateTagPartyInput {
 
 input DeleteContactInput {
   id: Int!
+  appUserGroupId: Int!
+}
+
+type Contact {
+  id: ID!
+  typeId: ID
+  statusId: ID
+  value: String!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  mainPartyId: ID!
+  partyRelationshipId: Float
+  appUserGroupId: ID!
+}
+
+input ContactInput {
+  id: Int
+  typeId: Int
+  statusId: Int
+  value: String
+  mainPartyId: Int
+  partyRelationshipId: Int
   appUserGroupId: Int!
 }

@@ -10,9 +10,12 @@
     },
     "form": {
         "isRequired": "pole {{fieldName}} je povinné",
-        "confirmYourAction": "Skutečně chcete provést tuto akci?"
+        "invalidEmail": "email není validní",
+        "confirmYourAction": "Skutečně chcete provést tuto akci?",
+        "password": "heslo"
     },
     "general": {
+        "welcomeAndLogin": "Vítejte v aplikaci, přihlašte se.",
         "actions": "akce",
         "more": "více",
         "options": "volby",
@@ -31,6 +34,7 @@
     },
     "pageTitles": {
         "contactsApp": "ContactsApp",
+        "homepage": "Úvodní",
         "people": "Lidé",
         "person": "Osoba",
         "tag": "Tag",

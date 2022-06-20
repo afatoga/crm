@@ -26,7 +26,9 @@ export const AccountSettings = () => {
   let navigate = useNavigate();
   const {user} = useAuth();
   const titleCode = getPageTitleCode(location.pathname);
-  const [language, setLanguage] = React.useState<string>('cs');
+
+  const initValue = localStorage.getItem('af-lang') ? localStorage.getItem('af-lang') : 'en'; 
+  const [language, setLanguage] = React.useState<string>(initValue);
 
   const handleChange = (event: SelectChangeEvent) => {
     const lang = event.target.value;

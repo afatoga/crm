@@ -11,6 +11,7 @@ import { useAuth } from '../../../hooks/useAuth';
 
 export const Routes = () => {
   const [routesState, setRoutesStage] = useState<Route[]>(routes);
+  const {user} = useAuth()
 
   const handleMenuClick = (route: Route) => {
     const items = routesState.map((item) => {
@@ -31,6 +32,7 @@ export const Routes = () => {
           if (!route.isEnabled) return [];
           if (route.isProtected && !token) return [];
           if (!route.isProtected && token) return [];
+          if (route.isAdmin && user.currentRole !== 'ADMIN') return [];
 
           return (
           <div key={route.key}>
@@ -39,9 +41,10 @@ export const Routes = () => {
                 <RouteItem key={`${route.key}`} route={route} hasChildren handleMenuClick={handleMenuClick} />
                 <Collapse in={route.expanded} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
-                    {route.subRoutes.map((sRoute: Route) => (
-                      <RouteItem key={`${sRoute.key}`} route={sRoute} nested />
-                    ))}
+                    {route.subRoutes.flatMap((sRoute: Route) => {
+                      if (sRoute.isAdmin && user.currentRole !== 'ADMIN') return [];
+                      return (<RouteItem key={`${sRoute.key}`} route={sRoute} nested />)
+                    })}
                   </List>
                 </Collapse>
               </>

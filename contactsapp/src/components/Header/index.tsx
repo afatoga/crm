@@ -7,12 +7,16 @@ import { AppTitle } from './AppTitle';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { Messages, More, Notifications, UserAccount } from '../Actions';
 import { DefaultMenu, MobileMenu } from './Menu';
+import { useAuth } from '../../hooks/useAuth';
 
 interface HeaderProps {
   toggleNavigation: () => void;
 }
 
 export const Header = ({ toggleNavigation }: HeaderProps) => {
+
+  const {user} = useAuth();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -34,7 +38,7 @@ export const Header = ({ toggleNavigation }: HeaderProps) => {
         <Toolbar disableGutters variant="dense">
           <Hamburger toggleNavigation={toggleNavigation} />
           <AppTitle />
-          <Search />
+          {user && <Search />}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex', alignItems: 'center' } }}>
             <ThemeSwitcher />

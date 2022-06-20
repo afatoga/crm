@@ -29,8 +29,8 @@ import { Tags } from '../pages/Tags';
 const routes: Array<Route> = [
   {
     key: 'router-home',
-    titleCode: 'Home',
-    description: 'Home',
+    titleCode: 'pageTitles.homepage',
+    //description: 'Home',
     component: Home,
     path: '/',
     isProtected: false,
@@ -50,7 +50,7 @@ const routes: Array<Route> = [
   {
     key: 'router-people',
     titleCode: 'pageTitles.people',
-    description: 'People',
+    //description: 'People',
     path: '/people',
     isProtected: true,
     isEnabled: true,
@@ -60,7 +60,7 @@ const routes: Array<Route> = [
   {
     key: 'router-singlePerson',
     titleCode: 'Person\'s Profile',
-    description: 'Person\'s profile',
+    //description: 'Person\'s profile',
     path: '/people/:id',
     isProtected: true,
     isEnabled: false,
@@ -70,7 +70,7 @@ const routes: Array<Route> = [
   {
     key: 'router-organizations',
     titleCode: 'pageTitles.organizations',
-    description: 'Organizations',
+    //description: 'Organizations',
     path: '/organizations',
     isProtected: true,
     isEnabled: true,
@@ -80,7 +80,7 @@ const routes: Array<Route> = [
   {
     key: 'router-singleOrganization',
     titleCode: 'Organization\'s Profile',
-    description: 'Organization\'s profile',
+    //description: 'Organization\'s profile',
     path: '/organizations/:id',
     isProtected: true,
     isEnabled: false,
@@ -90,7 +90,7 @@ const routes: Array<Route> = [
   {
     key: 'router-tags',
     titleCode: 'pageTitles.tags',
-    description: 'Tags',
+    //description: 'Tags',
     path: '/tags',
     isProtected: true,
     isEnabled: true,
@@ -100,7 +100,7 @@ const routes: Array<Route> = [
   {
     key: 'router-singleTag',
     titleCode: 'pageTitles.singleTag',
-    description: 'Tag\'s detail',
+    //description: 'Tag\'s detail',
     path: '/tags/:id',
     isProtected: true,
     isEnabled: false,
@@ -160,7 +160,7 @@ const routes: Array<Route> = [
   {
     key: 'router-settings',
     titleCode: 'pageTitles.settings',
-    description: 'Settings',
+    //description: 'Settings',
     path: '/settings',
     isProtected: true,
     isEnabled: true,
@@ -170,7 +170,7 @@ const routes: Array<Route> = [
         key: 'router-my-account',
         //titleCode: 'Settings',
         titleCode: 'pageTitles.myAccount',
-        description: 'Account Settings',
+        //description: 'Account Settings',
         path: '/settings/account',
         isProtected: true,
         isEnabled: true,
@@ -180,7 +180,7 @@ const routes: Array<Route> = [
       {
         key: 'router-preferences',
         titleCode: 'pageTitles.preferences',
-        description: 'App Preferences',
+        //description: 'App Preferences',
         path: '/settings/preferences',
         isProtected: true,
         isAdmin: true,
@@ -200,7 +200,7 @@ const routes: Array<Route> = [
   },
   {
     key: 'login',
-    titleCode: 'Login',
+    titleCode: 'userActions.login',
     path: '/login',
     isProtected: false,
     isEnabled: true,
@@ -212,7 +212,7 @@ const routes: Array<Route> = [
     titleCode: 'Register',
     path: '/register',
     isProtected: false,
-    isEnabled: true,
+    isEnabled: false,
     component: Login,
     icon: BookIcon,
   }

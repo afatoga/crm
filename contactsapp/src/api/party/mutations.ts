@@ -129,7 +129,7 @@ export const CREATE_PARTYRELATIONSHIP = gql`
     $firstPartyId: Int!
     $secondPartyId: Int!
     $typeId: Int,
-    $appUserGroupId: Int
+    $appUserGroupId: Int!
   ) {
     createPartyRelationship(
       data: {

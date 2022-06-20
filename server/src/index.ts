@@ -1,7 +1,5 @@
 import "reflect-metadata";
-//import Container from 'typedi'
 import * as tq from "type-graphql";
-//import { PostCreateInput, PostResolver, SortOrder } from './PostResolver'
 import { AppUserResolver } from "./AppUserResolver";
 import { PartyResolver } from "./PartyResolver";
 import { ApolloServer } from "apollo-server";
@@ -13,25 +11,24 @@ import {
   ApolloServerPluginLandingPageDisabled,
 } from "apollo-server-core";
 import { authChecker } from "./authChecker";
-import { ErrorLoggerMiddleware } from "./middleware/errorLogger";
-import { NoteResolver } from "./NoteResolver";
+// import { ErrorLoggerMiddleware } from "./middleware/errorLogger";
+//import { NoteResolver } from "./NoteResolver";
 import { TagResolver } from "./TagResolver";
 import { ContactResolver } from "./ContactResolver";
 import { StatusResolver } from "./StatusResolver";
+import { SearchResolver } from "./SearchResolver";
 
 const app = async () => {
-  //   tq.registerEnumType(SortOrder, {
-  //     name: 'SortOrder',
-  //   })
 
   const schema = await tq.buildSchema({
     resolvers: [
       AppUserResolver,
       ContactResolver,
       PartyResolver,
-      NoteResolver,
+      //NoteResolver,
       TagResolver,
       StatusResolver,
+      SearchResolver
     ],
     scalarsMap: [{ type: GraphQLScalarType, scalar: DateTimeResolver }],
     authChecker, // register auth checking function

@@ -25,7 +25,7 @@ export class StatusResolver {
     @Ctx() ctx: Context,
   ): Promise<Status[]> {
 
-    if(!ctx.currentUser) throw new Error('Only for logged in users')
+    //if(!ctx.currentUser) throw new Error('Only for logged in users')
 
     return await ctx.prisma.status.findMany();
 

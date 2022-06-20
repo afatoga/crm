@@ -224,11 +224,12 @@ export class TagResolver {
     @Ctx() ctx: Context
   ) {
     //ensure user is authorized
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
+
+    // if (
+    //   !ctx.currentUser ||
+    //   !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    // )
+    //   throw new Error("Not authorized");
 
     let statusCondition = data.statusId
       ? Prisma.sql`AND "Tag"."statusId" = ${data.statusId}`
@@ -251,11 +252,11 @@ export class TagResolver {
     @Ctx() ctx: Context
   ) {
     //ensure user is authorized
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
+    // if (
+    //   !ctx.currentUser ||
+    //   !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    // )
+    //   throw new Error("Not authorized");
 
     return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
   SELECT "Tag".*
@@ -274,11 +275,11 @@ export class TagResolver {
     @Ctx() ctx: Context
   ) {
     //ensure user is authorized
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
+    // if (
+    //   !ctx.currentUser ||
+    //   !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    // )
+    //   throw new Error("Not authorized");
 
     return ctx.prisma.$queryRaw<Tag[]>(Prisma.sql`
   SELECT CONCAT ("Person"."surname", ' ', "Person"."name") AS "personFullName", 
@@ -316,11 +317,11 @@ export class TagResolver {
   @Authorized()
   @Query((returns) => [ExtendedTag])
   async tagsByName(@Arg("data") data: TagsByNameInput, @Ctx() ctx: Context) {
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
+    // if (
+    //   !ctx.currentUser ||
+    //   !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    // )
+    //   throw new Error("Not authorized");
 
     if (!data.searchedName.length) return [];
 

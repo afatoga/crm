@@ -1,16 +1,37 @@
+import * as React from 'react';
 import { alpha, InputBase, styled, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { debounce } from '../../../utils/utilityFunctions';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+//sx={{ display: { xs: 'none', sm: 'flex' } }}
+export const Search = () => {
+  const {t} = useTranslation();
+  const [searchedText, setSearchedText] = React.useState<string>('');
+  const navigate = useNavigate()
 
-export const Search = () => (
-  <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+  const debounceOnChange = React.useCallback(
+    debounce(value => {
+      if(value.length > 3) setSearchedText(value);
+    }, 600),
+    []
+  );
+
+  return (
+  <Box >
     <SearchWrapper>
       <SearchIconWrapper>
         <SearchIcon />
       </SearchIconWrapper>
-      <StyledInputBase placeholder="Search…" inputProps={{ 'aria-label': 'search' }} />
+      <StyledInputBase placeholder={`${t('userActions.search')}...`} 
+      inputProps={{ 'aria-label': 'search' } }  
+      defaultValue={searchedText}
+      onChange={((event) => debounceOnChange(event.target.value))}
+      />
     </SearchWrapper>
   </Box>
-);
+  )
+};
 
 const SearchWrapper = styled('div')(({ theme }) => ({
   position: 'relative',

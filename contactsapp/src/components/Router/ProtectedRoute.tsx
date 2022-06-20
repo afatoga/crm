@@ -12,9 +12,7 @@ const ProtectedRoute = ({ children, isAdmin = false }: Props): JSX.Element => {
   const location = useLocation();
   const { token, user } = useAuth();
 
-  // console.log('CURRENT', token, user);
-
-  if (isAdmin && appRoles[user.currentRole] === "ADMIN") return children
+  if (isAdmin && user.currentRole === "ADMIN") return children
  
   if (!isAdmin && token) return children;
 

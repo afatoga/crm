@@ -202,11 +202,6 @@ export class ContactResolver {
     @Arg("data") data: PartyContactsInput,
     @Ctx() ctx: Context
   ) {
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
 
     let whereConditions: any = {
       mainPartyId: data.partyId,
@@ -246,12 +241,6 @@ export class ContactResolver {
     @Arg("data") data: PartyRelationshipContactsInput,
     @Ctx() ctx: Context
   ) {
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
-
     //if (!data.partyRelationshipId)  throw new Error("Party relationship invalid");
 
     let whereConditions: any = {
@@ -277,22 +266,22 @@ export class ContactResolver {
     });
   }
 
-  @Authorized()
-  @Query((returns) => [Contact], { nullable: true })
-  async contactsByProps(@Arg("data") data: ContactInput, @Ctx() ctx: Context) {
-    if (!ctx.currentUser) throw new Error("please log in");
+  // @Authorized()
+  // @Query((returns) => [Contact], { nullable: true })
+  // async contactsByProps(@Arg("data") data: ContactInput, @Ctx() ctx: Context) {
+  //   if (!ctx.currentUser) throw new Error("please log in");
 
-    return ctx.prisma.contact.findMany({
-      where: {
-        typeId: data.typeId && data.typeId,
-        value: data.value && { contains: data.value },
-        mainPartyId: data.mainPartyId,
-        partyRelationshipId:
-          data.partyRelationshipId && data.partyRelationshipId,
-        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
-      },
-    });
-  }
+  //   return ctx.prisma.contact.findMany({
+  //     where: {
+  //       typeId: data.typeId && data.typeId,
+  //       value: data.value && { contains: data.value },
+  //       mainPartyId: data.mainPartyId,
+  //       partyRelationshipId:
+  //         data.partyRelationshipId && data.partyRelationshipId,
+  //       appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+  //     },
+  //   });
+  // }
 
   // appUserGroupId:
   //    data.appUserGroupId &&

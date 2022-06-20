@@ -39,8 +39,9 @@ export const isUserAuthorized = (
 
   for (let i = 0; i < appUserGroups.length; i++) {
     if (
-      appUserGroups[i].appUserGroupId === targetGroupId &&
-      appRoles[appUserGroups[i].appUserRoleId] === "ADMIN"
+      appUserGroups[i].appUserGroupId === targetGroupId && (
+      appRoles[appUserGroups[i].appUserRoleId] === "ADMIN" 
+      || appRoles[appUserGroups[i].appUserRoleId] === "MOD")
     ) {
       // user has admin role in the target group
       isAuthorized = true;

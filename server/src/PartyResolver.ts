@@ -98,10 +98,8 @@ class PartyRelationshipInput {
   @Field((type) => Int, { nullable: true })
   typeId: number;
   
-  
-  @Field((type) => Int, { nullable: true })
+  @Field((type) => Int)
   appUserGroupId: number;
-  
 
 }
 
@@ -119,17 +117,20 @@ class PartyByNameInput {
 
 @InputType()
 class UpdatePartyRelationshipInput {
-  @Field({ nullable: true })
+  @Field((type) => Int)
   id: number;
 
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   firstPartyId: number;
 
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   secondPartyId: number;
 
-  @Field({ nullable: true })
+  @Field((type) => Int, { nullable: true })
   typeId: number;
+  
+  @Field((type) => Int)
+  appUserGroupId: number;
 }
 
 @InputType()
@@ -411,14 +412,15 @@ export class PartyResolver {
     @Arg("data") data: UpdatePartyRelationshipInput,
     @Ctx() ctx: Context
   ): Promise<PartyRelationship> {
-    // if (!data.operation) throw new Error("Invalid");
-    if (!ctx.currentUser) throw new Error("Only for logged in users");
+   
+    if (
+      !ctx.currentUser ||
+      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
+    )
+      throw new Error("Not authorized");
+
     if (data.firstPartyId === data.secondPartyId)
       throw new Error("use two different parties");
-
-    // if (data.operation === "CREATE") {
-
-    // }
 
     if (!data.id) throw new Error("provide id to update");
     const existingRelationship = await ctx.prisma.partyRelationship.findFirst({
@@ -434,14 +436,14 @@ export class PartyResolver {
     const firstParty = await ctx.prisma.party.findFirst({
       where: {
         id: data.firstPartyId,
-        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        appUserGroupId: data.appUserGroupId,
       },
     });
 
     const secondParty = await ctx.prisma.party.findFirst({
       where: {
         id: data.secondPartyId,
-        appUserGroupId: ctx.currentUser.currentAppUserGroupId,
+        appUserGroupId: data.appUserGroupId,
       },
     });
     if (!firstParty || !secondParty || firstParty.id === secondParty.id)
@@ -465,9 +467,6 @@ export class PartyResolver {
     @Arg("appUserGroupId", (type) => Int) appUserGroupId: number,
     @Ctx() ctx: Context
   ): Promise<APIResponse> {
-    // if (!data.operation) throw new Error("Invalid");
-    //if (!ctx.currentUser) throw new Error("Only for logged in users");
-
     if (
       !ctx.currentUser ||
       !isUserAuthorized(ctx.currentUser, appUserGroupId, ctx.appRoles)
@@ -506,7 +505,6 @@ export class PartyResolver {
     //   } // deletePartyRelationship
     // ]
 
-
     return {
       status: (typeof response[1].id === 'number') ? "SUCCESS" : "ERROR",
     };
@@ -518,13 +516,6 @@ export class PartyResolver {
     @Arg("data") data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
-
-    //ensure user is authorized
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
 
     let statusCondition = data.statusId
       ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}`
@@ -546,12 +537,6 @@ export class PartyResolver {
     @Arg("data") data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
-    //ensure user is authorized
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
 
       let statusCondition = data.statusId
       ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}`
@@ -639,11 +624,6 @@ export class PartyResolver {
     @Arg("data") data: PartyByNameInput,
     @Ctx() ctx: Context
   ) {
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
 
     if (!data.searchedName.length) return [];
 
@@ -677,11 +657,6 @@ export class PartyResolver {
     @Arg("appUserGroupId", (type) => Int) appUserGroupId: number,
     @Ctx() ctx: Context
   ) {
-    if (
-      !ctx.currentUser ||
-      !isUserAuthorized(ctx.currentUser, appUserGroupId, ctx.appRoles)
-    )
-      throw new Error("Not authorized");
 
     const organizationToOrganization = await ctx.prisma.$queryRaw<
       [ExtendedPartyRelationship]
@@ -759,7 +734,6 @@ export class PartyResolver {
   async partyRelationshipTypeList(
     @Ctx() ctx: Context
   ): Promise<PartyRelationshipType[]> {
-    if (!ctx.currentUser) throw new Error("Only for logged in users");
 
     return await ctx.prisma.partyRelationshipType.findMany();
   }

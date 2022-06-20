@@ -1,5 +1,13 @@
 import { useCallback, useContext, useEffect } from "react";
-import { Typography, Box, TextField, Stack, Button, Alert, AlertTitle } from "@mui/material";
+import {
+  Typography,
+  Box,
+  TextField,
+  Stack,
+  Button,
+  Alert,
+  AlertTitle,
+} from "@mui/material";
 import { useLocation, useNavigate } from "react-router";
 import { useAppUser } from "../hooks/useAppUser";
 import { Controller, useForm } from "react-hook-form";
@@ -8,11 +16,13 @@ import { useAuth } from "../hooks/useAuth";
 import { PageTitle } from "../components/PageTitle";
 //import { Email } from '@mui/icons-material';
 import { appRoles } from "../config";
-import { isEmptyObject } from "../utils/utilityFunctions";
+import { capitalizeString, isEmptyObject } from "../utils/utilityFunctions";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
 
 export const Login = () => {
+  const {t} = useTranslation()
   const { operations } = useAppUser();
   const [loginHandler, loginRequest] = operations.login;
 
@@ -27,7 +37,7 @@ export const Login = () => {
       type: "email",
     },
     {
-      label: "Password",
+      label: capitalizeString(t(`form.password`)),
       name: "password",
       type: "password",
     },
@@ -44,7 +54,7 @@ export const Login = () => {
             validations: [
               {
                 type: "required",
-                params: ["Required"],
+                params: [t(`form.isRequired`, {fieldName: 'email'})],
               },
               {
                 type: "trim",
@@ -52,7 +62,7 @@ export const Login = () => {
               },
               {
                 type: "email",
-                params: ["Not a valid email"],
+                params: [t(`form.invalidEmail`)],
               },
             ],
           };
@@ -63,7 +73,7 @@ export const Login = () => {
             validations: [
               {
                 type: "required",
-                params: ["Required"],
+                params: [t(`form.isRequired`, {fieldName: t(`form.password`)})],
               },
               {
                 type: "trim",
@@ -133,7 +143,6 @@ export const Login = () => {
     //reset();
   }, []);
 
-
   useEffect(() => {
     if (loginRequest.data) {
       const userData = loginRequest.data.login?.appUser;
@@ -154,7 +163,7 @@ export const Login = () => {
       navigate(
         (location as any).state?.from
           ? (location as any).state.from.pathname
-          : "/dashboard"
+          : "/"
       );
     }
   }, [loginRequest, navigate]);
@@ -185,8 +194,8 @@ export const Login = () => {
         }}
       >
         {/* <PageTitle title={location.pathname.replaceAll("/", " ").trimStart()} /> */}
-        <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
-          Welcome to ContactsApp.
+        <Typography paragraph textAlign={"center"} fontSize={"1.6rem"}>
+          {t('general.welcomeAndLogin')}
         </Typography>
 
         <Box
@@ -228,14 +237,15 @@ export const Login = () => {
               ))}
 
               <Button variant={"contained"} type="submit">
-                Login
+              {t('userActions.login')}
               </Button>
-              {!isSubmitting && loginRequest.error && <Alert severity="error">
-                <AlertTitle>Error</AlertTitle>
-                {loginRequest.error.message}
-              </Alert>}
+              {!isSubmitting && loginRequest.error && (
+                <Alert severity="error">
+                  <AlertTitle>{t('general.error')}</AlertTitle>
+                  {loginRequest.error.message}
+                </Alert>
+              )}
             </Stack>
-       
           </form>
         </Box>
       </Box>
