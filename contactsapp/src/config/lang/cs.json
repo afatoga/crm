@@ -55,11 +55,11 @@
             "faculty": "fakulta"
         },
         "o-p": {
-            "employee": "zaměstnanec",
-            "family": "rodina"
+            "employee": "zaměstnanec"
         },
         "p-p": {
-            "collegue": "kolega"
+            "collegue": "kolega",
+            "family": "rodina"
         }
     },
     "singleRecord": {

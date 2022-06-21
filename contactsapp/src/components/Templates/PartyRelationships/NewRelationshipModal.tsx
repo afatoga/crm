@@ -215,6 +215,7 @@ export const NewRelationshipModal = () => {
         <FormGroup>
         <Autocomplete
         id={fieldData.name}
+        noOptionsText={t('general.noRecords')}
         //sx={{ width: 300 }}
         open={open}
         onOpen={() => {if(filteredParties.length > 0) setOpen(true)}}
@@ -304,7 +305,7 @@ export const NewRelationshipModal = () => {
             <Stack spacing={2}>
               {fields.map((item, index) => {
 
-                if (item.name === 'isMainParty' && getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID && recordsPath === 'people') return null;
+                if (item.name === 'isMainParty' && (getValues('otherPartyTypeId') === ORGANIZATION_PARTY_TYPE_ID && recordsPath === 'people' || getValues('otherPartyTypeId') === PERSON_PARTY_TYPE_ID && recordsPath === 'organizations')) return null;
 
                 return (
                 <Controller

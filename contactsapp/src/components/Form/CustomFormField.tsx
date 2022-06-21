@@ -9,8 +9,10 @@ import {
 } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 import { IPartyRelationship } from "../../hooks/useParty";
+import { useTranslation } from "react-i18next";
 
 export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
+  const {t} = useTranslation()
   const { user } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
   const [searchText, setSearchText] = React.useState<string>('');
@@ -51,6 +53,8 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
           id: item.id,
         }));
       }
+
+      else return []
     }
 
     if (fieldData.name === "partyRelationshipTypeId") {
@@ -173,6 +177,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
   } else if (fieldData.type === "autocomplete") {
     return (
       <Autocomplete
+        noOptionsText={t('general.noRecords')}
         id={fieldData.name}
         // sx={{ width: 300 }}
         open={open}

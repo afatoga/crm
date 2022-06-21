@@ -80,31 +80,31 @@ export const NewRecord = () => {
   const customFields = {
     person: [
       {
-        label: "Firstname",
-        name: "name",
+        label: t('singleRecord.firstname'),
+        name: "firstname",
         type: "text",
         required: true,
       },
       {
-        label: "Surname",
+        label: t('singleRecord.surname'),
         name: "surname",
         type: "text",
         required: true,
       },
       {
-        label: "Pre-degree",
+        label: t('singleRecord.preDegree'),
         name: "preDegree",
         type: "text",
         required: false,
       },
       {
-        label: "Post-degree",
+        label: t('singleRecord.postDegree'),
         name: "postDegree",
         type: "text",
         required: false,
       },
       {
-        label: "Birthday",
+        label: t('singleRecord.birthday'),
         name: "birthday",
         type: "text",
         required: false,
@@ -118,7 +118,7 @@ export const NewRecord = () => {
     ],
     organization: [
       {
-        label: "Name",
+        label: t('singleRecord.name'),
         name: "name",
         type: "text",
         required: true,
@@ -132,7 +132,7 @@ export const NewRecord = () => {
     ],
     tag: [
       {
-        label: "Name",
+        label: t('singleRecord.name'),
         name: "name",
         type: "text",
         required: true,
@@ -364,11 +364,11 @@ export const NewRecord = () => {
                 type="submit"
                 sx={{ width: "120px" }}
               >
-                Save
+               {t('userActions.save')}
               </Button>
               {!isSubmitting && createPersonRequest.error && (
                 <Alert severity="error">
-                  <AlertTitle>{t("general.error")}</AlertTitle>
+                  <AlertTitle>{t('general.error')}</AlertTitle>
                   {createPersonRequest.error.message}
                 </Alert>
               )}
