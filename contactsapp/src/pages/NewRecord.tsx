@@ -81,7 +81,7 @@ export const NewRecord = () => {
     person: [
       {
         label: t('singleRecord.firstname'),
-        name: "firstname",
+        name: "name",
         type: "text",
         required: true,
       },
@@ -157,7 +157,7 @@ export const NewRecord = () => {
             validations: [
               {
                 type: customField.required ? "required" : "nullable",
-                params: ["Required"],
+                params: [t(`form.isRequired`, { fieldName: t(`singleRecord.${customField.name}`) })],
               },
               {
                 type: "trim",

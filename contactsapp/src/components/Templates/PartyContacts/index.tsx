@@ -94,7 +94,7 @@ export const PartyContacts = () => {
         
     }
     
-  }, [partyRelationshipList]);
+  }, [partyRelationshipList, recordId]);
 
   return (
     <>
@@ -105,6 +105,10 @@ export const PartyContacts = () => {
               // md: 300, // theme.breakpoints.up('md')
               lg: "360px", // theme.breakpoints.up('lg')
               //xl: 500, // theme.breakpoints.up('xl')
+            },
+            marginBottom: {
+              xs: 2,
+              lg: 0
             }
           }}>
         

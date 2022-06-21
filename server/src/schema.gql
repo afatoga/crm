@@ -22,6 +22,7 @@ type Query {
   partyPrivateContacts(data: PartyContactsInput!): [ExtendedContact!]!
   partyRelationshipContacts(data: PartyRelationshipContactsInput!): [ExtendedContact!]!
   statusList: [Status!]!
+  searchResults(data: SearchInput!): SearchResponse!
 }
 
 type AppUserLoginResponse {
@@ -217,7 +218,33 @@ input PartyRelationshipContactsInput {
   appUserGroupId: Int!
 }
 
+type SearchResponse {
+  status: ResponseStatus!
+  results: [SearchResult!]!
+  count: Int!
+}
+
+# API Response status
+enum ResponseStatus {
+  SUCCESS
+  ERROR
+}
+
+type SearchResult {
+  id: String!
+  entity: String!
+  searchedValue: String!
+  contactPartyId: ID
+  contactPartyTypeId: ID
+}
+
+input SearchInput {
+  searchedText: String!
+  appUserGroupId: Int!
+}
+
 type Mutation {
+  createAppUser(data: createAppUserInput!): APIResponse!
   createUpdateAppUser(data: AppUserInput!): APIResponse!
   createPerson(data: PersonInput!): Person!
   updatePerson(data: PersonInput!): Person!
@@ -242,10 +269,10 @@ type APIResponse {
   message: String!
 }
 
-# API Response status
-enum ResponseStatus {
-  SUCCESS
-  ERROR
+input createAppUserInput {
+  email: String!
+  nickname: String!
+  password: String!
 }
 
 input AppUserInput {

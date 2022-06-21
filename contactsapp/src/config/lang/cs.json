@@ -47,7 +47,8 @@
         "preferences": "Nastavení aplikace",
         "newTag": "Nový tag",
         "newPerson": "Nová osoba",
-        "newOrganization": "Nová organizace"
+        "newOrganization": "Nová organizace",
+        "searchResults": "Výsledky vyhledávání"
     },
     "partyRelationshipType":{
         "o-o": {

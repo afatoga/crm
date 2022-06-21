@@ -73,6 +73,10 @@ const actionResult = useReactiveVar(actionResultVar);
               lg: "360px", // theme.breakpoints.up('lg')
               //xl: 500, // theme.breakpoints.up('xl')
             },
+            marginBottom: {
+              xs: 2,
+              lg: 0
+            }
           }}>
          
             <Typography variant="h6">{t("singleRecord.tags")}</Typography>

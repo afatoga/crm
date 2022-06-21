@@ -25,6 +25,7 @@ import { AccountSettings } from '../pages/AccountSettings';
 import { Route } from '../types/Route';
 import { Organizations } from '../pages/Organizations';
 import { Tags } from '../pages/Tags';
+import { SearchResults } from '../pages/SearchResults';
 
 const routes: Array<Route> = [
   {
@@ -38,15 +39,14 @@ const routes: Array<Route> = [
     icon: HomeIcon,
     appendDivider: true,
   },
-  // {
-  //   key: 'router-dashboard',
-  //   titleCode: 'Dashboard',
-  //   description: 'Dashboard',
-  //   path: '/dashboard',
-  //   isProtected: true,
-  //   isEnabled: true,
-  //   icon: DashboardIcon,
-  // },
+  {
+    key: 'router-search',
+    titleCode: 'pageTitles.searchResults',
+    path: '/search',
+    isProtected: true,
+    isEnabled: false,
+    component: SearchResults
+  },
   {
     key: 'router-people',
     titleCode: 'pageTitles.people',
@@ -117,46 +117,6 @@ const routes: Array<Route> = [
     //icon: PeopleIcon,
     component: NewRecord//() => ({titleCode: 'New'})
   },
-  // {
-  //   key: 'router-gh',
-  //   titleCode: 'GitHub',
-  //   description: 'GitHub',
-  //   path: '/gh',
-  //   isProtected: true,
-  //   isEnabled: true,
-  //   icon: GitHubIcon,
-  //   subRoutes: [
-  //     {
-  //       key: 'router-gh-public',
-  //       titleCode: 'Public Repos',
-  //       description: 'Public Repos',
-  //       path: '/gh/public',
-  //       isProtected: true,
-  //       isEnabled: true,
-  //       icon: PublicIcon,
-  //     },
-  //     {
-  //       key: 'router-gh-private',
-  //       titleCode: 'Private Repos',
-  //       description: 'Private Repos',
-  //       path: '/gh/private',
-  //       isAdmin: true,
-  //       isProtected: true,
-  //       isEnabled: false,
-  //       icon: PrivateIcon,
-  //     },
-  //   ],
-  // },
-  // {
-  //   key: 'router-code',
-  //   titleCode: 'Code Editor',
-  //   description: 'Code Editor',
-  //   path: '/code-editor',
-  //   isProtected: true,
-  //   isEnabled: true,
-  //   icon: CodeIcon,
-  //   appendDivider: true,
-  // },
   {
     key: 'router-settings',
     titleCode: 'pageTitles.settings',
@@ -186,16 +146,7 @@ const routes: Array<Route> = [
         isAdmin: true,
         isEnabled: true,
         icon: ListIcon,
-      },
-      // {
-      //   key: 'router-billing',
-      //   titleCode: 'Billing',
-      //   description: 'Account Billing',
-      //   path: '/account/billing',
-      //   isProtected: true,
-      //   isEnabled: true,
-      //   icon: BillingIcon,
-      // },
+      }
     ],
   },
   {

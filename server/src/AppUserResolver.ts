@@ -29,6 +29,20 @@ class AppUserGroupUniqueInput {
 }
 
 @InputType()
+class createAppUserInput {
+  @Field((type) => String)
+  @IsEmail()
+  @IsEmailAlreadyExist({ message: "email already used" })
+  email: string
+
+  @Field((type) => String)
+  nickname: string
+
+  @Field()
+  password: string
+}
+
+@InputType()
 class AppUserLogin {
   @Field()
   email: string
@@ -65,6 +79,27 @@ class AppUserInput {
 
 @Resolver(AppUser)
 export class AppUserResolver {
+
+  @Mutation(() => APIResponse)
+  async createAppUser(
+    @Arg('data') data: createAppUserInput,
+    @Ctx() ctx: Context,
+  ): Promise<APIResponse> {
+
+    const hashedPassword = await bcrypt.hash(data.password, 10)
+
+    await ctx.prisma.appUser.create({
+      data: {
+        email: data.email,
+        nickname: data?.nickname,
+        password: hashedPassword
+      }
+    })
+
+    return {
+      status: "SUCCESS"
+    }
+  }
 
 
   @Mutation(() => APIResponse)
