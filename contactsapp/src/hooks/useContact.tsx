@@ -86,9 +86,6 @@ export function useContact() {
         }
     });
 
-    const prepareExtendedPartyRelationshipContacts = (data) => {
-
-    }
 
     const retrieveStatusListFromCache = () => {
         const data = client.readQuery({

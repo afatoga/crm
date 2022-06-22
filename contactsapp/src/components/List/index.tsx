@@ -25,7 +25,7 @@ interface IMultiLevelList {
     currentRecordId?: string,
     currentRecordType?: string,
     data: any,
-    deleteItem: (id: string) => void;
+    deleteItem?: (id: string) => void;
     editItem?: (id: string) => void;
     listName?: string;
 }
@@ -63,6 +63,23 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
             } else return navigate(`/people/${item.partyId}`);
             
          }
+
+         else if (listName === 'searchResults') {
+          if (item.entity === 'Contact') {
+            return navigate(`${(parseInt(item.contactPartyTypeId) === PERSON_PARTY_TYPE_ID)
+                ? '/people/'
+                : '/organizations/'}${item.contactPartyId}`)
+          }
+          else if (item.entity === 'Person') {
+            return navigate(`/people/${item.entityId}`)
+          }
+          else if (item.entity === 'Organization') {
+            return navigate(`/organizations/${item.entityId}`)
+          }
+          else if (item.entity === 'Tag') {
+            return navigate(`/tags/${item.entityId}`);
+          }
+        }
             
         
         return false;
@@ -76,11 +93,14 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
              return parseInt(currentRecordId) === item.firstPartyId ? item.secondPartyName : item.firstPartyName;
          }
 
-        if (listName === 'taggedParties') {
+        else if (listName === 'taggedParties') {
           return (!item.personFullName || !item.personFullName.trim().length) ? item.organizationName: item.personFullName;
         }
-        if (listName === 'privateContacts' || listName === 'partyRelationshipContacts') {
+        else if (listName === 'privateContacts' || listName === 'partyRelationshipContacts') {
           return item.value;
+        }
+        else if (listName === 'searchResults') {
+          return item.searchedValue;
         }
 
         return item.name;
@@ -96,34 +116,42 @@ export const MultiLevelList = ({currentRecordId, currentRecordType, data, delete
 
         }
 
-        if (listName === 'privateContacts') {
+        else if (listName === 'privateContacts') {
           return item.contactType?.name;
         }
-        if (listName === 'partyRelationshipContacts') {
+        else if (listName === 'partyRelationshipContacts') {
           return `${item.contactType?.name}, ${item.otherPartyName}`;
+        }
+        else if (listName === 'searchResults') {
+          return t(`entityType.${item.entity.toLowerCase()}`);
         }
 
         return undefined;
     }
+
+
 
     return (
 
         <List dense={false}>
         {data.map((item:any) => {
 
+          let listItemKey: string = item.id;
+          if (listName === 'taggedParties') listItemKey = item.partyId;
+          else if (listName === 'searchResults') listItemKey = `${item.entity}_${item.entityId}`;
 
           return (
             <ListItem
-              key={listName === 'taggedParties' ? item.partyId:item.id}
+              key={ listItemKey}
               secondaryAction={
                 <>
                 {(listName === 'privateContacts' || listName === 'partyRelationshipContacts') && 
                 <IconButton edge="end" aria-label="edit" onClick={() => editItem(item.id)}>
                 <EditIcon />
               </IconButton>}
-                <IconButton edge="end" aria-label="delete" onClick={() => deleteItem(listName === 'taggedParties' ? item.partyId:item.id)}>
+                {deleteItem && <IconButton edge="end" aria-label="delete" onClick={() => deleteItem(listName === 'taggedParties' ? item.partyId:item.id)}>
                   <DeleteIcon />
-                </IconButton>
+                </IconButton>}
                 </>
               }
             >

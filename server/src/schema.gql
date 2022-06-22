@@ -231,7 +231,7 @@ enum ResponseStatus {
 }
 
 type SearchResult {
-  id: String!
+  entityId: String!
   entity: String!
   searchedValue: String!
   contactPartyId: ID

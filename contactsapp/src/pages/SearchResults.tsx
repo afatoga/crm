@@ -1,74 +1,39 @@
 import * as React from "react";
-import { GroupedVirtuoso } from 'react-virtuoso'
-import List from '@mui/material/List'
-import ListSubheader from '@mui/material/ListSubheader'
-import ListItem from '@mui/material/ListItem'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
-import Avatar from '@mui/material/Avatar'
-import ListItemText from '@mui/material/ListItemText'
-import { Typography, Box, TextField, Stack, Button, Alert, AlertTitle } from "@mui/material";
-import { useLocation, useNavigate } from "react-router";
-import { useTag } from "../hooks/useTag";
-import { Controller, useForm } from "react-hook-form";
-import { useAuth } from "../hooks/useAuth";
-import { Edit as EditIcon } from "@mui/icons-material";
+
+import {  Box,  Stack, Typography} from "@mui/material";
+
 import { PageTitle } from "../components/PageTitle";
-import { appRoles } from "../config";
-import { groupBy } from "../utils/utilityFunctions";
+
 import { useTranslation } from "react-i18next";
-import { useSearch } from "../hooks/useSearch";
+import { useSearch, foundResultsVar } from "../hooks/useSearch";
+import { useReactiveVar,  } from "@apollo/client";
+import { MultiLevelList } from "../components/List";
+import { useAuth } from "../hooks/useAuth";
+//import { GET_SEARCH_RESULTS } from "../api/search/queries";
 
 
 
 export const SearchResults = () => {
   const {t} = useTranslation();
-  const { operations } = useSearch();
-  // const [getSearchResultsHandler, getSearchResultsRequest] = operations.getSearchResults;
+  //const { operations } = useSearch();
+  //const [getSearchResultsHandler, getSearchResultsRequest] = operations.getSearchResults;
 
-  const location = useLocation();
-  let navigate = useNavigate();
-  const {user} = useAuth()
+  //const location = useLocation();
+  //let navigate = useNavigate();
+  const {user} = useAuth();
+  //const client = useApolloClient();
+
+  const foundResults = useReactiveVar(foundResultsVar);
+  //const [searchResults, setSearchResults] = React.useState<any[]>([]);
+
 
   
 
- React.useEffect(() => {
-  //getTagsHandler({variables:{appUserGroupId: user.currentAppUserGroupId}})
- }, [])
-
-//  const handleOnRowClick = (params) => {
-//   console.log(params);
-// };
-
-  // React.useEffect(() => {
-  //   if (getTagsRequest.called) {
-
-  //     getTagsRequest.refetch();
-
-  //   }
-  // }, [getTagsRequest]);
+//  React.useEffect(() => {
 
 
-  // React.useEffect(() => {
-  //   const timeout = loadMore()
-  //   return () => clearTimeout(timeout)
-  // }, [])
+//  }, [foundResults])
 
-
-  // const Footer = () => {
-  //   return (
-  //     <div
-  //       style={{
-  //         padding: '2rem',
-  //         display: 'flex',
-  //         justifyContent: 'center',
-  //       }}
-  //     >
-  //       Loading...
-  //     </div>
-  //   )
-  // }
-
-  // const tagsData = getTagsRequest.data ? getTagsRequest.data.tagsByAppUserGroup : false;
 
   return (
     <>
@@ -99,9 +64,11 @@ export const SearchResults = () => {
           }}
         >
 
-
-        <Box sx={{display:'block'}}>
-         
+        
+        <Box sx={{display:'block', padding: '0 0 1rem'}}>
+          {foundResults.length > 0 ?
+         <MultiLevelList data={foundResults} listName="searchResults" />
+        : <Typography variant="subtitle1">{t('general.noRecords')}</Typography>}
           </Box>
 
         </Stack>

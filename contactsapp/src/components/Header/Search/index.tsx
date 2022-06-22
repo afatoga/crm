@@ -7,18 +7,18 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSearch } from '../../../hooks/useSearch';
 import { useAuth } from '../../../hooks/useAuth';
-//sx={{ display: { xs: 'none', sm: 'flex' } }}
+
 export const Search = () => {
   const {t} = useTranslation();
-  const [searchedText, setSearchedText] = React.useState<string>('');
+  const [inputValue, setInputValue] = React.useState<string>('');
   const navigate = useNavigate();
   const location = useLocation();
 
   const {user} = useAuth();
-  //const inputRef = React.useRef(null);
 
   const {operations} = useSearch();
   const [getSearchResultsHandler, getSearchResultsRequest] = operations.getSearchResults;
+  //const searchedText = useReactiveVar(searchedTextVar);
 
   const debounceSubmitRequest = React.useCallback(
     debounce((value)=> {
@@ -29,48 +29,56 @@ export const Search = () => {
         }
       })
     }, 700),
-    []
+    [inputValue]
   );
-
-  // const onChange = (event) => {
-    
-  // }
   
   const resetInput = () => {
     //inputRef.current.value = '';
-    setSearchedText('');
+    setInputValue('');
+  }
+
+  const viewCurrentResults = () => {
+    if (getSearchResultsRequest.data.searchResults.count > 0 && location.pathname !== '/search') {
+      navigate('/search');
+    }
   }
 
   React.useEffect(() => {
 
-    if (searchedText.length>3) {
-      debounceSubmitRequest(searchedText)
+    if (inputValue.length>3) {
+      debounceSubmitRequest(inputValue)
     }
-  }, [searchedText])
+  }, [inputValue])
 
-  React.useEffect(() => {
-    if (location.pathname !== "/search" 
-      && getSearchResultsRequest.data?.searchResults.status === 'SUCCESS' 
-      && searchedText.length > 3
-    ) {
-      navigate('/search');
-    }
-  }, [getSearchResultsRequest, location])
+//   React.useEffect(() => {
+//     if (
+//  getSearchResultsRequest
+
+
+//     // else if (
+//     //     !getSearchResultsRequest.loading
+//     //   && getSearchResultsRequest.data?.searchResults.status === 'SUCCESS'
+//     //   && inputValue.length > 3)
+//     //   {
+//     //     searchedTextVar(inputValue);
+//     // }
+  
+//   }, [getSearchResultsRequest])
 
   return (
   <Box >
     <SearchWrapper>
       <SearchIconWrapper>
-        <SearchIcon />
+        <SearchIcon onClick={viewCurrentResults} />
       </SearchIconWrapper>
       <StyledInputBase 
       //ref={inputRef}
       placeholder={`${t('userActions.search')}...`} 
       inputProps={{ 'aria-label': 'search' } }  
-      value={searchedText}
-      onChange={(event) => setSearchedText(event.target.value)}
+      value={inputValue}
+      onChange={(event) => setInputValue(event.target.value)}
       />
-      {searchedText.length > 0 && <ClearIconWrapper>
+      {inputValue.length > 0 && <ClearIconWrapper>
       <ClearIcon fontSize='small' onClick={resetInput} />
       </ClearIconWrapper>}
     </SearchWrapper>
@@ -102,7 +110,9 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
   height: '100%',
   position: 'absolute',
-  pointerEvents: 'none',
+  cursor: 'pointer',
+  zIndex: '10'
+  //pointerEvents: 'none',
 }));
 const ClearIconWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -113,7 +123,7 @@ const ClearIconWrapper = styled('div')(({ theme }) => ({
   position: 'absolute',
   right: 0,
   cursor: 'pointer',
-  zIndex: '50'
+  zIndex: '10'
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({

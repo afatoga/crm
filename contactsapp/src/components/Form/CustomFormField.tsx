@@ -146,7 +146,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
         onBlur={controllerProps.onBlur}
         label={fieldData.label}
         error={Boolean(errors[fieldData.name])}
-        placeholder={fieldData.name === 'birthday' && 'yyyy-mm-dd'}
+        placeholder={fieldData.name === 'birthday' ? 'yyyy-mm-dd' : undefined}
         helperText={
           errors[fieldData.name] ? errors[fieldData.name].message : ""
         }

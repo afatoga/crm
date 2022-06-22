@@ -19,10 +19,14 @@ import { useTranslation } from "react-i18next";
 import { TaggedParties } from "../components/Templates/TaggedParties";
 import { SinglePartyTags } from "../components/Templates/SinglePartyTags";
 import { PartyContacts } from "../components/Templates/PartyContacts";
+import { ModalContext } from "../contexts/ModalContext";
+import { useReactiveVar } from "@apollo/client";
+import { actionResultVar } from "../App";
 //import { useApolloClient } from "@apollo/client";
 
 export const SingleRecord = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
+  let { handleModal, isShown } = React.useContext(ModalContext);
   // Local state
   const [recordType, setRecordType] = React.useState<string>("");
   const [recordLoaded, setRecordLoaded] = React.useState<boolean>(false);
@@ -67,6 +71,7 @@ export const SingleRecord = () => {
     operations.deleteOrganization;
   const [updateTagHandler, updateTagRequest] = tagOperations.updateTag;
   const [deleteTagHandler, deleteTagRequest] = tagOperations.deleteTag;
+  const actionResult = useReactiveVar(actionResultVar);
 
   const location: any = useLocation();
   const { id: recordIdString } = useParams();
@@ -83,53 +88,61 @@ export const SingleRecord = () => {
           appUserGroupId: user.currentAppUserGroupId,
         },
       });
-    }
-    else if (recordType === "organization") {
+
+      return navigate("/people");
+    } else if (recordType === "organization") {
       deleteOrganizationHandler({
         variables: {
           partyId: recordId,
           appUserGroupId: user.currentAppUserGroupId,
         },
       });
-    }
-    else if (recordType === "tag") {
+
+      return navigate("/organizations");
+    } else if (recordType === "tag") {
       deleteTagHandler({
         variables: {
           id: recordId,
           appUserGroupId: user.currentAppUserGroupId,
         },
       });
+
+      return navigate("/tags");
     }
+  };
+
+  const confirmDeleteAction = () => {
+    handleModal("ConfirmDialog");
   };
 
   const customFields = {
     person: [
       {
-        label: t('singleRecord.firstname'),
+        label: t("singleRecord.firstname"),
         name: "name",
         type: "text",
         required: true,
       },
       {
-        label: t('singleRecord.surname'),
+        label: t("singleRecord.surname"),
         name: "surname",
         type: "text",
         required: true,
       },
       {
-        label: t('singleRecord.preDegree'),
+        label: t("singleRecord.preDegree"),
         name: "preDegree",
         type: "text",
         required: false,
       },
       {
-        label: t('singleRecord.postDegree'),
+        label: t("singleRecord.postDegree"),
         name: "postDegree",
         type: "text",
         required: false,
       },
       {
-        label: t('singleRecord.birthday'),
+        label: t("singleRecord.birthday"),
         name: "birthday",
         type: "text",
         required: false,
@@ -144,7 +157,7 @@ export const SingleRecord = () => {
     ],
     organization: [
       {
-        label: t('singleRecord.name'),
+        label: t("singleRecord.name"),
         name: "name",
         type: "text",
         required: true,
@@ -166,7 +179,7 @@ export const SingleRecord = () => {
     ],
     tag: [
       {
-        label: t('singleRecord.name'),
+        label: t("singleRecord.name"),
         name: "name",
         type: "text",
         required: true,
@@ -262,7 +275,6 @@ export const SingleRecord = () => {
 
   const onSubmit = React.useCallback(
     (values) => {
-
       if (recordType === "person") {
         updatePersonHandler({
           variables: {
@@ -290,7 +302,7 @@ export const SingleRecord = () => {
         updateTagHandler({
           variables: {
             ...values,
-            id: recordId, 
+            id: recordId,
             statusId: values.statusId ? values.statusId : null,
             appUserGroupId: user.currentAppUserGroupId,
           },
@@ -304,28 +316,15 @@ export const SingleRecord = () => {
     getStatusListHandler();
   }, []);
 
-  // React.useEffect(() => {
-  //   //get data of single record
+  React.useEffect(() => {
+    if (actionResult.code === "CONFIRM") {
+      deleteRecord();
 
-  //   setRecordLoaded(false);
-
-  //   const variables = {
-  //     id: recordId,
-  //     appUserGroupId: user.currentAppUserGroupId,
-  //   };
-
-  //   if (recordType === "person") {
-  //    getPersonByIdHandler({ variables: variables });
-  //   }
-
-  //   if (recordType === "organization") {
-  //     getOrganizationByIdHandler({ variables: variables });
-  //   }
-
-  //   if (recordType === "tag") {
-  //     getTagByIdHandler({ variables: variables });
-  //   }
-  // }, [recordType]);
+      actionResultVar({});
+    } else if (actionResult.code === "CANCEL") {
+      actionResultVar({});
+    }
+  }, [actionResult]);
 
   React.useEffect(() => {
     if (!recordLoaded && getPersonByIdRequest.data && recordType === "person") {
@@ -396,7 +395,7 @@ export const SingleRecord = () => {
 
     if (pathname.indexOf("/people/") === 0) {
       recordTypeToSelect = "person";
-      getPersonByIdHandler({ variables: variables })
+      getPersonByIdHandler({ variables: variables });
     } else if (pathname.indexOf("/organizations/") === 0) {
       recordTypeToSelect = "organization";
       getOrganizationByIdHandler({ variables: variables });
@@ -436,7 +435,7 @@ export const SingleRecord = () => {
         >
           <Box
             sx={{
-              margin: '0 1rem 1.5rem',
+              margin: "0 1rem 1.5rem",
               width: {
                 xs: "100%", // theme.breakpoints.up('xs')
                 sm: "60%", //400, // theme.breakpoints.up('sm')
@@ -470,20 +469,20 @@ export const SingleRecord = () => {
                     type="submit"
                     sx={{ width: "120px" }}
                   >
-                    {t('userActions.save')}
+                    {t("userActions.save")}
                   </Button>
                   <Button
                     variant={"outlined"}
                     type="button"
                     color="warning"
                     sx={{ width: "120px" }}
-                    onClick={deleteRecord}
+                    onClick={confirmDeleteAction}
                   >
-                     {t('userActions.delete')}
+                    {t("userActions.delete")}
                   </Button>
                   {!isSubmitting && updatePersonRequest.error && (
                     <Alert severity="error">
-                      <AlertTitle> {t('general.error')}</AlertTitle>
+                      <AlertTitle> {t("general.error")}</AlertTitle>
                       {updatePersonRequest.error.message}
                     </Alert>
                   )}
@@ -495,16 +494,13 @@ export const SingleRecord = () => {
           {(recordType === "person" || recordType === "organization") && (
             <PartyRelationships recordType={recordType} />
           )}
-           {(recordType === "person" || recordType === "organization") && (
+          {(recordType === "person" || recordType === "organization") && (
             <SinglePartyTags />
           )}
-           {(recordType === "person" || recordType === "organization") && (
+          {(recordType === "person" || recordType === "organization") && (
             <PartyContacts />
           )}
-           {(recordType === "tag") && (
-            <TaggedParties />
-          )}
-          
+          {recordType === "tag" && <TaggedParties />}
         </Box>
       </Box>
     </>

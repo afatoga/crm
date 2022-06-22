@@ -9,8 +9,9 @@ export const GET_SEARCH_RESULTS = gql`
      status
      count
      results {
-      id
+      #id
       entity
+      entityId
       searchedValue
       contactPartyId
       contactPartyTypeId

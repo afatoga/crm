@@ -25,8 +25,10 @@ export class APIResponse {
 
 @ObjectType()
 export class SearchResult {
+  // @Field((type) => Int, {nullable: true}) 
+  // id: number | null
   @Field((type) => String) 
-  id: string
+  entityId: string
   @Field((type) => String) 
   entity: string // party contact tag
   @Field((type) => String) 

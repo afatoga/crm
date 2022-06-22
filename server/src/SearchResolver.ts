@@ -44,7 +44,7 @@ export class SearchResolver {
       [SearchResult]
     >(Prisma.sql`
         SELECT
-          "Organization"."partyId" AS "id",
+          "Organization"."partyId" AS "entityId",
           'Organization' AS "entity",
           "Organization"."name" AS "searchedValue"
           --"Party"."typeId" AS "partyTypeId"
@@ -55,7 +55,7 @@ export class SearchResolver {
         AND LOWER("Organization"."name") LIKE ${searchText}
           UNION ALL
         SELECT
-          "Person"."partyId" as "id",
+          "Person"."partyId" as "entityId",
           'Person' AS "entity",
           CONCAT ("Person"."surname", ' ', "Person"."name") AS "searchedValue"
           --"Party"."typeId" AS "partyTypeId"
@@ -72,7 +72,7 @@ export class SearchResolver {
       [SearchResult]
     >(Prisma.sql`
         SELECT
-          "Tag"."id" AS "id",
+          "Tag"."id" AS "entityId",
           'Tag' AS "entity",
           "Tag"."name" AS "searchedValue"
         FROM "Tag"
@@ -85,7 +85,7 @@ export class SearchResolver {
       [SearchResult]
     >(Prisma.sql`
         SELECT
-          "Contact"."id" AS "id",
+          "Contact"."id" AS "entityId",
           'Contact' AS "entity",
           "Contact"."value" AS "searchedValue",
           "Party"."id" AS "contactPartyId",
@@ -98,11 +98,12 @@ export class SearchResolver {
         AND LOWER("Contact"."value") LIKE ${searchText}
       `);
 
-    const joinedResults = [
-      ...partyResultArray,
-      ...tagResultArray,
-      ...contactResultArray,
-    ];
+    let joinedResults:SearchResult[] = contactResultArray.concat(partyResultArray).concat(tagResultArray);
+
+    // joinedResults = joinedResults.map((item:SearchResult, index: number) => ({
+    //    ...item,
+    //    id: index
+    // }));
 
     return {
       status: "SUCCESS",
