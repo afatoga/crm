@@ -1,5 +1,8 @@
 /node_modules
 /server/node_modules
 /server/.env
-/fe
 /server/src/schema.gql
+/README.md
+/client
+/contactsapp
+/static-graphql-documentation

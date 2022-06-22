@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// plugin for CRUD operations, ommited
+// generator typegraphql {
+//   provider = "typegraphql-prisma"
+// }
+
+datasource db {
+  provider = "postgresql"
+  url    = env("DATABASE_URL")
+}
+
+model AppUser {
+  id    Int     @id @default(autoincrement())
+  nickname String?  @unique @db.VarChar(60)
+  email String  @unique @db.VarChar(254)
+  password String @db.VarChar(60)
+  count Int     @default(0) //to extend jwt access with refresh tokens
+  notes Note[]
+  appUserGroupRelationships AppUserGroupRelationship[]
+}
+
+model AppUserRole {
+  id    Int     @id @default(autoincrement())
+  name String @unique @db.VarChar(16)
+  //capabilities are in application logic
+  appUserGroupRelationships AppUserGroupRelationship[]
+}
+
+model AppUserGroupRelationship {
+  appUser AppUser @relation(fields: [appUserId], references: [id])
+  appUserId Int
+  appUserRole AppUserRole  @relation(fields: [appUserRoleId], references: [id])
+  appUserRoleId Int
+  appUserGroup AppUserGroup  @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId Int
+  @@id([appUserId,appUserRoleId,appUserGroupId])
+}
+
+model AppUserGroup {
+  id    Int     @id @default(autoincrement())
+  name String  @unique @db.VarChar(60)
+  note String? @db.Text
+  parties Party[]
+  contacts Contact[]
+  tags Tag[]
+  notes Note[]
+  //appUsers AppUser[] // ommitted due to new relationship table
+  appUserGroupRelationships AppUserGroupRelationship[]
+}
+
+model Party {
+  id        Int     @id @default(autoincrement())
+  type   PartyType? @relation(fields: [typeId], references: [id])
+  typeId   Int?
+  status   Status? @relation(fields: [statusId], references: [id])
+  statusId   Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  appUserGroup    AppUserGroup    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int
+  person Person? //optional: either person or org
+  organization Organization?
+  firstPartyRelationships PartyRelationship[] @relation("FirstPartyOfRelationship")
+  secondPartyRelationships PartyRelationship[] @relation("SecondPartyOfRelationship")
+  contacts Contact[] @relation("MainPartyOfContact")
+  //firstPartyContacts Contact[] @relation("FirstPartyOfContact")
+  //secondPartyContacts Contact[] @relation("SecondPartyOfContact")
+  tagParty TagParty[] //separate table
+  noteParty NoteParty[] //separate table
+}
+
+model Person {
+  party    Party    @relation(fields: [partyId], references: [id])
+  partyId Int @id
+  preDegree String? @db.VarChar(30)
+  surname String @db.VarChar(120)
+  name String @db.VarChar(120)
+  postDegree String? @db.VarChar(30)
+  birthday DateTime? @db.Date
+}
+
+model Organization {
+  party    Party    @relation(fields: [partyId], references: [id])
+  partyId Int @id
+  name String @db.VarChar(120)
+  type OrganizationType? @relation(fields: [typeId], references: [id])
+  typeId Int? //could be undefined
+}
+
+model PartyRelationship {
+  id Int @id @default(autoincrement())
+  contacts Contact[] @relation("ContactBelongsToRelationship")
+  firstParty Party @relation(name:"FirstPartyOfRelationship", fields:[firstPartyId], references: [id])
+  secondParty Party @relation(name:"SecondPartyOfRelationship", fields:[secondPartyId], references: [id])
+  firstPartyId Int 
+  secondPartyId Int
+  firstPartyType PartyType @relation(name:"TypeOfFirstParty", fields: [firstPartyTypeId], references: [id])
+  firstPartyTypeId Int
+  secondPartyType PartyType @relation(name:"TypeOfSecondParty", fields: [secondPartyTypeId], references: [id])
+  secondPartyTypeId Int
+  type PartyRelationshipType? @relation(fields: [typeId], references: [id])
+  typeId Int? 
+}
+
+model PartyRelationshipType {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  category String? @db.VarChar(16) // 'person-person', 'person-organization', 'organization-organization'
+  partyRelationships PartyRelationship[]
+}
+
+model PartyType {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  parties Party[]
+  firstPartyRelationships PartyRelationship[] @relation("TypeOfFirstParty") //firstPartyTypeId
+  secondPartyRelationships PartyRelationship[] @relation("TypeOfSecondParty") //secondPartyTypeId
+}
+
+model OrganizationType {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  organizations Organization[]
+}
+
+model Status {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  parties Party[]
+  contacts Contact[]
+  tags Tag[]
+}
+
+model ContactType {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(30)
+  contacts Contact[]
+}
+
+model Contact {
+  id        Int     @id @default(autoincrement())
+  contactType   ContactType? @relation(fields: [typeId], references: [id])
+  typeId   Int?
+  value    String @db.VarChar(254)
+  status   Status? @relation(fields: [statusId], references: [id])
+  statusId   Int?
+  mainParty Party @relation(name:"MainPartyOfContact", fields:[mainPartyId], references: [id])
+  partyRelationship PartyRelationship? @relation(name:"ContactBelongsToRelationship", fields:[partyRelationshipId], references: [id])
+  mainPartyId Int
+  partyRelationshipId Int?
+  //firstPartyId Int
+  //secondPartyId Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  appUserGroup    AppUserGroup    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int
+}
+
+model Tag {
+  id        Int     @id @default(autoincrement())
+  name      String @db.VarChar(32)
+  status   Status?  @relation(fields: [statusId], references: [id])
+  statusId   Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  appUserGroup    AppUserGroup    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int
+  tagParty TagParty[]
+  noteTag NoteTag[]
+  @@unique([appUserGroupId, name])
+}
+
+model TagParty {
+  //id        Int     @id @default(autoincrement())
+  party   Party @relation(fields: [partyId], references: [id])
+  partyId Int
+  tag   Tag @relation(fields: [tagId], references: [id])
+  tagId Int
+  @@id ([partyId, tagId])
+}
+
+model Note {
+  id        Int     @id @default(autoincrement())
+  content   String @db.Text()
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  appUser    AppUser    @relation(fields: [appUserId], references: [id])
+  appUserId  Int
+  appUserGroup    AppUserGroup?    @relation(fields: [appUserGroupId], references: [id])
+  appUserGroupId  Int?
+  noteParty NoteParty[]
+  noteTag NoteTag[]
+}
+
+model NoteParty {
+  //id        Int     @id @default(autoincrement())
+  party   Party @relation(fields: [partyId], references: [id])
+  partyId Int
+  note   Note @relation(fields: [noteId], references: [id])
+  noteId Int
+  @@id ([partyId, noteId])
+}
+
+model NoteTag { //displayed in Tag detail page
+  //id        Int     @id @default(autoincrement())
+  tag   Tag @relation(fields: [tagId], references: [id])
+  tagId Int
+  note   Note @relation(fields: [noteId], references: [id])
+  noteId Int
+  @@id ([tagId, noteId])
+}
