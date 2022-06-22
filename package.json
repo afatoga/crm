@@ -1,7 +1,7 @@
 {
   "name": "contactsapp-backend",
   "engines": {
-    "node": "16.15.1"
+    "node": "16.14.0"
   },
   "scripts": {
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
