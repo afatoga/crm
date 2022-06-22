@@ -42,10 +42,6 @@ const app = async () => {
   });
 
   new ApolloServer({
-    cors: {
-      origin: ["https://contactsapp-fe.vercel.app"], // <- allow request from all domains
-      //credentials: true,
-    },
     schema,
     context: context,
     plugins: [
