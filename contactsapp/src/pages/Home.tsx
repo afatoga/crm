@@ -7,11 +7,12 @@ import logo from '../logo.svg';
 
 import { AppContext } from '../contexts';
 import { APP_TITLE, PAGE_TITLE_HOME } from '../utils/constants';
+import { useTranslation } from 'react-i18next';
 
 export const Home = () => {
   const context = useContext(AppContext);
+  const {t} = useTranslation();
 
-  // console.log('homepageContext:', context);
 
   return (
     <>
@@ -24,22 +25,22 @@ export const Home = () => {
       </HelmetProvider>
       {context.user ? 
       <>
-      <Typography variant="h4">{`Hello, ${context.user?.email} 🎃`}</Typography>
+      <Typography variant="h4">{`${t('general.welcome')}, ${context.user?.email} 🎃`}</Typography>
       <LogoWrapper>
         <StyledLogo src={logo} alt="logo" />
       </LogoWrapper>
       </> : <>
       <Typography textAlign={'center'} fontSize={'3rem'} margin={'1rem 0'}>
-        Welcome to ContactsApp.
+        {t('general.welcomeTo') + ` ` + t('pageTitles.contactsApp')}
       </Typography>
       <Typography textAlign={'center'} fontSize={'1.6rem'} margin={'1rem 0'}>
-        <br />It's made for storing and browsing both personal and organizational profiles.
+        <br />{t('general.appIntro')}
         
       </Typography>
 
-      <Typography textAlign={'center'} fontSize={'1.2rem'}>Continue to <Link to={"/login"}>Login</Link> or <Link to={"/register"}>Register</Link> pages.</Typography>
+      <Typography textAlign={'center'} fontSize={'1.2rem'}>{t('general.continueTo')} <Link to={"/login"}>Login</Link> {t('general.page')}.</Typography>
 
-      <Typography textAlign={'center'} margin={'1rem 0'}>This app is written in TypeScript.</Typography>
+      <Typography textAlign={'center'} margin={'1rem 0'}>{t('general.appWrittenInTypeScript')}</Typography>
    
       </>}
       

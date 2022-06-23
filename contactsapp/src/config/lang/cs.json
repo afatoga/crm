@@ -15,7 +15,13 @@
         "password": "heslo"
     },
     "general": {
-        "welcomeAndLogin": "Vítejte v aplikaci, přihlašte se.",
+        "welcome": "Vítejte",
+        "welcomeTo": "Vítejte v",
+        "appIntro": "Aplikace byla vytvořena pro ukládání a prohlížení osobních i organizačních kontaktních údajů.",
+        "continueTo": "Pokračovat na",
+        "page": "stránku",
+        "appWrittenInTypeScript": "Tato aplikace je napsána v jazyce TypeScript.",
+        "welcomeAndLogin": "Vítejte v aplikaci, přihlaste se.",
         "actions": "akce",
         "more": "více",
         "options": "volby",

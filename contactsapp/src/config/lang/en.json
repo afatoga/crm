@@ -1,18 +1,113 @@
-{
-    "partyType": {
-        "organization": "Organization",
-        "organizations": "Organizations",
-        "person": "Person",
-        "people": "People"
-    },
-    "singleRecord": {
-        "relationships": "Relationships"
-    },
+{   
     "accountSettings": {
         "language": {
             "label": "language",
             "en": "english",
             "cs": "czech"
+        },
+        "currentPermissions": "Current permissions",
+        "currentAppUserGroup": "Current user group"
+    },
+    "form": {
+        "isRequired": "field {{fieldName}} is required",
+        "invalidEmail": "email is not valid",
+        "confirmYourAction": "Do you want to proceed?",
+        "password": "password"
+    },
+    "general": {
+        "welcome": "Welcome",
+        "welcomeTo": "Welcome to",
+        "appIntro": "It's made for storing and browsing both personal and organizational profiles.",
+        "continueTo": "Continue to",
+        "page": "page",
+        "appWrittenInTypeScript": "This app is written in TypeScript.",
+        "welcomeAndLogin": "Welcome to app, please, log in.",
+        "actions": "actions",
+        "more": "more",
+        "options": "options",
+        "error": "error",
+        "noRecords": "No records"
+    },
+    "entityType": {
+        "organization": "Organization",
+        "organizations": "Organizations",
+        "person": "Person",
+        "people": "People",
+        "contact": "Contact",
+        "contacts": "Contacts",
+        "tags": "Tags",
+        "tag": "Tag"
+    },
+    "pageTitles": {
+        "contactsApp": "ContactsApp",
+        "homepage": "Home",
+        "people": "People",
+        "person": "Person",
+        "tag": "Tag",
+        "organization": "Organization",
+        "organizations": "Organizations",
+        "tags": "Tags",
+        "settings": "Settings",
+        "myAccount": "My account",
+        "accountSettings": "Account Settings",
+        "preferences": "Preferences",
+        "newTag": "New Tag",
+        "newPerson": "New Person",
+        "newOrganization": "New Organization",
+        "searchResults": "Search Results"
+    },
+    "partyRelationshipType":{
+        "o-o": {
+            "department": "department",
+            "faculty": "faculty"
+        },
+        "o-p": {
+            "employee": "employee"
+        },
+        "p-p": {
+            "collegue": "collegue",
+            "family": "family"
         }
+    },
+    "singleRecord": {
+        "relationships": "Relationships",
+        "tags": "Tags",
+        "firstname": "firstname",
+        "surname": "surname",
+        "preDegree": "degree before",
+        "postDegree": "degree after",
+        "birthday": "birthday",
+        "name": "name",
+        "profile": "profile",
+        "createNewRelationship": "New Relationship",
+        "createNewContact": "New Contact",
+        "editContact": "Edit contact",
+        "privateContacts": "Private contacts",
+        "partyRelationshipContacts": "Company /org. Contacts",
+        "createNewTagParty": "Add Tag",
+        "otherParty": "other party",
+        "abovePartyIsOfHigherPriority": "other party is of higher importance",
+        "relationType": "relationship type",
+        "connections": "Connections"
+    },
+    "contact": {
+        "type": "Contact type",
+        "partyRelationship": "Relationship Connection",
+        "value": "value"
+    },
+    "userActions": {
+        "login": "Log In",
+        "signOut": "Sign Out",
+        "toggleTheme": "Toggle Theme",
+        "save": "Save",
+        "delete": "Delete",
+        "addNew": "Add New",
+        "search": "Search",
+        "switchTo": "Switch to",
+        "lookForParty": "Look for person / org.",
+        "lookForTag": "Look for tag",
+        "edit": "Edit",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
     }
 }

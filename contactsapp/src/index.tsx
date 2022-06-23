@@ -23,7 +23,7 @@ import { APP_TITLE, APP_DESCRIPTION } from './utils/constants';
 
 
 const httpLink = createHttpLink({
-  uri: process.env.BACKEND_URL ? process.env.BACKEND_URL : 'http://localhost:4000',
+  uri: process.env.REACT_APP_BACKEND_URL ? process.env.REACT_APP_BACKEND_URL : 'http://localhost:4000',
   //credentials: 'same-origin' //credentials: 'include' if your backend is a different domain.
 });
 
@@ -50,7 +50,6 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       if (message === 'Context creation failed: Authorization is invalid') {
         //logout
         localStorage.clear();
-        //(window as any).location.href = '/login';
       }
 
       // console.log(
