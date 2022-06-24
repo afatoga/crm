@@ -1,22 +1,22 @@
 import "reflect-metadata";
 import * as tq from "type-graphql";
-import { AppUserResolver } from "./AppUserResolver";
-import { PartyResolver } from "./PartyResolver";
+import { AppUserResolver } from "./resolvers/AppUserResolver";
+import { PartyResolver } from "./resolvers/PartyResolver";
 import { ApolloServer } from "apollo-server";
 import { DateTimeResolver } from "graphql-scalars";
-import { context } from "./context";
+import { context } from "./helpers/context";
 import { GraphQLScalarType } from "graphql";
 import {
   ApolloServerPluginLandingPageGraphQLPlayground,
   ApolloServerPluginLandingPageDisabled,
 } from "apollo-server-core";
-import { authChecker } from "./authChecker";
+import { authChecker } from "./helpers/authChecker";
 // import { ErrorLoggerMiddleware } from "./middleware/errorLogger";
 //import { NoteResolver } from "./NoteResolver";
-import { TagResolver } from "./TagResolver";
-import { ContactResolver } from "./ContactResolver";
-import { StatusResolver } from "./StatusResolver";
-import { SearchResolver } from "./SearchResolver";
+import { TagResolver } from "./resolvers/TagResolver";
+import { ContactResolver } from "./resolvers/ContactResolver";
+import { StatusResolver } from "./resolvers/StatusResolver";
+import { SearchResolver } from "./resolvers/SearchResolver";
 
 const app = async () => {
 

@@ -9,9 +9,9 @@ import {
   Field,
   Authorized,
 } from 'type-graphql'
-import { Note } from './Note'
-import {APIResponse} from './GlobalObjects'
-import { Context } from './context'
+import { Note } from '../types/Note'
+import {APIResponse} from '../types/GlobalObjects'
+import { Context } from '../helpers/context'
 
 
 @InputType()

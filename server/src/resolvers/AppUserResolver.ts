@@ -13,14 +13,14 @@ import {
   Authorized
 } from 'type-graphql'
 //import { Post } from './Post'
-import { APIResponse } from './GlobalObjects'
-import { AppUser, AppUserLoginResponse } from './AppUser'
-import { Context } from './context'
+import { APIResponse } from '../types/GlobalObjects'
+import { AppUser, AppUserLoginResponse } from '../types/AppUser'
+import { Context } from '../helpers/context'
 import { Prisma } from '@prisma/client'
 import { IsEmail } from 'class-validator'
-import { IsEmailAlreadyExist } from './decorators/isEmailAlreadyExist'
+import { IsEmailAlreadyExist } from '../decorators/isEmailAlreadyExist'
 import bcrypt from "bcryptjs";
-import { createTokens } from './auth';
+import { createTokens } from '../helpers/auth';
 
 @InputType()
 class AppUserGroupUniqueInput {

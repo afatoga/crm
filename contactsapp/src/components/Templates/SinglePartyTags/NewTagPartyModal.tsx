@@ -104,7 +104,7 @@ export const NewTagPartyModal = () => {
     }, [])
 
     React.useEffect(() => {
-      if(searchedName.length > 0) {
+      if(searchedName.length > 2) {
         getTagsByNameHandler({variables: {searchedName: searchedName, appUserGroupId: user.currentAppUserGroupId}});
       }
       //inputRef.current.querySelector('input').focus();

@@ -13,6 +13,18 @@ registerEnumType(ResponseStatus, {
   description: 'API Response status'
 });
 
+enum Entity {
+  PERSON = "PERSON",
+  ORGANIZATION = "ORGANIZATION",
+  CONTACT = "CONTACT",
+  TAG = "TAG"
+}
+
+registerEnumType(Entity, {
+  name: 'Entity',
+  description: 'Entity name'
+});
+
 @ObjectType()
 export class APIResponse {
 
@@ -25,11 +37,9 @@ export class APIResponse {
 
 @ObjectType()
 export class SearchResult {
-  // @Field((type) => Int, {nullable: true}) 
-  // id: number | null
-  @Field((type) => String) 
+  @Field((type) => ID) 
   entityId: string
-  @Field((type) => String) 
+  @Field((type) => Entity) 
   entity: string // party contact tag
   @Field((type) => String) 
   searchedValue: string // party full name, contact value, tag name
@@ -37,8 +47,6 @@ export class SearchResult {
   contactPartyId: string | null
   @Field((type) => ID, {nullable: true}) 
   contactPartyTypeId: string | null // 1, 2 (partyTypeId)
-  // @Field((type) => String, {nullable: true}) 
-  // contactPartyName: number | null // 1, 2 (partyTypeId)
 }
 
 @ObjectType()

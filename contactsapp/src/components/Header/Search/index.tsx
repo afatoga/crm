@@ -21,7 +21,7 @@ export const Search = () => {
   //const searchedText = useReactiveVar(searchedTextVar);
 
   const debounceSubmitRequest = React.useCallback(
-    debounce((value)=> {
+    debounce((value: string)=> {
      getSearchResultsHandler({
         variables: {
           searchedText: value,
@@ -45,25 +45,11 @@ export const Search = () => {
 
   React.useEffect(() => {
 
-    if (inputValue.length>3) {
+    if (inputValue.length > 2) {
       debounceSubmitRequest(inputValue)
     }
   }, [inputValue])
 
-//   React.useEffect(() => {
-//     if (
-//  getSearchResultsRequest
-
-
-//     // else if (
-//     //     !getSearchResultsRequest.loading
-//     //   && getSearchResultsRequest.data?.searchResults.status === 'SUCCESS'
-//     //   && inputValue.length > 3)
-//     //   {
-//     //     searchedTextVar(inputValue);
-//     // }
-  
-//   }, [getSearchResultsRequest])
 
   return (
   <Box >

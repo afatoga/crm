@@ -11,9 +11,9 @@ import {
   Authorized,
 } from "type-graphql";
 import { Prisma } from "@prisma/client";
-import { SearchResult, SearchResponse } from "./GlobalObjects";
-import { isUserAuthorized } from "./authChecker";
-import { Context } from "./context";
+import { SearchResult, SearchResponse } from "../types/GlobalObjects";
+import { isUserAuthorized } from "../helpers/authChecker";
+import { Context } from "../helpers/context";
 
 @InputType()
 class SearchInput {
@@ -45,7 +45,7 @@ export class SearchResolver {
     >(Prisma.sql`
         SELECT
           "Organization"."partyId" AS "entityId",
-          'Organization' AS "entity",
+          'ORGANIZATION' AS "entity",
           "Organization"."name" AS "searchedValue"
           --"Party"."typeId" AS "partyTypeId"
         FROM "Organization"
@@ -56,7 +56,7 @@ export class SearchResolver {
           UNION ALL
         SELECT
           "Person"."partyId" as "entityId",
-          'Person' AS "entity",
+          'PERSON' AS "entity",
           CONCAT ("Person"."surname", ' ', "Person"."name") AS "searchedValue"
           --"Party"."typeId" AS "partyTypeId"
         FROM "Person"
@@ -73,7 +73,7 @@ export class SearchResolver {
     >(Prisma.sql`
         SELECT
           "Tag"."id" AS "entityId",
-          'Tag' AS "entity",
+          'TAG' AS "entity",
           "Tag"."name" AS "searchedValue"
         FROM "Tag"
         WHERE "Tag"."appUserGroupId" = ${data.appUserGroupId}
@@ -86,7 +86,7 @@ export class SearchResolver {
     >(Prisma.sql`
         SELECT
           "Contact"."id" AS "entityId",
-          'Contact' AS "entity",
+          'CONTACT' AS "entity",
           "Contact"."value" AS "searchedValue",
           "Party"."id" AS "contactPartyId",
           "Party"."typeId" AS "contactPartyTypeId"

@@ -10,10 +10,10 @@ import {
   Field,
   Authorized,
 } from "type-graphql";
-import { Contact, ContactType, ExtendedContact } from "./Contact";
-import { APIResponse } from "./GlobalObjects";
-import { isUserAuthorized } from "./authChecker";
-import { Context } from "./context";
+import { Contact, ContactType, ExtendedContact } from "../types/Contact";
+import { APIResponse } from "../types/GlobalObjects";
+import { isUserAuthorized } from "../helpers/authChecker";
+import { Context } from "../helpers/context";
 
 @InputType()
 class ContactInput {

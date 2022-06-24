@@ -1,13 +1,13 @@
 spectaql:
-  logoFile: ./test/fixtures/logo.png
-  faviconFile: ./test/fixtures/favicon.png
-  displayAllServers: true
+  #logoFile: ./test/fixtures/logo.png
+  #faviconFile: ./test/fixtures/favicon.png
+  #displayAllServers: true
 
 introspection:
   removeTrailingPeriodFromDescriptions: false
   schemaFile: ../server/src/schema.gql
   # metadataFile: ./examples/data/metadata.json
-  dynamicExamplesProcessingModule: ./examples/customizations/examples
+  #dynamicExamplesProcessingModule: ./examples/customizations/examples
   queryNameStrategy: capitalizeFirst
   fieldExpansionDepth: 2
 
@@ -15,27 +15,25 @@ extensions:
   graphqlScalarExamples: true
 
 info:
-  title: GraphQL API Reference
-  description: Welcome to the party!
-  termsOfService: https://www.example.com/terms
+  title: ContactsApp API Reference
+  description: Application for storing and browsing both personal and organizational profiles.
+  #termsOfService: https://www.example.com/terms
   contact:
     name: API Support
-    url: http://www.example.com/support
-    email: support@example.com
-  license:
-    name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
-  x-introItems:
-    - title: Important thing 1
-      description: Some important stuff we wanted you to know. Supports `markdown`
+    url: https://github.com/afatoga/crm
+    email: afatoga@gmail.com
+  # license:
+  #   name: Apache 2.0
+  #   url: https://www.apache.org/licenses/LICENSE-2.0.html
+  # x-introItems:
+  #   - title: Important thing 1
+  #     description: Some important stuff we wanted you to know. Supports `markdown`
 
 servers:
-  - url: https://staging.example.com/graphql
-    description: Staging
-  - url: https://example.com/graphql
-    description: Production
+  - url: https://crm-contacts.herokuapp.com
+    description: Demo
     production: true
     headers:
       - name: Authorization
         example: Bearer <YOUR_TOKEN_HERE>
-        comment: Your foo from bar
+        # comment: Your foo from bar

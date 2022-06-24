@@ -23,11 +23,11 @@ import {
   ExtendedPartyRelationship,
   SortedPartyRelationships,
   PartyRelationshipType,
-} from "./Party";
-import { Context } from "./context";
+} from "../types/Party";
+import { Context } from "../helpers/context";
 import { Prisma } from "@prisma/client";
-import { isUserAuthorized } from "./authChecker";
-import { APIResponse } from "./GlobalObjects";
+import { isUserAuthorized } from "../helpers/authChecker";
+import { APIResponse } from "../types/GlobalObjects";
 //import { Service } from 'typedi'
 
 @InputType()

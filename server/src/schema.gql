@@ -231,11 +231,19 @@ enum ResponseStatus {
 }
 
 type SearchResult {
-  entityId: String!
-  entity: String!
+  entityId: ID!
+  entity: Entity!
   searchedValue: String!
   contactPartyId: ID
   contactPartyTypeId: ID
+}
+
+# Entity name
+enum Entity {
+  PERSON
+  ORGANIZATION
+  CONTACT
+  TAG
 }
 
 input SearchInput {

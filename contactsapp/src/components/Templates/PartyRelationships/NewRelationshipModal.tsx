@@ -171,7 +171,7 @@ export const NewRelationshipModal = () => {
     }, [])
 
     React.useEffect(() => {
-      if(searchedName.length > 0) {
+      if(searchedName.length > 2) {
         getPartiesByNameHandler({variables: {searchedName: searchedName, appUserGroupId: user.currentAppUserGroupId}});
       }
       //inputRef.current.querySelector('input').focus();

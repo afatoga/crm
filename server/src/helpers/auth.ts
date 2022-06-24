@@ -1,5 +1,5 @@
 import { sign } from "jsonwebtoken";
-import { AppUser } from "./AppUser";
+import { AppUser } from "../types/AppUser";
 // import dotenv from "dotenv";
 
 export const createTokens = (user: Pick<AppUser,'email'|'id'|'count' >) => {

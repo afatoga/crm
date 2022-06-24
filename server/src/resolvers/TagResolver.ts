@@ -10,10 +10,10 @@ import {
   Authorized,
   Int,
 } from "type-graphql";
-import { Tag, ExtendedTag, ExtendedTagParty } from "./Tag";
-import { APIResponse } from "./GlobalObjects";
-import { Context, ICurrentUser } from "./context";
-import { isUserAuthorized } from "./authChecker";
+import { Tag, ExtendedTag, ExtendedTagParty } from "../types/Tag";
+import { APIResponse } from "../types/GlobalObjects";
+import { Context, ICurrentUser } from "../helpers/context";
+import { isUserAuthorized } from "../helpers/authChecker";
 import { Prisma } from "@prisma/client";
 
 @InputType()

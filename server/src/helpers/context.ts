@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { verify } from "jsonwebtoken";
-import { AppUser } from "./AppUser";
+import { AppUser } from "../types/AppUser";
 
 const prisma = new PrismaClient();
 
