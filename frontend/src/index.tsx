@@ -7,18 +7,13 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  createHttpLink,
-  //useQuery,
-  //gql
+  createHttpLink
 } from "@apollo/client";
-import { useNavigate } from 'react-router-dom';
 
 import { setContext } from '@apollo/client/link/context';
 import { onError } from "@apollo/client/link/error";
 
 import App from './App';
-
-//import reportWebVitals from './reportWebVitals';
 import { APP_TITLE, APP_DESCRIPTION } from './utils/constants';
 
 
@@ -28,14 +23,12 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext((_, { headers }) => {
-  // get the authentication token from local storage if it exists
   let accessToken = null;
   const currentAuth = localStorage.getItem('af-auth');
   if (currentAuth) {
     const {token} = JSON.parse(currentAuth);
     accessToken = token;
   }
-  // return the headers to the context so httpLink can read them
   return {
     headers: {
       ...headers,
@@ -48,13 +41,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
     graphQLErrors.forEach(({ message, locations, path }) => {
       if (message === 'Context creation failed: Authorization is invalid') {
-        //logout
+        //signout
         localStorage.clear();
       }
-
-      // console.log(
-      //   `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      // )
     }
       
     );
@@ -66,14 +55,9 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 });
 
-// const client = new ApolloClient({
-//   cache: new InMemoryCache(),
-//   link,
-// });
-
 ReactDOM.render(
   <React.StrictMode>
-    <HelmetProvider >
+    <HelmetProvider>
     <Helmet>
       <title>{APP_TITLE}</title>
       <meta name="description" content={APP_DESCRIPTION} />
@@ -88,4 +72,3 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-//reportWebVitals(console.log);
