@@ -1,4 +1,4 @@
-import React, { ComponentType, FC } from 'react';
+import React, { ComponentType, FC } from "react";
 
 /**
  * Represents the route of a page.
@@ -42,7 +42,7 @@ export type Route = {
    * @example
    * "/dashboard"
    */
-  path: string
+  path: string;
 
   /**
    * The component referenced by the route
@@ -52,12 +52,12 @@ export type Route = {
    * @example
    * "<Dashboard />"
    */
-  component?: React.ComponentType
+  component?: React.ComponentType;
 
   /**
    * For administrators
-   * 
-   * 
+   *
+   *
    * @type {boolean}
    * @memberof Route
    * @required
@@ -70,8 +70,8 @@ export type Route = {
 
   /**
    * For logged-in users only
-   * 
-   * 
+   *
+   *
    * @type {boolean}
    * @memberof Route
    * @required
@@ -138,7 +138,3 @@ export type Route = {
    */
   expanded?: boolean;
 };
-
-// export type PageProps = {
-//   titleCode: string;
-// }

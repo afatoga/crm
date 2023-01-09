@@ -6,8 +6,6 @@ import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
 
 import { PageTitle } from "../components/PageTitle";
-//import { Email } from '@mui/icons-material';
-import { appRoles } from "../config";
 import { isEmptyObject } from "../utils/utilityFunctions";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -22,19 +20,21 @@ import { PartyContacts } from "../components/Templates/PartyContacts";
 import { ModalContext } from "../contexts/ModalContext";
 import { useReactiveVar } from "@apollo/client";
 import { actionResultVar } from "../App";
-//import { useApolloClient } from "@apollo/client";
+import {
+  useCustomFieldsDynamicSchema,
+  useCustomFieldsExtendValidation,
+} from "../hooks/useDynamicFormValidation";
 
 export const SingleRecord = () => {
   const { t } = useTranslation();
-  let { handleModal, isShown } = React.useContext(ModalContext);
-  // Local state
+  let { handleModal } = React.useContext(ModalContext);
+
   const [recordType, setRecordType] = React.useState<string>("");
   const [recordLoaded, setRecordLoaded] = React.useState<boolean>(false);
 
   const { operations } = useParty();
   const { operations: tagOperations } = useTag();
 
-  // const apolloClient = useApolloClient();
   const [getPersonByIdHandler, getPersonByIdRequest] = operations.getPersonById;
   const [getOrganizationByIdHandler, getOrganizationByIdRequest] =
     operations.getOrganizationById;
@@ -64,20 +64,18 @@ export const SingleRecord = () => {
   };
 
   const [updatePersonHandler, updatePersonRequest] = operations.updatePerson;
-  const [deletePersonHandler, deletePersonRequest] = operations.deletePerson;
-  const [updateOrganizationHandler, updateOrganizationRequest] =
-    operations.updateOrganization;
-  const [deleteOrganizationHandler, deleteOrganizationRequest] =
-    operations.deleteOrganization;
-  const [updateTagHandler, updateTagRequest] = tagOperations.updateTag;
-  const [deleteTagHandler, deleteTagRequest] = tagOperations.deleteTag;
+  const [deletePersonHandler] = operations.deletePerson;
+  const [updateOrganizationHandler] = operations.updateOrganization;
+  const [deleteOrganizationHandler] = operations.deleteOrganization;
+  const [updateTagHandler] = tagOperations.updateTag;
+  const [deleteTagHandler] = tagOperations.deleteTag;
   const actionResult = useReactiveVar(actionResultVar);
 
-  const location: any = useLocation();
+  const location = useLocation();
   const { id: recordIdString } = useParams();
   const recordId = parseInt(recordIdString);
 
-  let navigate = useNavigate(); //save and view detail
+  let navigate = useNavigate();
   const { user } = useAuth();
 
   const deleteRecord = () => {
@@ -162,13 +160,6 @@ export const SingleRecord = () => {
         type: "text",
         required: true,
       },
-      // {
-      //   label: t('singleRecord.organizationType'),
-      //   name: "typeId",
-      //   type: "autocomplete", //"select",
-      //   required: true,
-      //   apiRequest: getOrganizationTypeListRequest,
-      // },
       {
         label: "status",
         name: "statusId",
@@ -193,61 +184,6 @@ export const SingleRecord = () => {
       },
     ],
   };
-
-  // Extend customFields with validation based on type
-  const useCustomFieldsExtendValidation = (
-    recordType: string,
-    customFields: any
-  ) => {
-    if (!recordType.length) return {};
-
-    return customFields[recordType].map((customField) => {
-      switch (customField.type) {
-        case "text":
-          return {
-            ...customField,
-            validationType: "string",
-            validations: [
-              {
-                type: customField.required ? "required" : "nullable",
-                params: ["Required"],
-              },
-              {
-                type: "trim",
-                params: [],
-              },
-              {
-                type: customField.required ? "min" : null,
-                params: [2, "Minimalal length is 2 characters."],
-              },
-            ],
-          };
-        default:
-          return customField;
-      }
-    });
-  };
-
-  // This function creates the dynamic Yup schema, thanks to vijayranghar (https://github.com/jquense/yup/issues/559)
-  const useCustomFieldsDynamicSchema = (schema, config) => {
-    const { name, validationType, validations = [] } = config;
-    if (!yup[validationType]) {
-      return schema;
-    }
-    let validator = yup[validationType]();
-    validations.forEach((validation) => {
-      const { params, type } = validation;
-      if (!validator[type]) {
-        return;
-      }
-      validator = validator[type](...params);
-    });
-    schema[name] = validator;
-    return schema;
-  };
-
-  // Create the dynamic form
-  // Split out for readability
 
   // First extend the data with our validations
   const dynamicFormData = useCustomFieldsExtendValidation(
@@ -309,7 +245,7 @@ export const SingleRecord = () => {
         });
       }
     },
-    [recordType]
+    [recordType, recordId]
   );
 
   React.useEffect(() => {
@@ -328,10 +264,7 @@ export const SingleRecord = () => {
 
   React.useEffect(() => {
     if (!recordLoaded && getPersonByIdRequest.data && recordType === "person") {
-      //exists
-
       const loadedData = getPersonByIdRequest.data.personById;
-      // console.log(loadedData)
       if (!loadedData) navigate("/people");
       else {
         setRecordLoaded(true);
@@ -349,8 +282,6 @@ export const SingleRecord = () => {
       getOrganizationByIdRequest.data &&
       recordType === "organization"
     ) {
-      //exists
-
       const loadedData = getOrganizationByIdRequest.data.organizationById;
       if (!loadedData) navigate("/organizations");
       else {
@@ -367,8 +298,6 @@ export const SingleRecord = () => {
       getTagByIdRequest.data &&
       recordType === "tag"
     ) {
-      //exists
-
       const loadedData = getTagByIdRequest.data.tagById;
       if (!loadedData) navigate("/tags");
       else {
@@ -421,11 +350,6 @@ export const SingleRecord = () => {
         }}
       >
         <PageTitle title={t(`pageTitles.${recordType}`)} />
-        {/* <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
-          Welcome to ContactsApp.
-        </Typography> */}
-
-        {/* this is row for md, col for  */}
         <Box
           sx={{
             display: "flex",

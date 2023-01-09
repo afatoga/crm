@@ -1,5 +1,5 @@
 {
-  "name": "typegraphql-example",
+  "name": "backend-contactsapp",
   "scripts": {
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
     "build": "rimraf ./build && tsc",

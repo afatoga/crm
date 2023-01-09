@@ -2,7 +2,6 @@ import "reflect-metadata";
 import {
   Resolver,
   Query,
-  //Mutation,
   Arg,
   Ctx,
   InputType,
@@ -98,12 +97,9 @@ export class SearchResolver {
         AND LOWER("Contact"."value") LIKE ${searchText}
       `);
 
-    let joinedResults:SearchResult[] = contactResultArray.concat(partyResultArray).concat(tagResultArray);
-
-    // joinedResults = joinedResults.map((item:SearchResult, index: number) => ({
-    //    ...item,
-    //    id: index
-    // }));
+    let joinedResults: SearchResult[] = contactResultArray
+      .concat(partyResultArray)
+      .concat(tagResultArray);
 
     return {
       status: "SUCCESS",

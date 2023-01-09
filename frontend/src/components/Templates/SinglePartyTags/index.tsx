@@ -3,7 +3,7 @@ import { useTag } from "../../../hooks/useTag";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import { MultiLevelList } from "../../List";
-import { Typography, Box, Button } from "@mui/material";
+import { Typography, Button } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ModalContext } from "../../../contexts/ModalContext";
 import { StyledPaper } from "../../Container";
@@ -27,31 +27,27 @@ export const SinglePartyTags = () => {
   const [deleteTagPartyHandler, deleteTagPartyRequest] =
     operations.deleteTagParty;
 
-const [selectedTagId, setSelectedTagId] = React.useState<string>(''); 
-const actionResult = useReactiveVar(actionResultVar);
+  const [selectedTagId, setSelectedTagId] = React.useState<string>("");
+  const actionResult = useReactiveVar(actionResultVar);
 
   const untag = (tagId: string) => {
     handleModal("ConfirmDialog");
     setSelectedTagId(tagId);
-
-   
   };
 
   React.useEffect(() => {
     if (actionResult.code === "CONFIRM" && selectedTagId.length) {
-
-        deleteTagPartyHandler({
-            variables: {
-              tagId: parseInt(selectedTagId),
-              partyId: parseInt(recordId),
-              appUserGroupId: user.currentAppUserGroupId,
-            },
-          });
+      deleteTagPartyHandler({
+        variables: {
+          tagId: parseInt(selectedTagId),
+          partyId: parseInt(recordId),
+          appUserGroupId: user.currentAppUserGroupId,
+        },
+      });
 
       actionResultVar({});
-  
     }
-  }, [actionResult])
+  }, [actionResult]);
 
   React.useEffect(() => {
     getSinglePartyTagsHandler({
@@ -65,7 +61,8 @@ const actionResult = useReactiveVar(actionResultVar);
   return (
     <>
       {getSinglePartyTagsRequest.data?.singlePartyTags && (
-        <StyledPaper  sx={{
+        <StyledPaper
+          sx={{
             width: {
               xs: "100%", // theme.breakpoints.up('xs')
               sm: "60%", //400, // theme.breakpoints.up('sm')
@@ -75,25 +72,24 @@ const actionResult = useReactiveVar(actionResultVar);
             },
             marginBottom: {
               xs: 2,
-              lg: 0
-            }
-          }}>
-         
-            <Typography variant="h6">{t("singleRecord.tags")}</Typography>
+              lg: 0,
+            },
+          }}
+        >
+          <Typography variant="h6">{t("singleRecord.tags")}</Typography>
 
-            <MultiLevelList
-              listName="tagList"
-              data={getSinglePartyTagsRequest.data.singlePartyTags}
-              deleteItem={untag}
-            />
-            <Button
-              variant={"contained"}
-              sx={{ my: 3, width: "150px" }}
-              onClick={toggleNewTagPartyModal}
-            >
-              {t("singleRecord.createNewTagParty")}
-            </Button>
-          
+          <MultiLevelList
+            listName="tagList"
+            data={getSinglePartyTagsRequest.data.singlePartyTags}
+            deleteItem={untag}
+          />
+          <Button
+            variant={"contained"}
+            sx={{ my: 3, width: "150px" }}
+            onClick={toggleNewTagPartyModal}
+          >
+            {t("singleRecord.createNewTagParty")}
+          </Button>
         </StyledPaper>
       )}
     </>

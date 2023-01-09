@@ -1,46 +1,42 @@
-import 'reflect-metadata'
-import { ObjectType, Field, ID } from 'type-graphql'
+import "reflect-metadata";
+import { ObjectType, Field, ID } from "type-graphql";
 
 @ObjectType()
 class AppUserGroupRelationship {
-  @Field(type => Number)
+  @Field((type) => Number)
   appUserId: number;
-  @Field(type => Number)
+  @Field((type) => Number)
   appUserGroupId: number;
-  @Field(type => Number)
+  @Field((type) => Number)
   appUserRoleId: number;
 }
 
 @ObjectType()
 export class AppUser {
   @Field((type) => ID)
-  id: number
+  id: number;
 
   @Field((type) => String)
-  email: string
-  
+  email: string;
+
   @Field((type) => String)
-  password: string
+  password: string;
 
   @Field((type) => String, { nullable: true })
-  nickname: string | null
+  nickname: string | null;
 
   @Field((type) => [AppUserGroupRelationship])
-  appUserGroupRelationships: AppUserGroupRelationship[] 
+  appUserGroupRelationships: AppUserGroupRelationship[];
 
   @Field((type) => Number)
-  count: number
-  // @Field((type) => [Post], { nullable: true })
-  // posts?: [Post] | null
+  count: number;
 }
 
 @ObjectType()
 export class AppUserLoginResponse {
   @Field((type) => AppUser)
-  appUser: AppUser
+  appUser: AppUser;
 
   @Field((type) => String)
-  accessToken: string
-
-  //refreshToken TBI
+  accessToken: string;
 }

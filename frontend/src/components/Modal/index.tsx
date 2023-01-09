@@ -1,5 +1,4 @@
-import React, { FC, useEffect } from "react";
-// import FocusLock from "react-focus-lock";
+import React, { FC } from "react";
 import ReactDOM from "react-dom";
 import { ModalContext } from "../../contexts/ModalContext";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -45,8 +44,8 @@ const BootstrapDialogTitle = (props: DialogTitleProps) => {
           //xl: 500, // theme.breakpoints.up('xl')
         },
         minWidth: {
-          xs: '310px'
-        }
+          xs: "310px",
+        },
       }}
       {...other}
     >
@@ -73,32 +72,25 @@ export const Modal: FC = () => {
   let { isShown, handleModal, template } = React.useContext(ModalContext);
   const { t } = useTranslation();
 
-  
-
   const getModalTitle = (): JSX.Element => {
     if (template === "NewRelationship")
       return (
-        <BootstrapDialogTitle
-          // id="customized-dialog-title"
-          onClose={handleModal}
-        >
+        <BootstrapDialogTitle onClose={handleModal}>
           {t("singleRecord.createNewRelationship")}
         </BootstrapDialogTitle>
       );
     else if (template === "NewTagParty")
       return (
-        <BootstrapDialogTitle
-          onClose={handleModal}
-        >
+        <BootstrapDialogTitle onClose={handleModal}>
           {t("singleRecord.createNewTagParty")}
         </BootstrapDialogTitle>
       );
     else if (template === "CreateUpdateContact")
       return (
-        <BootstrapDialogTitle
-          onClose={handleModal}
-        >
-          {contactToEditVar().length ? t("singleRecord.editContact") : t("singleRecord.createNewContact")}
+        <BootstrapDialogTitle onClose={handleModal}>
+          {contactToEditVar().length
+            ? t("singleRecord.editContact")
+            : t("singleRecord.createNewContact")}
         </BootstrapDialogTitle>
       );
     return null;
@@ -108,26 +100,11 @@ export const Modal: FC = () => {
     if (template === "ConfirmDialog") return <ConfirmDialog />;
     else if (template === "NewRelationship") return <NewRelationshipModal />;
     else if (template === "NewTagParty") return <NewTagPartyModal />;
-    else if (template === "CreateUpdateContact") return <CreateUpdateContactModal />;
+    else if (template === "CreateUpdateContact")
+      return <CreateUpdateContactModal />;
 
     return null;
   };
-
-  // const onKeyDown = (event: KeyboardEvent) => {
-  //   if (event.key === 'Escape' && isShown) {
-  //     handleModal();
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   isShown
-  //     ? (document.body.style.overflow = "hidden")
-  //     : (document.body.style.overflow = "unset");
-  //   document.addEventListener("keydown", onKeyDown, false);
-  //   return () => {
-  //     document.removeEventListener("keydown", onKeyDown, false);
-  //   };
-  // }, [isShown]);
 
   const modal = (
     <React.Fragment>
@@ -139,23 +116,6 @@ export const Modal: FC = () => {
         {getModalTitle()}
         {getModalContent()}
       </BootstrapDialog>
-      {/* <Backdrop onClick={hide} /> */}
-      {/* <FocusLock> */}
-      {/* <Wrapper
-          aria-modal
-          aria-labelledby={headerText}
-          tabIndex={-1}
-          role="dialog"
-        >
-          <StyledModal>
-            <Header>
-              <HeaderText>{headerText}</HeaderText>
-              <CloseButton onClick={hide}>X</CloseButton>
-            </Header>
-            <Content>{modalContent}</Content>
-          </StyledModal>
-        </Wrapper> */}
-      {/* </FocusLock> */}
     </React.Fragment>
   );
 

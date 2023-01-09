@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import {
   Typography,
   Box,
@@ -12,9 +12,6 @@ import { useLocation, useNavigate } from "react-router";
 import { useAppUser } from "../hooks/useAppUser";
 import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
-
-import { PageTitle } from "../components/PageTitle";
-//import { Email } from '@mui/icons-material';
 import { appRoles } from "../config";
 import { capitalizeString, isEmptyObject } from "../utils/utilityFunctions";
 import * as yup from "yup";
@@ -22,7 +19,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
 
 export const Login = () => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const { operations } = useAppUser();
   const [loginHandler, loginRequest] = operations.login;
 
@@ -54,7 +51,7 @@ export const Login = () => {
             validations: [
               {
                 type: "required",
-                params: [t(`form.isRequired`, {fieldName: 'email'})],
+                params: [t(`form.isRequired`, { fieldName: "email" })],
               },
               {
                 type: "trim",
@@ -73,20 +70,14 @@ export const Login = () => {
             validations: [
               {
                 type: "required",
-                params: [t(`form.isRequired`, {fieldName: t(`form.password`)})],
+                params: [
+                  t(`form.isRequired`, { fieldName: t(`form.password`) }),
+                ],
               },
               {
                 type: "trim",
                 params: [],
               },
-              // {
-              //   type: "min",
-              //   params: [6, "Minimal length is 6 characters"]
-              // },
-              // {
-              //   type: "matches",
-              //   params: [/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,  "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character"]
-              // }
             ],
           };
         default:
@@ -168,18 +159,6 @@ export const Login = () => {
     }
   }, [loginRequest, navigate]);
 
-  //   {
-  //     "login": {
-  //         "appUser": {
-  //             "id": "2",
-  //             "appUserGroupRelationships": [],
-  //             "__typename": "AppUser"
-  //         },
-  //         "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZmF0b2dhQGdtYWlsLmNvbSIsImlhdCI6MTY1MDY0MDI3NiwiZXhwIjoxNjUwNjQxMTc2fQ.f4tMiTcAx-LdvDC_-TiyMBQxMFEt0HKgd603LxGoVa4",
-  //         "__typename": "AppUserLoginResponse"
-  //     }
-  // }
-
   return (
     <>
       <Box
@@ -193,9 +172,8 @@ export const Login = () => {
           justifyContent: "center",
         }}
       >
-        {/* <PageTitle title={location.pathname.replaceAll("/", " ").trimStart()} /> */}
         <Typography paragraph textAlign={"center"} fontSize={"1.6rem"}>
-          {t('general.welcomeAndLogin')}
+          {t("general.welcomeAndLogin")}
         </Typography>
 
         <Box
@@ -232,16 +210,15 @@ export const Login = () => {
                   control={control}
                   name={item.name}
                   defaultValue=""
-                  // rules={{ required: { value: true, message: "Invalid input" } }}
                 />
               ))}
 
               <Button variant={"contained"} type="submit">
-              {t('userActions.login')}
+                {t("userActions.login")}
               </Button>
               {!isSubmitting && loginRequest.error && (
                 <Alert severity="error">
-                  <AlertTitle>{t('general.error')}</AlertTitle>
+                  <AlertTitle>{t("general.error")}</AlertTitle>
                   {loginRequest.error.message}
                 </Alert>
               )}

@@ -1,10 +1,10 @@
 import * as React from "react";
 
-import { Typography, Box, Button } from "@mui/material";
+import { Typography, Button } from "@mui/material";
 
 import { ModalContext } from "../../../contexts/ModalContext";
 import { useParty } from "../../../hooks/useParty";
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router";
 import { useAuth } from "../../../hooks/useAuth";
 import { MultiLevelList } from "../../List";
 import { useReactiveVar } from "@apollo/client";
@@ -12,21 +12,15 @@ import { actionResultVar } from "../../../App";
 import { useTranslation } from "react-i18next";
 import { StyledPaper } from "../../Container";
 
-// type PartyRelationship = {
-//   id: string,
-//   otherPartyId: number,
-//   name: string,
-//   typeName: string
-// }
-
-export const PartyRelationships: React.FC<{recordType: string}> = ({recordType}) => {
+export const PartyRelationships: React.FC<{ recordType: string }> = ({
+  recordType,
+}) => {
   const { id: recordIdString } = useParams();
-  const {t} = useTranslation();
-  //const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const [selectedRelationshipId,setSelectedRelationshipId] = React.useState<string>('');
+  const [selectedRelationshipId, setSelectedRelationshipId] =
+    React.useState<string>("");
 
-  // actions: create or delete (update is unnecessary)
   const { operations } = useParty();
   const [getPartyRelationshipsHandler, getPartyRelationshipsRequest] =
     operations.getPartyRelationships;
@@ -63,16 +57,14 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
 
   React.useEffect(() => {
     if (getPartyRelationshipsRequest.called && !isShown) {
-      //refetches on every modal closing
       getPartyRelationshipsRequest.refetch({
-        partyId: parseInt(recordIdString)
-    });
+        partyId: parseInt(recordIdString),
+      });
     }
   }, [isShown, recordIdString]);
 
   React.useEffect(() => {
     if (actionResult.code === "CONFIRM" && selectedRelationshipId.length) {
-
       deletePartyRelationshipHandler({
         variables: {
           id: parseInt(selectedRelationshipId),
@@ -81,13 +73,11 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
       });
 
       actionResultVar({});
-  
-    }
-
-    else if (actionResult.code === "CANCEL" && selectedRelationshipId.length) {
-
-      setSelectedRelationshipId(''); //reset
-  
+    } else if (
+      actionResult.code === "CANCEL" &&
+      selectedRelationshipId.length
+    ) {
+      setSelectedRelationshipId(""); //reset
     }
   }, [actionResult]);
 
@@ -97,7 +87,7 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
         deletePartyRelationshipRequest.data.deletePartyRelationship.status ===
         "SUCCESS"
       ) {
-        setSelectedRelationshipId(''); //reset
+        setSelectedRelationshipId(""); //reset
         getPartyRelationshipsRequest.refetch();
       } else {
         console.warn("error: removal request failed");
@@ -108,77 +98,80 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
   }, [deletePartyRelationshipRequest]);
 
   return (
-    <StyledPaper sx={{
-      width: {
-        xs: "100%", // theme.breakpoints.up('xs')
-        sm: "60%", //400, // theme.breakpoints.up('sm')
-        // md: 300, // theme.breakpoints.up('md')
-        lg: "360px", // theme.breakpoints.up('lg')
-        //xl: 500, // theme.breakpoints.up('xl')
-      },
-      marginBottom: {
-        xs: 2,
-        lg: 0
-      }
-     
-    }}>
-  
-      {/* <Grid item xs={12} md={6}> */}
-      <Typography variant="h6">{t('singleRecord.relationships')}</Typography>
-      {/* <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
-          Relationships
-        </Typography> */}
-      {/* <Demo> */}
-      {getPartyRelationshipTypeListRequest.data && <>
-      {getPartyRelationshipsRequest.data?.partyRelationships
-        .organizationToOrganization.length > 0 && (
+    <StyledPaper
+      sx={{
+        width: {
+          xs: "100%", // theme.breakpoints.up('xs')
+          sm: "60%", //400, // theme.breakpoints.up('sm')
+          // md: 300, // theme.breakpoints.up('md')
+          lg: "360px", // theme.breakpoints.up('lg')
+          //xl: 500, // theme.breakpoints.up('xl')
+        },
+        marginBottom: {
+          xs: 2,
+          lg: 0,
+        },
+      }}
+    >
+      <Typography variant="h6">{t("singleRecord.relationships")}</Typography>
+      {getPartyRelationshipTypeListRequest.data && (
         <>
-          <Typography variant="subtitle1">Organizations</Typography>
-          <MultiLevelList
-            currentRecordId={recordIdString}
-            currentRecordType={recordType}
-            data={
-              getPartyRelationshipsRequest.data?.partyRelationships
-                .organizationToOrganization
-            }
-            listName="organizationToOrganizationRelationships"
-            deleteItem={deleteRelationship}
-          />
+          {getPartyRelationshipsRequest.data?.partyRelationships
+            .organizationToOrganization.length > 0 && (
+            <>
+              <Typography variant="subtitle1">Organizations</Typography>
+              <MultiLevelList
+                currentRecordId={recordIdString}
+                currentRecordType={recordType}
+                data={
+                  getPartyRelationshipsRequest.data?.partyRelationships
+                    .organizationToOrganization
+                }
+                listName="organizationToOrganizationRelationships"
+                deleteItem={deleteRelationship}
+              />
+            </>
+          )}
+          {getPartyRelationshipsRequest.data?.partyRelationships
+            .personToOrganization.length > 0 && (
+            <>
+              <Typography variant="subtitle1">
+                {recordType === "person"
+                  ? t("entityType.organizations")
+                  : t("entityType.people")}
+              </Typography>
+              <MultiLevelList
+                currentRecordId={recordIdString}
+                currentRecordType={recordType}
+                data={
+                  getPartyRelationshipsRequest.data?.partyRelationships
+                    .personToOrganization
+                }
+                listName="personToOrganizationRelationships"
+                deleteItem={deleteRelationship}
+              />
+            </>
+          )}
+          {getPartyRelationshipsRequest.data?.partyRelationships.personToPerson
+            .length > 0 && (
+            <>
+              <Typography variant="subtitle1">
+                {t("entityType.people")}
+              </Typography>
+              <MultiLevelList
+                currentRecordId={recordIdString}
+                currentRecordType={recordType}
+                data={
+                  getPartyRelationshipsRequest.data?.partyRelationships
+                    .personToPerson
+                }
+                listName="personToPersonRelationships"
+                deleteItem={deleteRelationship}
+              />
+            </>
+          )}
         </>
       )}
-      {getPartyRelationshipsRequest.data?.partyRelationships
-        .personToOrganization.length > 0 && (
-        <>
-          <Typography variant="subtitle1">{recordType === 'person' ? t('entityType.organizations') : t('entityType.people') }</Typography>
-          <MultiLevelList
-            currentRecordId={recordIdString}
-            currentRecordType={recordType}
-            data={
-              getPartyRelationshipsRequest.data?.partyRelationships
-                .personToOrganization
-            }
-            listName="personToOrganizationRelationships"
-            deleteItem={deleteRelationship}
-          />
-        </>
-      )}
-      {getPartyRelationshipsRequest.data?.partyRelationships.personToPerson
-        .length > 0 && (
-        <>
-          <Typography variant="subtitle1">{t('entityType.people')}</Typography>
-          <MultiLevelList
-            currentRecordId={recordIdString}
-            currentRecordType={recordType}
-            data={
-              getPartyRelationshipsRequest.data?.partyRelationships
-                .personToPerson
-            }
-            listName="personToPersonRelationships"
-            deleteItem={deleteRelationship}
-          />
-        </>
-      )}
-      </>}
       {/* </Demo> */}
       {/* </Grid> */}
 
@@ -187,9 +180,8 @@ export const PartyRelationships: React.FC<{recordType: string}> = ({recordType})
         sx={{ my: 3, width: "150px" }}
         onClick={toggleNewRelationshipModal}
       >
-        {t('singleRecord.createNewRelationship')}
+        {t("singleRecord.createNewRelationship")}
       </Button>
- 
     </StyledPaper>
   );
 };

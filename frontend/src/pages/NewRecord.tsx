@@ -17,28 +17,14 @@ import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
 
 import { PageTitle } from "../components/PageTitle";
-//import { Email } from '@mui/icons-material';
-import { appRoles } from "../config";
-import { capitalizeString, isEmptyObject } from "../utils/utilityFunctions";
+import { capitalizeString } from "../utils/utilityFunctions";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParty } from "../hooks/useParty";
 import { useTag } from "../hooks/useTag";
 import { useTranslation } from "react-i18next";
 
-// interface ILocation {
-//   hash: string;
-//   key: string;
-//   pathname: string;
-//   search: string;
-//   state: {
-//     from: { pathname: string }
-//   }
-
-// }
-
 export const NewRecord = () => {
-  // Local state
   const { t } = useTranslation();
   const [recordType, setRecordType] = React.useState<string>("person");
 
@@ -74,75 +60,57 @@ export const NewRecord = () => {
     }
   }, [location]);
 
-  let navigate = useNavigate(); //save and view detail
+  let navigate = useNavigate();
   const { user } = useAuth();
 
   const customFields = {
     person: [
       {
-        label: t('singleRecord.firstname'),
+        label: t("singleRecord.firstname"),
         name: "name",
         type: "text",
         required: true,
       },
       {
-        label: t('singleRecord.surname'),
+        label: t("singleRecord.surname"),
         name: "surname",
         type: "text",
         required: true,
       },
       {
-        label: t('singleRecord.preDegree'),
+        label: t("singleRecord.preDegree"),
         name: "preDegree",
         type: "text",
         required: false,
       },
       {
-        label: t('singleRecord.postDegree'),
+        label: t("singleRecord.postDegree"),
         name: "postDegree",
         type: "text",
         required: false,
       },
       {
-        label: t('singleRecord.birthday'),
+        label: t("singleRecord.birthday"),
         name: "birthday",
         type: "text",
         required: false,
       },
-      // {
-      //   label: "Status",
-      //   name: "statusId",
-      //   type: "number", //"select",
-      //   required: false,
-      // },
     ],
     organization: [
       {
-        label: t('singleRecord.name'),
+        label: t("singleRecord.name"),
         name: "name",
         type: "text",
         required: true,
       },
-      // {
-      //   label: "Status",
-      //   name: "statusId",
-      //   type: "number", //"select",
-      //   required: false,
-      // },
     ],
     tag: [
       {
-        label: t('singleRecord.name'),
+        label: t("singleRecord.name"),
         name: "name",
         type: "text",
         required: true,
       },
-      // {
-      //   label: "Status",
-      //   name: "statusId",
-      //   type: "number", //"select",
-      //   required: true,
-      // },
     ],
   };
 
@@ -157,7 +125,11 @@ export const NewRecord = () => {
             validations: [
               {
                 type: customField.required ? "required" : "nullable",
-                params: [t(`form.isRequired`, { fieldName: t(`singleRecord.${customField.name}`) })],
+                params: [
+                  t(`form.isRequired`, {
+                    fieldName: t(`singleRecord.${customField.name}`),
+                  }),
+                ],
               },
               {
                 type: "trim",
@@ -225,7 +197,6 @@ export const NewRecord = () => {
           variables: {
             ...values,
             birthday: values.birthday.length ? values.birthday : null,
-            //statusId: values.statusId.length ? parseInt(values.statusId) : null,
             appUserGroupId: user.currentAppUserGroupId,
           },
         });
@@ -233,8 +204,6 @@ export const NewRecord = () => {
         createOrganizationHandler({
           variables: {
             ...values,
-            //birthday: values.birthday.length ? values.birthday : null,
-            //statusId: values.statusId.length ? parseInt(values.statusId) : null,
             appUserGroupId: user.currentAppUserGroupId,
           },
         });
@@ -242,7 +211,6 @@ export const NewRecord = () => {
         createTagHandler({
           variables: {
             ...values,
-            // statusId: values.statusId.length ? parseInt(values.statusId) : null,
             appUserGroupId: user.currentAppUserGroupId,
           },
         });
@@ -318,9 +286,6 @@ export const NewRecord = () => {
         </Box>
 
         <PageTitle title={t(`pageTitles.new${capitalizeString(recordType)}`)} />
-        {/* <Typography paragraph textAlign={'center'} fontSize={'1.6rem'}>
-          Welcome to ContactsApp.
-        </Typography> */}
 
         <Box
           sx={{
@@ -364,11 +329,11 @@ export const NewRecord = () => {
                 type="submit"
                 sx={{ width: "120px" }}
               >
-               {t('userActions.save')}
+                {t("userActions.save")}
               </Button>
               {!isSubmitting && createPersonRequest.error && (
                 <Alert severity="error">
-                  <AlertTitle>{t('general.error')}</AlertTitle>
+                  <AlertTitle>{t("general.error")}</AlertTitle>
                   {createPersonRequest.error.message}
                 </Alert>
               )}

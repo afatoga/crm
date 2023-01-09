@@ -3,3 +3,4 @@
 /server/.env
 /fe
 /server/src/schema.gql
+.DS_Store

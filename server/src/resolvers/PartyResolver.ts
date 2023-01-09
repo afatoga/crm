@@ -28,15 +28,11 @@ import { Context } from "../helpers/context";
 import { Prisma } from "@prisma/client";
 import { isUserAuthorized } from "../helpers/authChecker";
 import { APIResponse } from "../types/GlobalObjects";
-//import { Service } from 'typedi'
 
 @InputType()
 class PersonInput {
   @Field((type) => Int, { nullable: true })
   partyId: number;
-
-  // @Field({ nullable: true })
-  // typeId: number;
 
   @Field((type) => Int, { nullable: true })
   statusId: number;
@@ -54,7 +50,7 @@ class PersonInput {
   postDegree: string;
 
   @Field({ nullable: true })
-  birthday: Date; //Date?
+  birthday: Date;
 
   @Field((type) => Int, { nullable: true })
   appUserGroupId: number;
@@ -97,10 +93,9 @@ class PartyRelationshipInput {
 
   @Field((type) => Int, { nullable: true })
   typeId: number;
-  
+
   @Field((type) => Int)
   appUserGroupId: number;
-
 }
 
 @InputType()
@@ -128,7 +123,7 @@ class UpdatePartyRelationshipInput {
 
   @Field((type) => Int, { nullable: true })
   typeId: number;
-  
+
   @Field((type) => Int)
   appUserGroupId: number;
 }
@@ -221,10 +216,7 @@ export class PartyResolver {
 
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => APIResponse)
-  async deletePerson(
-    @Arg("data") data: DeletePartyInput,
-    @Ctx() ctx: Context
-  ) {
+  async deletePerson(@Arg("data") data: DeletePartyInput, @Ctx() ctx: Context) {
     if (
       !ctx.currentUser ||
       !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
@@ -246,10 +238,6 @@ export class PartyResolver {
     };
   }
 
-  // @Query(() => [Person])
-  // async allPersons(@Ctx() ctx: Context) {
-  //   return ctx.prisma.person.findMany();
-  // }
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => Organization)
   async createOrganization(
@@ -303,7 +291,7 @@ export class PartyResolver {
     //update
     return await ctx.prisma.organization.update({
       where: {
-        partyId: data.partyId
+        partyId: data.partyId,
       },
       data: {
         name: data.name,
@@ -338,11 +326,6 @@ export class PartyResolver {
       message: "organization was archived",
     };
   }
-
-  // @Query(() => [Person])
-  // async allOrganizations(@Ctx() ctx: Context) {
-  //   return ctx.prisma.organization.findMany();
-  // }
 
   @Authorized(["MOD", "ADMIN"])
   @Mutation((returns) => PartyRelationship)
@@ -412,7 +395,6 @@ export class PartyResolver {
     @Arg("data") data: UpdatePartyRelationshipInput,
     @Ctx() ctx: Context
   ): Promise<PartyRelationship> {
-   
     if (
       !ctx.currentUser ||
       !isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
@@ -473,8 +455,6 @@ export class PartyResolver {
     )
       throw new Error("Not authorized");
 
-    // transaction!
-    //at first, remove connected contacts
     const deleteContacts = ctx.prisma.contact.deleteMany({
       where: {
         partyRelationshipId: id,
@@ -493,20 +473,8 @@ export class PartyResolver {
       deletePartyRelationship,
     ]);
 
-    // [
-    //   { count: 0 }, //deleteContacts
-    //   {
-    //     id: 23,
-    //     firstPartyId: 15,
-    //     secondPartyId: 8,
-    //     firstPartyTypeId: 1,
-    //     secondPartyTypeId: 1,
-    //     typeId: 3
-    //   } // deletePartyRelationship
-    // ]
-
     return {
-      status: (typeof response[1].id === 'number') ? "SUCCESS" : "ERROR",
+      status: typeof response[1].id === "number" ? "SUCCESS" : "ERROR",
     };
   }
 
@@ -516,7 +484,6 @@ export class PartyResolver {
     @Arg("data") data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
-
     let statusCondition = data.statusId
       ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}`
       : Prisma.empty;
@@ -537,8 +504,7 @@ export class PartyResolver {
     @Arg("data") data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
-
-      let statusCondition = data.statusId
+    let statusCondition = data.statusId
       ? Prisma.sql`AND "Party"."statusId" = ${data.statusId}`
       : Prisma.empty;
 
@@ -550,27 +516,6 @@ export class PartyResolver {
       AND ("Party"."statusId" != 4 OR "Party"."statusId" IS NULL)
       ${statusCondition}
     `);
-
-    // return ctx.prisma.appUserGroup
-    //   .findUnique({
-    //     where: {
-    //       id: data.appUserGroupId,
-    //     },
-    //   })
-    //   .parties({
-    //     where: {
-    //       typeId: data.partyTypeId,
-    //       statusId: data.statusId && data.statusId,
-    //     },
-    //     include: {
-    //       organization: true,
-    //     },
-    //   })
-    //   .then((res) => {
-    //     return res.map((item) => {
-    //       return item.organization;
-    //     });
-    //   });
   }
 
   @Authorized()
@@ -579,8 +524,6 @@ export class PartyResolver {
     @Arg("data") data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
-    //let partyTypeName = data.partyTypeId === 1 ? `"Person"` : `"Organization"`
-
     const queryResultArray = await ctx.prisma.$queryRaw<
       [ExtendedPerson]
     >(Prisma.sql`
@@ -601,8 +544,6 @@ export class PartyResolver {
     @Arg("data") data: PartyByAppUserGroupInput,
     @Ctx() ctx: Context
   ) {
-    //let partyTypeName = data.partyTypeId === 1 ? `"Person"` : `"Organization"`
-
     const queryResultArray = await ctx.prisma.$queryRaw<
       [ExtendedOrganization]
     >(Prisma.sql`
@@ -624,7 +565,6 @@ export class PartyResolver {
     @Arg("data") data: PartyByNameInput,
     @Ctx() ctx: Context
   ) {
-
     if (!data.searchedName.length) return [];
 
     const searchText = `%${data.searchedName.toLocaleLowerCase()}%`;
@@ -657,7 +597,6 @@ export class PartyResolver {
     @Arg("appUserGroupId", (type) => Int) appUserGroupId: number,
     @Ctx() ctx: Context
   ) {
-
     const organizationToOrganization = await ctx.prisma.$queryRaw<
       [ExtendedPartyRelationship]
     >(Prisma.sql`
@@ -734,7 +673,6 @@ export class PartyResolver {
   async partyRelationshipTypeList(
     @Ctx() ctx: Context
   ): Promise<PartyRelationshipType[]> {
-
     return await ctx.prisma.partyRelationshipType.findMany();
   }
 }

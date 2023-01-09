@@ -1,14 +1,5 @@
 import { gql } from "@apollo/client";
 
-// export const GET_ALL_TAGS = gql`
-//   query {
-//     allTags {
-//       partyId
-//       name
-//       surname
-//     }
-//   }
-// `;
 export const GET_TAGS = gql`
   query ($appUserGroupId: Int!, $statusId: Int) {
     tagsByAppUserGroup(

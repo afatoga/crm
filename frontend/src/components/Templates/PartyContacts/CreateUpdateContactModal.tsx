@@ -1,20 +1,8 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
 import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Typography from "@mui/material/Typography";
-import {
-  Alert,
-  AlertTitle,
-  Stack,
-  TextField,
-  //CircularProgress,
-  FormGroup,
-} from "@mui/material";
-
-import Autocomplete from "@mui/material/Autocomplete";
-
-import { useLocation } from "react-router"; //useParams
+import { Alert, AlertTitle, Stack } from "@mui/material";
+import { useLocation } from "react-router";
 import { ModalContext } from "../../../contexts/ModalContext";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -141,7 +129,6 @@ export const CreateUpdateContactModal = () => {
         operations.retrievePartyPrivateContactsCache({
           appUserGroupId: user.currentAppUserGroupId,
           partyId: parseInt(recordId),
-          // statusId
         });
       const existingPartyRelationshipContacts =
         extendedPartyRelationshipContactsVar();
@@ -155,7 +142,6 @@ export const CreateUpdateContactModal = () => {
         );
         if (found) {
           reset({
-            //id: found.id,
             contactValue: found.value,
             contactTypeId: found?.contactType
               ? parseInt(found?.contactType.id)
@@ -170,18 +156,6 @@ export const CreateUpdateContactModal = () => {
     }
   }, [contactToEdit]);
 
-  // const filterOptions = React.useCallback((options, state) => {
-  //   const results = _filterOptions(options, state);
-  //   return results;
-  // }, []);
-
-  // const debounceOnChange = React.useCallback(
-  //   debounce(value => {
-  //     setSearchedName(value);
-  //   }, 400),
-  //   []
-  // );
-
   React.useEffect(() => {
     if (createContactRequest.data) {
       if (createContactRequest.data.createContact.id) {
@@ -190,7 +164,7 @@ export const CreateUpdateContactModal = () => {
       }
     } else if (updateContactRequest.data) {
       if (updateContactRequest.data.updateContact.id) {
-        contactToEditVar(""); //reset;
+        contactToEditVar("");
         updateContactRequest.reset();
         isShown && handleModal();
       }
@@ -216,7 +190,6 @@ export const CreateUpdateContactModal = () => {
                     )}
                     control={control}
                     name={item.name}
-                    //defaultValue={getRecordData(item.name)}
                   />
                 );
               })}

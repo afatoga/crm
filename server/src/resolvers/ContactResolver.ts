@@ -33,7 +33,7 @@ class ContactInput {
   mainPartyId: number; //target
 
   @Field((type) => Int, { nullable: true })
-  partyRelationshipId: number; //target
+  partyRelationshipId: number;
 
   @Field((type) => Int)
   appUserGroupId: number;
@@ -52,9 +52,6 @@ class DeleteContactInput {
 class PartyContactsInput {
   @Field((type) => Int!)
   partyId: number;
-
-  // @Field((type) => Int, { nullable: true })
-  // partyRelationshipId: number;
 
   @Field((type) => Int, { nullable: true })
   statusId: number;
@@ -170,9 +167,6 @@ export class ContactResolver {
     });
     if (!currentContact) throw new Error("contact not found");
 
-    // zamceni zaznamu for update
-    // druhy uzivatel ceka, nedostane nactana data
-
     if (data.partyRelationshipId) {
       const partyRelationship = await ctx.prisma.partyRelationship.findUnique({
         where: { id: data.partyRelationshipId },
@@ -188,10 +182,9 @@ export class ContactResolver {
       data: {
         typeId: data.typeId && data.typeId,
         value: data.value,
-        //mainPartyId: data.mainPartyId,
         partyRelationshipId:
           data.partyRelationshipId && data.partyRelationshipId,
-        statusId: data?.statusId
+        statusId: data?.statusId,
       },
     });
   }
@@ -202,10 +195,9 @@ export class ContactResolver {
     @Arg("data") data: PartyContactsInput,
     @Ctx() ctx: Context
   ) {
-
     let whereConditions: any = {
       mainPartyId: data.partyId,
-      partyRelationshipId: null, //has to be null
+      partyRelationshipId: null,
     };
 
     if (data.statusId) {
@@ -221,16 +213,8 @@ export class ContactResolver {
       where: whereConditions,
       include: {
         contactType: true,
-        // {
-        //   select: 
-        //   {  name: true,},
-        // },
-        status: true
-        // {
-        //   select: {
-        //     name: true,
-        //   },
-        // },
+
+        status: true,
       },
     });
   }
@@ -241,8 +225,6 @@ export class ContactResolver {
     @Arg("data") data: PartyRelationshipContactsInput,
     @Ctx() ctx: Context
   ) {
-    //if (!data.partyRelationshipId)  throw new Error("Party relationship invalid");
-
     let whereConditions: any = {
       mainPartyId: data.partyId,
       partyRelationshipId: { in: data.partyRelationshipIdList },
@@ -265,27 +247,4 @@ export class ContactResolver {
       },
     });
   }
-
-  // @Authorized()
-  // @Query((returns) => [Contact], { nullable: true })
-  // async contactsByProps(@Arg("data") data: ContactInput, @Ctx() ctx: Context) {
-  //   if (!ctx.currentUser) throw new Error("please log in");
-
-  //   return ctx.prisma.contact.findMany({
-  //     where: {
-  //       typeId: data.typeId && data.typeId,
-  //       value: data.value && { contains: data.value },
-  //       mainPartyId: data.mainPartyId,
-  //       partyRelationshipId:
-  //         data.partyRelationshipId && data.partyRelationshipId,
-  //       appUserGroupId: ctx.currentUser.currentAppUserGroupId,
-  //     },
-  //   });
-  // }
-
-  // appUserGroupId:
-  //    data.appUserGroupId &&
-  //    isUserAuthorized(ctx.currentUser, data.appUserGroupId, ctx.appRoles)
-  //    ? data.appUserGroupId
-  //    : undefined,
 }
