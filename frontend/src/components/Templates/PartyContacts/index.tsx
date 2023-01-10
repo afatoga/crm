@@ -12,10 +12,7 @@ import {
 } from "../../../hooks/useContact";
 import { StyledPaper } from "../../Container";
 import { useReactiveVar } from "@apollo/client";
-import {
-  IPartyRelationship,
-  partyRelationshipListVar,
-} from "../../../hooks/useParty";
+import { partyRelationshipListVar } from "../../../hooks/useParty";
 import { actionResultVar } from "../../../App";
 
 export const PartyContacts = () => {
@@ -81,8 +78,8 @@ export const PartyContacts = () => {
 
   React.useEffect(() => {
     if (partyRelationshipList.length) {
-      const partyRelationshipIdList = partyRelationshipList.map(
-        (item: IPartyRelationship) => parseInt(item.id)
+      const partyRelationshipIdList = partyRelationshipList.map((item) =>
+        parseInt(item.id)
       );
 
       getPartyRelationshipContactsHandler({

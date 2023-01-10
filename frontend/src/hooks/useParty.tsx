@@ -29,25 +29,16 @@ import {
   DELETE_PARTYRELATIONSHIP,
 } from "../api/party/mutations";
 import { isEmptyObject } from "../utils/utilityFunctions";
+import {
+  ExtendedPartyRelationship,
+  SortedPartyRelationships,
+} from "../types/codegen";
 
 export type PartyOption = {
   id: string;
   name: string;
   typeId: string;
 };
-
-type PartyRelationship = {
-  id: string;
-  typeId: string;
-  firstPartyId: number;
-  secondPartyId: number;
-  firstPartyName: string;
-  secondPartyName: string;
-};
-
-export interface IPartyRelationship extends PartyRelationship {
-  __typename: string;
-}
 
 interface IPartyByName extends PartyOption {
   __typename: string;
@@ -61,7 +52,9 @@ type PartyRelationshipType = {
 
 export const filteredPartiesVar = makeVar<PartyOption[]>([]);
 export const partyRelationshipTypesVar = makeVar<PartyRelationshipType[]>([]);
-export const partyRelationshipListVar = makeVar<IPartyRelationship[]>([]);
+export const partyRelationshipListVar = makeVar<ExtendedPartyRelationship[]>(
+  []
+);
 
 export function useParty() {
   const client = useApolloClient();
@@ -94,14 +87,17 @@ export function useParty() {
     fetchPolicy: "network-only",
     onCompleted: (data) => {
       if (data?.partyRelationships && !isEmptyObject(data.partyRelationships)) {
-        let partyRelationshipList = [];
-        Object.keys(data.partyRelationships).forEach((key: string) => {
+        const partyRelationships: SortedPartyRelationships =
+          data.partyRelationships;
+
+        let partyRelationshipList: ExtendedPartyRelationship[] = [];
+        Object.keys(partyRelationships).forEach((key: string) => {
           if (
-            typeof data.partyRelationships[key] !== "string" &&
-            data.partyRelationships[key].length
+            typeof partyRelationships[key] !== "string" &&
+            partyRelationships[key].length
           ) {
-            data.partyRelationships[key].forEach(
-              (relationship: IPartyRelationship) => {
+            partyRelationships[key].forEach(
+              (relationship: ExtendedPartyRelationship) => {
                 partyRelationshipList.push(relationship);
               }
             );

@@ -11,7 +11,7 @@ import {
   GET_CONTACTTYPE_LIST,
 } from "../api/contact/queries";
 
-import { partyRelationshipListVar, IPartyRelationship } from "./useParty";
+import { partyRelationshipListVar } from "./useParty";
 
 import { GET_STATUS_LIST } from "../api/status/queries";
 
@@ -20,30 +20,14 @@ import {
   UPDATE_CONTACT,
   DELETE_CONTACT,
 } from "../api/contact/mutations";
+import { ExtendedContact } from "../types/codegen";
 
 export const contactToEditVar = makeVar<string>(""); //contactId to load data in modal component
 export const extendedPartyRelationshipContactsVar = makeVar<
   ExtendedPartyRelationshipContact[]
 >([]);
 
-//"otherPartyName": string;
-type PartyRelationshipContact = {
-  id: string;
-  mainPartyId: number;
-  partyRelationshipId: number;
-  contactType: {
-    name: string;
-    __typename: "ContactType";
-  };
-  value: string;
-  status: {
-    name: string;
-    __typename: "Status";
-  };
-  __typename: string;
-};
-
-interface ExtendedPartyRelationshipContact extends PartyRelationshipContact {
+interface ExtendedPartyRelationshipContact extends ExtendedContact {
   otherPartyName: string;
 }
 
@@ -62,28 +46,26 @@ export function useContact() {
         if (data?.partyRelationshipContacts.length) {
           const partyRelationships = partyRelationshipListVar();
 
-          let extendedData = data.partyRelationshipContacts.map(
-            (contact: PartyRelationshipContact) => {
-              const found = partyRelationships.find(
-                (partyRelationship: IPartyRelationship) => {
-                  if (
-                    parseInt(partyRelationship.id) ===
-                    contact.partyRelationshipId
-                  )
-                    return partyRelationship;
-                  else return false;
-                }
-              );
-              return {
-                ...contact,
-                otherPartyName: found
-                  ? contact.mainPartyId === found.firstPartyId
-                    ? found.secondPartyName
-                    : found.firstPartyName
-                  : "",
-              };
-            }
-          );
+          const list: ExtendedContact[] = data.partyRelationshipContacts;
+
+          let extendedData = list.map((contact) => {
+            const found = partyRelationships.find((partyRelationship) => {
+              if (
+                parseInt(partyRelationship.id) === contact.partyRelationshipId
+              )
+                return partyRelationship;
+              else return false;
+            });
+
+            return {
+              ...contact,
+              otherPartyName: found
+                ? contact.mainPartyId === found.firstPartyId.toString()
+                  ? found.secondPartyName
+                  : found.firstPartyName
+                : "",
+            };
+          });
 
           extendedPartyRelationshipContactsVar(extendedData);
         } else {

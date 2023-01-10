@@ -15,10 +15,22 @@ import {
 } from "../../utils/constants";
 import { useTranslation } from "react-i18next";
 
+// Types
+import {
+  Tag,
+  ExtendedTagParty,
+  ExtendedPartyRelationship,
+  ExtendedContact,
+} from "../../types/codegen";
+
 interface IMultiLevelList {
   currentRecordId?: string;
   currentRecordType?: string;
-  data: any;
+  data:
+    | ExtendedTagParty[]
+    | Tag[]
+    | ExtendedPartyRelationship[]
+    | ExtendedContact[];
   deleteItem?: (id: string) => void;
   editItem?: (id: string) => void;
   listName?: string;

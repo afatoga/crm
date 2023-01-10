@@ -8,8 +8,8 @@ import {
   FormGroup,
 } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
-import { IPartyRelationship } from "../../hooks/useParty";
 import { useTranslation } from "react-i18next";
+import { ExtendedPartyRelationship } from "../../types/codegen";
 
 export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
   const { t } = useTranslation();
@@ -34,7 +34,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
       if (fieldData.apiRequest) {
         const list = fieldData.apiRequest;
 
-        return list.map((item: IPartyRelationship) => ({
+        return list.map((item: ExtendedPartyRelationship) => ({
           name:
             parseInt(fieldData.currentPartyId) === item.firstPartyId
               ? item.secondPartyName
@@ -95,7 +95,7 @@ export const CustomFormField = ({ controllerProps, fieldData, errors }) => {
           const list = fieldData.apiRequest;
 
           const found = list.find(
-            (item: IPartyRelationship) => option === parseInt(item.id)
+            (item: ExtendedPartyRelationship) => option === parseInt(item.id)
           );
           // option's type is number, therefore we need to look up the name in data from "fieldData.apiRequest"
           if (found)
